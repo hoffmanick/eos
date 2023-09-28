@@ -14,6 +14,9 @@ editor_options:
 ---
 
 <style type="text/css">
+p {
+  font-size:15px;
+}
 table {
    padding: 0;border-collapse: collapse;
    layout: fixed;
@@ -623,30 +626,6 @@ tm_shape(bg)+
 ```
 
 And the University of Florida, like its constituent museum, holds just vertebrate fauna. 
-
-```{r anything-else,\include=TRUE,message = FALSE}
-
-all_specs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=specimens&limit=4000&offset=0"))$data
-
-spec_mat = matrix(nrow=length(all_specs),ncol=length(all_specs[[1]]))
-
-for (i in seq(1,length(all_specs))) {
-  for (j in seq(1,length(all_specs[[1]]))) {
-    if (!is.null(all_specs[[i]][[j]])) {
-    spec_mat[i,j] = all_specs[[i]][[j]]}
-  }
-}
-
-spec_df = as.data.frame(spec_mat)
-names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid","maturityid","sexid","domesticstatusid","preservative","nisp","repositoryid","specimennr","fieldnr","arctosnr","notes","recdatecreated","recdatemodified")
-
-fl_repos = repo_df %>%
-  filter(repository %in% repo_df$repository[grep("Florida",repo_df$repository)])
-
-
-fl_specs = spec_df %>%
-  filter(repositoryid %in% fl_repos$repositoryid)
-```
 ## Querying for Contact Information
 
 If we needed to, we could use Neotoma to query for contact information associated with the researchers who collected data from any particular site. That gets a little involved, so we won't show the process here. Let us know if you would like to learn how to do that!
