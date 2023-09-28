@@ -1,1 +1,157 @@
+---
+theme: jekyll-theme-minimal
+layout: page
+title: Ethical Open Science for Past Global Change Data
+description: Implementing FAIR and CARE principles in the historical sciences
+email: "EthicalOS.RCN@gmail.com"
+logo: "/images/eos_rcn_logo.png"
+paginate: 10
+team_members:
+  -
+    name: "Jessica Blois"
+    role: "Project Leader"
+    institution: "University of California, Merced"
+    website: >
+      "https://jessicablois.com/"
+    email: "jblois@ucmerced.edu"
+    picture: "\"./images/blois_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0003-4048-177X"
+  -
+    name: "Meghan Balk"
+    role: ""
+    institution: "University of Arizona, University of Oslo"
+    website: ""
+    email: "meghan.balk@gmail.com"
+    picture: "\"./images/balk_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0003-2699-3066"
+  -
+    name: "Suzanne Pilaar Birch"
+    role: ""
+    institution: "University of Georgia"
+    website: ""
+    email: "sepbirch@uga.edu"
+    picture: "\"./images/birch_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0003-1544-5881"
+  -
+    name: "Kitty Emery"
+    role: ""
+    institution: "Florida Museum of Natural History, University of Florida"
+    website: ""
+    email: "kemery@flmnh.ufl.edu"
+    picture: "\"./images/emery_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0002-4031-1968"
+  -
+    name: "Simon Goring"
+    role: ""
+    institution: "University of Wisconsin, Madison"
+    website: ""
+    email: "goring@wisc.edu"
+    picture: "\"./images/goring_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0002-2700-4605"
+  -
+    name: "Michelle LeFebvre"
+    role: ""
+    institution: "Florida Museum of Natural History, University of Florida"
+    website: ""
+    email: "mlefebvre@flmnh.ufl.edu"
+    picture: "\"./images/lefebvre_headshot.png\""
+    orcid: >
+      "https://orcid.org/0000-0002-1741-9997"
+  -
+    name: "Leigh Lieberman"
+    role: ""
+    institution: "Princeton, Open Context"
+    website: ""
+    email: "llieberm@princeton.edu"
+    picture: "\"./images/lieberman_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0002-9970-8003"
+  - 
+    name: "Andrea Thomer"
+    role: ""
+    institution: "University of Arizona"
+    website: ""
+    email: "athomer@arizona.edu"
+    picture: "\"./images/thomer_headshot.png\""
+    orcid: >
+      "https://orcid.org/0000-0001-6238-3498"
+  -
+    name: "John W. Williams"
+    role: ""
+    institution: "University of Wisconsin, Madison"
+    website: ""
+    email: "jwwilliams1@wisc.edu"
+    picture: "\"./images/williams_headshot.jpg\""
+    orcid: >
+      "https://orcid.org/0000-0001-6046-9634"
 
+
+advise_members:
+  -
+    name: "Tonya Connor"
+    institution: "University of North Dakota"
+    picture: "\"./images/connor_headshot.jpg\""
+  -
+    name: "Edward Davis"
+    institution: "University of Oregon Museum of Natural and Cultural History"
+    picture: "\"./images/davis_headshot.jpg\""
+  -
+    name: "Nick McKay"
+    institution: "Northern Arizona University"
+    picture: "\"./images/mckay_headshot.jpg\""
+  -
+    name: "Carrie Morrill"
+    institution: "National Oceanic and Atmospheric Administration"
+    picture: "\"./images/morrill_headshot.jpg\""
+  -
+    name: "Ricardo Punzalan"
+    institution: "University of Michigan"
+    picture: "\"./images/punzalan_headshot.jpg\""
+  -
+    name: "Mark Uhen"
+    institution: "George Mason University"   
+    picture: "\"./images/uhen_headshot.jpg\""
+    
+personnel_members:
+  -
+    name: "Melissa Cradic"
+    institution: "Open Context"
+    picture: "\"./images/cradic_headshot.jpg\""
+  -
+    name: "Nicole Fuller"
+    institution: "Florida Museum of Natural History, University of Florida"
+    picture: "\"./images/fuller_headshot.jpg\""
+  -
+    name: "Jen Green"
+    institution: "Florida Museum of Natural History, University of Florida"
+    picture: "\"./images/green_headshot.jpg\""
+  -
+    name: "Nick Hoffman"
+    institution: "University of California, Merced"   
+    picture: "\"./images/hoffman_headshot.jpg\""
+  -
+    name: "Eric Kansa"
+    institution: "Open Context"
+    picture: "\"./images/kansa_headshot.png\""
+  -
+    name: "Natalie Raia"
+    institution: "University of Arizona"
+    picture: "\"./images/raia_headshot.jpg\""
+
+---
+defaults:
+  -
+    scope:
+      path: "" # an empty string here means all files in the project
+    values:
+      layout: "default"
+      
+      
+collections:
+  posts:
+    output: true
