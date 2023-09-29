@@ -645,7 +645,7 @@ tm_shape(bg)+
 
 The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. I was surprised to learn this. Apparently they belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
 
-The smaller stewards on our specimen list hold specimen data. The map below shows where these specimens derive from.
+The smaller stewards on our specimen list all hold vertebrate fauna. The map below shows where these specimens derive from.
 
 ```{r others,echo=FALSE,include=TRUE,message = FALSE}
 
