@@ -626,6 +626,7 @@ tm_shape(bg)+
 ```
 
 And the University of Florida, like its constituent museum, holds just vertebrate fauna. 
+
 ## Querying for Contact Information
 
 If we needed to, we could use Neotoma to query for contact information associated with the researchers who collected data from any particular site. That gets a little involved, so we won't show the process here. Let us know if you would like to learn how to do that!
