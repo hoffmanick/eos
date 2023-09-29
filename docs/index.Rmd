@@ -243,14 +243,14 @@ sum_dt %>%
 
 From the above table and bar graph, we can see that the most abundant datasets in Florida are vertebrate fauna. 
 
-Also abundant are: <ul>
+<p>Also abundant are:</p> <ul>
 <li>pollen surface samples,</li> 
 <li>stratigraphic pollen (here labeled "pollen": i.e., pollen sampled at different strata of a sedimentary core extracted from a lake),</li>
 <li>water chemistry data, and</li> 
 <li>various kinds of diatom data.</li>
 </ul>
 
-Not abundant, but still interesting and potentially useful are:<ul>
+<p>Not abundant, but still interesting and potentially useful are:</p><ul>
 <li>loss-on-ignition (i.e., how much of your mud can you burn away; a measure of reduced carbon content - potentially a proxy for eutrophication),</li>
 <li>sedimentary charcoal (for reconstructing fire history),</li>
 <li>X-ray fluorescence (for measuring trace elements),</li>
