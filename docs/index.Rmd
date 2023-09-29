@@ -664,6 +664,132 @@ tm_shape(bg)+
 
 ```
 
+## What kinds of fossil animals are held in these repositories?
+
+Neglecting the diatoms in Philadelphia for now, we might want to learn more about the kinds of fossil specimens held by these Florida museums. The table below shows the most common taxonomic classifications of these fauna. 
+
+
+```{r spec, include=FALSE,eval=TRUE,echo = FALSE, results = FALSE}
+
+
+joined_flmnh = repo_join %>% filter(repositoryid=="53")
+
+flmnh_datasets = joined_flmnh %>% group_by(datasetid) %>% summarize()
+flmnh_sites = joined_flmnh %>% group_by(siteid) %>% summarize()
+
+vert_sets = get_datasets(verts)
+
+vert_loads=  get_downloads(vert_sets)
+vert_samples=samples(vert_loads)
+vert_samples = vert_samples %>%
+  dplyr::select(!c(age,agetype))
+```
+```{r extra, echo=FALSE,include=TRUE,message = FALSE}
+
+all_specs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=specimens&limit=4000&offset=0"))$data
+
+spec_mat = matrix(nrow=length(all_specs),ncol=length(all_specs[[1]]))
+
+for (i in seq(1,length(all_specs))) {
+  for (j in seq(1,length(all_specs[[1]]))) {
+    if (!is.null(all_specs[[i]][[j]])) {
+    spec_mat[i,j] = all_specs[[i]][[j]]}
+  }
+}
+
+spec_df = as.data.frame(spec_mat)
+names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid","maturityid","sexid","domesticstatusid","preservative","nisp","repositoryid","specimennr","fieldnr","arctosnr","notes","recdatecreated","recdatemodified")
+
+flmnh_specs = spec_df %>% filter(repositoryid=="53")
+
+
+isospecimendata = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=isospecimendata&limit=8000&offset=0"))$data
+
+iso_mat = matrix(nrow=length(isospecimendata),ncol=length(isospecimendata[[1]]))
+
+for (i in seq(1,length(isospecimendata))) {
+  for (j in seq(1,length(isospecimendata[[1]]))) {
+    if (!is.null(isospecimendata[[i]][[j]])) {
+    iso_mat[i,j] = isospecimendata[[i]][[j]]}
+  }
+}
+
+iso_df = as.data.frame(iso_mat)
+names(iso_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid")
+
+names(iso_df) = c("isospecimendataid","dataid","specimenid","sd","recdatecreated","recdatemodified")
+
+actual_repos = repo_join %>%
+  dplyr::filter(!is.na(repositoryid)) %>%
+  dplyr::select(!c(notes.y,recdatecreated.x,recdatemodified.x,recdatecreated.y,recdatemodified.y,area,notes.y.y,elev))
+
+sampleRepo = left_join(actual_repos,vert_samples,by="datasetid")
+
+sampleRepo = sampleRepo %>% dplyr::select(!c(siteid.x,doi,datasettype.x,sitename.x,lat.x,long.x,description.x,database.x,elev,area))
+
+sampleRepo = sampleRepo %>%
+  filter(!is.na(variablename))
+
+sampleRepo = sampleRepo %>%
+  mutate(duration = age_range_old-age_range_young) %>%
+  mutate(meanAge =(age_range_old+age_range_young)/2 )
+
+commons = sampleRepo %>% group_by(variablename) %>% count() %>% arrange(desc(n))
+
+datatable(commons, rownames = FALSE)
+```
+
+<p>There are 375 distinct classifications made at varying taxonomic resolutions. The ten most common classifications (using English common names) are:</p>
+<ol>
+<li>White-tailed deer</li>
+<li>Virginia opossum</li>
+<li>Reptile</li>
+<li>Raccoon</li>
+<li>Bony fish</li>
+<li>Cottontail rabbit</li>
+<li>Hispid cotton rat</li>
+<li>Bird</li>
+<li>Roundtail muskrat, and</li>
+<li>Horse</li>
+</ol>
+
+The table below shows the taxon groups at a less granular taxonomic resolution.
+
+```{r more-repo,echo=FALSE,include=TRUE,message = FALSE }
+
+sampleRepo %>% group_by(taxongroup) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+
+```
+
+The next graph shows the distribution in time of the youngest of these fossil samples. Most of the fossils (1104 out of 1950) have a mean estimated age of fewer than 30,000 years.
+
+```{r repo-time,echo=FALSE,include=TRUE,message = FALSE }
+youngest = sampleRepo %>%
+  dplyr::filter(meanAge <=30000)
+
+ggplot(youngest) +
+  geom_histogram(mapping=aes(x=meanAge),fill="blue",bins=50,alpha=0.5) +
+  theme_bw() +
+  labs(x = "Years Before Present",y="Number of Fossils", title="The Youngest Fossils")
+```
+
+The next largest group of fossils (378) come from between 1,000,000 and 2,100,000 years ago.
+
+
+``` {r mediums,echo=FALSE,include=TRUE,message = FALSE}
+
+medium = sampleRepo %>%
+  dplyr::filter(meanAge >=900000 & meanAge <=2100000)
+
+ggplot(medium) +
+  geom_histogram(mapping=aes(x=meanAge),fill="blue",bins=50,alpha=0.5) +
+  theme_bw() +
+  labs(x = "Years Before Present",y="Number of Fossils", title="The Middle-aged Fossils")
+```
+
+
+The oldest fossils (80 of them) all have the same mean estimated age of 3,400,000 years.
+
 ## Querying for Contact Information
 
 If we needed to, we could use Neotoma to query for contact information associated with the researchers who collected data from any particular site. That gets a little involved, so we won't show the process here. Let us know if you would like to learn how to do that!
