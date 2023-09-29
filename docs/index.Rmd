@@ -187,6 +187,7 @@ tm_shape(bg)+
 ```
 
 Below is a table of all the site names and descriptions of the area recorded by researchers who collected data from those sites. 
+<br>
 
 ```{r dt, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -202,6 +203,8 @@ datatable(stof_sites[c(2,7)],rownames = FALSE)
 ## What kinds of data were recorded at these sites?
 
 Now we know there are data concerning Florida held by Neotoma. The next question we might want to answer is what kinds of data these are.
+
+<br>
 
 ``` {r dataset-counts,echo=FALSE,include=TRUE,message=FALSE}
 
@@ -443,6 +446,8 @@ And some of these data (e.g., vertebrate fauna) are indeed held by museums or ot
 
 The following table shows which institutions are the largest holders of Floridian paleoecological specimens. 
 
+<br>
+
 ```{r mapping-collections, echo=FALSE,include=TRUE,message = FALSE}
 
 
@@ -523,6 +528,7 @@ datatable(reps,rownames = FALSE)
 ```
 
 Notice that the largest count (460) is for datasets without an institutional repository. The following table breaks down those data without a repository by dataset type. 
+<br>
 
 ``` {r missing, echo=FALSE,include=TRUE,message = FALSE}
 missings = repo_join %>%
@@ -541,7 +547,7 @@ datatable(missings,rownames = FALSE)
 
 As we might have suspected, these data without institutional repositories are pollen, other microfossils, and chemical data.
 
-For those institutions which are the largest repositories of Floridian paleoecological specimens, what kinds of specimens are they holding?
+For those institutions which are stewarding Floridian paleoecological specimens, what kinds of specimens are they holding?
 
 ```{r map repos, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -566,6 +572,9 @@ repo_simp = repo_map %>%
 
 repo_phil = repo_simp %>%
   dplyr::filter(repository=="Academy of Natural Sciences, Philadelphia")
+
+repo_others = repo_map %>%
+  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida"))
 
 repo_flmnh = repo_simp %>%
   dplyr::filter(repository=="Florida Museum of Natural History")
@@ -595,6 +604,26 @@ tm_shape(bg)+
 
 All the specimens at the Florida Museum of Natural History are vertebrate fauna.
 
+```{r uf,echo=FALSE,include=TRUE,message = FALSE}
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(repo_uf) +
+    tm_dots("datasettype",size=0.1,palette="Set1") +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.text.size=0.8,
+              main.title= 'University of Florida Holdings', 
+              main.title.position = "center",
+      
+              title.bg.color = "white", panel.label.height=1)
+
+```
+
+And the University of Florida, like its constituent museum, holds just vertebrate fauna. 
+
+
 ```{r philly, echo=FALSE,include=TRUE,message = FALSE}
 
 
@@ -614,26 +643,26 @@ tm_shape(bg)+
 
 ```
 
-The Academy of Natural Sciences in Philadelphia actually holds diatom specimens - that surprises me!
+The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. I was surprised to learn this. Apparently they belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
 
-```{r uf,echo=FALSE,include=TRUE,message = FALSE}
+The smaller stewards on our specimen list hold specimen data. The map below shows where these specimens derive from.
+
+```{r others,echo=FALSE,include=TRUE,message = FALSE}
 
 tm_shape(bg)+
     tm_rgb() +
-    tm_shape(repo_uf) +
-    tm_dots("datasettype",size=0.1,palette="Set1") +
+    tm_shape(repo_others) +
+    tm_dots("repository",size=0.1,palette="Set1") +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
               legend.bg.color="white",
               legend.bg.alpha=0.9,
               legend.text.size=0.8,
-              main.title= 'University of Florida Holdings', 
+              main.title= 'Other Repositories', 
               main.title.position = "center",
       
               title.bg.color = "white", panel.label.height=1)
 
 ```
-
-And the University of Florida, like its constituent museum, holds just vertebrate fauna. 
 
 ## Querying for Contact Information
 
