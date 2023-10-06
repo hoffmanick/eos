@@ -380,6 +380,8 @@ neotoma2::plotLeaflet(diats)
 
 ## Where, if anywhere, are the specimens held?
 
+My first strategy here is to get the full "repository specimens" table (which connects dataset ids to repository ids) and connect it to all the sites in Florida that have dataset ids listed in the table. This theoretically leads to a lot of representation in repositories. But it's unclear that there are actually specimens in these repositories...
+
 ```{r repos, echo=FALSE,include=TRUE,message = FALSE}
 
 
@@ -664,131 +666,115 @@ tm_shape(bg)+
 
 ```
 
-## What kinds of fossil animals are held in these repositories?
+## Other strategy for specimens
 
-Neglecting the diatoms in Philadelphia for now, we might want to learn more about the kinds of fossil specimens held by these Florida museums. The table below shows the most common taxonomic classifications of these fauna. 
+My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to use the site id to get information on sites through that. However, in this case I find that there are no specimens from sites in Florida, of the 435 sites listed here. And only 5 of these datasets are held at Florida Museum of Natural History.
 
+```{r specimens, echo=FALSE,include=TRUE,message = FALSE}
 
-```{r spec, include=FALSE,eval=TRUE,echo = FALSE, results = FALSE}
-
-
-joined_flmnh = repo_join %>% filter(repositoryid=="53")
-
-flmnh_datasets = joined_flmnh %>% group_by(datasetid) %>% summarize()
-flmnh_sites = joined_flmnh %>% group_by(siteid) %>% summarize()
-
-vert_sets = get_datasets(verts)
-
-vert_loads=  get_downloads(vert_sets)
-vert_samples=samples(vert_loads)
-vert_samples = vert_samples %>%
-  dplyr::select(!c(age,agetype))
-```
-```{r extra, echo=FALSE,include=TRUE,message = FALSE}
-
-all_specs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=specimens&limit=4000&offset=0"))$data
-
-spec_mat = matrix(nrow=length(all_specs),ncol=length(all_specs[[1]]))
-
-for (i in seq(1,length(all_specs))) {
-  for (j in seq(1,length(all_specs[[1]]))) {
-    if (!is.null(all_specs[[i]][[j]])) {
-    spec_mat[i,j] = all_specs[[i]][[j]]}
-  }
-}
-
-spec_df = as.data.frame(spec_mat)
-names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid","maturityid","sexid","domesticstatusid","preservative","nisp","repositoryid","specimennr","fieldnr","arctosnr","notes","recdatecreated","recdatemodified")
-
-flmnh_specs = spec_df %>% filter(repositoryid=="53")
-
-
-isospecimendata = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=isospecimendata&limit=8000&offset=0"))$data
-
-iso_mat = matrix(nrow=length(isospecimendata),ncol=length(isospecimendata[[1]]))
-
-for (i in seq(1,length(isospecimendata))) {
-  for (j in seq(1,length(isospecimendata[[1]]))) {
-    if (!is.null(isospecimendata[[i]][[j]])) {
-    iso_mat[i,j] = isospecimendata[[i]][[j]]}
-  }
-}
-
-iso_df = as.data.frame(iso_mat)
-names(iso_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid")
-
-names(iso_df) = c("isospecimendataid","dataid","specimenid","sd","recdatecreated","recdatemodified")
-
-actual_repos = repo_join %>%
-  dplyr::filter(!is.na(repositoryid)) %>%
-  dplyr::select(!c(notes.y,recdatecreated.x,recdatemodified.x,recdatecreated.y,recdatemodified.y,area,notes.y.y,elev))
-
-sampleRepo = left_join(actual_repos,vert_samples,by="datasetid")
-
-sampleRepo = sampleRepo %>% dplyr::select(!c(siteid.x,doi,datasettype.x,sitename.x,lat.x,long.x,description.x,database.x,elev,area))
-
-sampleRepo = sampleRepo %>%
-  filter(!is.na(variablename))
-
-sampleRepo = sampleRepo %>%
-  mutate(duration = age_range_old-age_range_young) %>%
-  mutate(meanAge =(age_range_old+age_range_young)/2 )
-
-commons = sampleRepo %>% group_by(variablename) %>% count() %>% arrange(desc(n))
-
-datatable(commons, rownames = FALSE)
-```
-
-<p>There are 375 distinct classifications made at varying taxonomic resolutions. The ten most common classifications (using English common names) are:</p>
-<ol>
-<li>White-tailed deer</li>
-<li>Virginia opossum</li>
-<li>Reptile</li>
-<li>Raccoon</li>
-<li>Bony fish</li>
-<li>Cottontail rabbit</li>
-<li>Hispid cotton rat</li>
-<li>Bird</li>
-<li>Roundtail muskrat, and</li>
-<li>Horse</li>
-</ol>
-
-The table below shows the taxon groups at a less granular taxonomic resolution.
-
-```{r more-repo,echo=FALSE,include=TRUE,message = FALSE }
-
-sampleRepo %>% group_by(taxongroup) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
-
-```
-
-The next graph shows the distribution in time of the youngest of these fossil samples. Most of the fossils (1104 out of 1950) have a mean estimated age of fewer than 30,000 years.
-
-```{r repo-time,echo=FALSE,include=TRUE,message = FALSE }
-youngest = sampleRepo %>%
-  dplyr::filter(meanAge <=30000)
-
-ggplot(youngest) +
-  geom_histogram(mapping=aes(x=meanAge),fill="blue",bins=50,alpha=0.5) +
-  theme_bw() +
-  labs(x = "Years Before Present",y="Number of Fossils", title="The Youngest Fossils")
-```
-
-The next largest group of fossils (378) come from between 1,000,000 and 2,100,000 years ago.
-
-
-``` {r mediums,echo=FALSE,include=TRUE,message = FALSE}
-
-medium = sampleRepo %>%
-  dplyr::filter(meanAge >=900000 & meanAge <=2100000)
-
-ggplot(medium) +
-  geom_histogram(mapping=aes(x=meanAge),fill="blue",bins=50,alpha=0.5) +
-  theme_bw() +
-  labs(x = "Years Before Present",y="Number of Fossils", title="The Middle-aged Fossils")
+spec_df.csv = read.csv("spec_df.csv")
 ```
 
 
-The oldest fossils (80 of them) all have the same mean estimated age of 3,400,000 years.
+```{r spec-samples, echo=FALSE,include=TRUE,message = FALSE}
+
+specsamples = read.csv("specsamples.csv")
+
+
+datspecs = read.csv("datspecs.csv")
+```
+
+```{r specimens-from-florida, echo=FALSE,include=TRUE,message = FALSE}
+
+
+fullspecs = read.csv("fullspecs.csv")
+
+fl_specs = specsamples %>%
+  filter(siteid %in% stof_sites$siteid)
+
+specsamples = specsamples %>%
+  mutate(siteid=as.character(siteid))
+
+specsites = get_sites(as.numeric(specsamples$siteid),all_data=TRUE)
+
+specsites_df = as.data.frame(specsites) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+bg_big = osm.raster(specsites_df)
+
+setsites = read.csv("setsites.csv") %>%
+  mutate(datasetid=as.character(datasetid))
+
+test = left_join(setsites,repospec_df) %>%
+  filter(!is.na(repositoryid)) 
+
+repo_count = test %>% group_by(repositoryid) %>%
+  count() %>% arrange(desc(n)) %>%
+  left_join(repo_df) %>%
+  dplyr::select(repository,n)
+
+datatable(repo_count[2:3],rownames = FALSE)
+
+
+tm_shape(bg_big)+
+    tm_rgb() +
+    tm_shape(specsites_df) +
+    tm_dots(size=0.05,alpha=0.4) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'Neotoma Spec sites: from Specimens', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+```
+
+Then I try a third strategy. I grab the repository specimens and get all specimens associated with each dataset id through a Tilia call. There are 6404 rows in repository specimens, but only 112 of these datasets have specimens associated with them through the Tilia call. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. 9 of these specimens are held by the Florida Museum of Natural History.
+
+```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
+
+
+sitelist = content(GET("https://api.neotomadb.org/v2.0/data/datasets/4575,4593,4594,4595,4635,5365,5562,6060,6290,6636,6790,6896,6985,7063,7112,7131,7202,7536,7561,7686,11999,13091,19832,19860,19862,20569,24656,24693,25520,25904,26226,27337,32390,32654,32682,32684,32688,32690,32696,32712,32732,33381,33807,36732,36794,38910,38915,39066,39070,39167,39171,39174,39175,39176,39183,39189,39195,39200,39203,39211,39213,39223,39225,39227,39229,39231,39233,39235,39236,39237,39239,39241,39243,39245,39247,39248,39250,39254,39255,39257,39259,39260,39262,39264,39266,39267,39270,39272,39274,39321,39323,39325,39334,39336,39338,39340,39989,39992,39994,39996,40023,40025,40053,40805,41142,41249,41267,47115,48618,48619,49214,49232/sites"))$data
+
+
+
+fullspec_sites = as.data.frame(matrix(nrow=25,ncol=6))
+for (i in seq(1,25)) {
+  for (j in seq(1,6)) {
+      if (!is.null(sitelist[[i]][[j]])) {
+      fullspec_sites[i,j] = sitelist[[i]][[j]]
+    }
+  }}
+names(fullspec_sites) = names(sitelist[[1]])
+
+fullspec_sites_n = as.data.frame(get_sites(fullspec_sites$siteid)) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+
+bg_less = osm.raster(fullspec_sites_n)
+
+
+tm_shape(bg_less)+
+    tm_rgb() +
+    tm_shape(fullspec_sites_n) +
+    tm_dots(size=0.05,alpha=0.4) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'Neotoma Spec Sites: repo spec', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+fl_specs = fullspecs %>% filter(repository=="Florida Museum of Natural History")
+
+datatable(fl_specs[c(5,6,13,18)],rownames = FALSE)
+```
 
 ## Querying for Contact Information
 
