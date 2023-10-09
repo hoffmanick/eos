@@ -380,7 +380,7 @@ neotoma2::plotLeaflet(diats)
 
 ## Where, if anywhere, are the specimens held?
 
-My first strategy here is to get the full "repository specimens" table (which connects dataset ids to repository ids) and connect it to all the sites in Florida that have dataset ids listed in the table. This theoretically leads to a lot of representation in repositories. But it's unclear that there are actually specimens in these repositories...
+My first strategy here is to get the full "repository specimens" table (which connects dataset ids to repository ids) and filter it just for those datasets connected to sites in Florida. This leads to 159 datasets in repositories. But it's unclear that there are actually specimens in these repositories...
 
 ```{r repos, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -442,11 +442,7 @@ names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recd
 
 ```
 
-Some of the types of data held by Neotoma (e.g., pollen) tend not to be stewarded by institutional repositories. (Although particular researchers hold on to their pollen specimens - and those of their advisors, and their advisors' advisors - for many years. I've seen pollen slides preserved since the 1950s. The individual pollen grains get fat from absorbing the fluid in which they are suspended!)
-
-And some of these data (e.g., vertebrate fauna) are indeed held by museums or other institutions.
-
-The following table shows which institutions are the largest holders of Floridian paleoecological specimens. 
+The following table shows which institutions are the largest holders of Floridian paleoecological specimens (by strategy 1). 
 
 <br>
 
@@ -507,9 +503,11 @@ data_id = datasets %>%
 repospec_FL = repospec_df %>%
   filter(datasetid %in% data_id$datasetid)
 
-repo_join = left_join(datasets,repospec_FL, by="datasetid") %>%
-  left_join(repo_df, by = "repositoryid") %>%
-  left_join(stof_sites, by ="siteid") %>%
+repo_join = inner_join(repospec_FL, datasets, by="datasetid") %>%
+  distinct() %>%
+  inner_join(repo_df, by = "repositoryid") %>%
+  distinct() %>%
+  inner_join(stof_sites, by ="siteid") %>%
   distinct()
   
 ```
@@ -529,25 +527,6 @@ reps = repo_join %>% dplyr::select(datasetid,repository) %>%
 datatable(reps,rownames = FALSE)
 ```
 
-Notice that the largest count (460) is for datasets without an institutional repository. The following table breaks down those data without a repository by dataset type. 
-<br>
-
-``` {r missing, echo=FALSE,include=TRUE,message = FALSE}
-missings = repo_join %>%
-  dplyr::filter(is.na(repository)) %>% 
-  group_by(datasettype) %>%
-  dplyr::filter(datasettype!="geochronologic") %>%
-  count()%>%
-  arrange(desc(n))  
-
-datatable(missings,rownames = FALSE)
-
-##geochronologies not counted
-
-
-```
-
-As we might have suspected, these data without institutional repositories are pollen, other microfossils, and chemical data.
 
 For those institutions which are stewarding Floridian paleoecological specimens, what kinds of specimens are they holding?
 
@@ -584,9 +563,6 @@ repo_flmnh = repo_simp %>%
 
 repo_uf = repo_simp %>%
   dplyr::filter(repository=="University of Florida")
-
-repo_missing = repo_simp %>%
-  dplyr::filter(is.na(repository))
 
 
 tm_shape(bg)+
@@ -665,10 +641,12 @@ tm_shape(bg)+
               title.bg.color = "white", panel.label.height=1)
 
 ```
+Unfortunately, when I do a Tilia call to find the specimen IDs associated with these datasets, none show up - there are no specimens listed for these datasets, even though the datasets are connected to repositories in the repositoryspecimens table.
+
 
 ## Other strategy for specimens
 
-My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to use the site id to get information on sites through that. However, in this case I find that there are no specimens from sites in Florida, of the 435 sites listed here. And only 5 of these datasets are held at Florida Museum of Natural History.
+My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to filter that table for sites from Florida. However, in this case I find that there are no specimens from sites in Florida, of the 435 sites listed here. And only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
 
 ```{r specimens, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -690,7 +668,7 @@ datspecs = read.csv("datspecs.csv")
 fullspecs = read.csv("fullspecs.csv")
 
 fl_specs = specsamples %>%
-  filter(siteid %in% stof_sites$siteid)
+  filter(siteid %in% as.numeric(stof_sites$siteid))
 
 specsamples = specsamples %>%
   mutate(siteid=as.character(siteid))
@@ -708,6 +686,12 @@ setsites = read.csv("setsites.csv") %>%
 test = left_join(setsites,repospec_df) %>%
   filter(!is.na(repositoryid)) 
 
+test = test %>% dplyr::select(siteid,collectionunitid,datasetid,datasettype,repositoryid) %>%
+  distinct() %>%
+  mutate(siteid = as.character(siteid))
+
+specimen_dataset_join = inner_join(test,specsamples, by=join_by(siteid,collectionunitid))
+
 repo_count = test %>% group_by(repositoryid) %>%
   count() %>% arrange(desc(n)) %>%
   left_join(repo_df) %>%
@@ -715,6 +699,18 @@ repo_count = test %>% group_by(repositoryid) %>%
 
 datatable(repo_count[2:3],rownames = FALSE)
 
+flmnh_specs = specimen_dataset_join %>% filter(repositoryid==53) %>%
+  mutate(datasetid = as.numeric(datasetid))
+
+flmnh_spec_info = inner_join(flmnh_specs, fullspecs, by = join_by(datasetid,specimenid))
+
+datatable(flmnh_spec_info[c(7,12,13,20,25)],rownames = FALSE)
+
+```
+
+One problem here is that the repository hosting the specimens according to the specimens table (specimen -> site -> dataset -> repository)is the Florida Museum of Natural History - but according to the repository specimens table there are some discrepancies.
+
+``` {r map-specs-2, echo=FALSE,include=TRUE,message = FALSE}
 
 tm_shape(bg_big)+
     tm_rgb() +
@@ -760,7 +756,7 @@ bg_less = osm.raster(fullspec_sites_n)
 tm_shape(bg_less)+
     tm_rgb() +
     tm_shape(fullspec_sites_n) +
-    tm_dots(size=0.05,alpha=0.4) +
+    tm_dots(size=0.15,alpha=1) +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
               legend.bg.color="white",
               legend.bg.alpha=0.9,
@@ -773,8 +769,10 @@ tm_shape(bg_less)+
 
 fl_specs = fullspecs %>% filter(repository=="Florida Museum of Natural History")
 
-datatable(fl_specs[c(5,6,13,18)],rownames = FALSE)
+datatable(fl_specs[c(3,5,6,13,18)],rownames = FALSE)
 ```
+
+One thing I'm realizing is that there are both specimens unconnected to datasets (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repositorydatasets).
 
 ## Querying for Contact Information
 
