@@ -708,7 +708,7 @@ datatable(flmnh_spec_info[c(7,12,13,20,25)],rownames = FALSE)
 
 ```
 
-One problem here is that the repository hosting the specimens according to the specimens table (specimen -> site -> dataset -> repository)is the Florida Museum of Natural History - but according to the repository specimens table there are some discrepancies.
+One problem here is that the repository hosting the specimens according to the specimens table (specimen -> site -> dataset -> repository)is the Florida Museum of Natural History - but according to the repository specimens table there are some discrepancies. I think two of these datasets may be associated with multiple repositories, but only have specimens connected to them from the non-FLMNH repository.
 
 ``` {r map-specs-2, echo=FALSE,include=TRUE,message = FALSE}
 
