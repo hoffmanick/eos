@@ -643,7 +643,8 @@ tm_shape(bg)+
               title.bg.color = "white", panel.label.height=1)
 
 ```
-#### No Specimens here
+
+### No Specimens here
 
 When I do a Tilia call to find the specimen IDs associated with these datasets, none show up. There are no specimens listed for these datasets, even though the datasets are connected to repositories in the repository specimens table. My interpretation is that although Neotoma knows that the datasets contain specimens held by these repositories, it just doesn't know anything in particular about these specimens.
 
@@ -819,12 +820,12 @@ tm_shape(bg_big)+
     tm_shape(specsites_df) +
     tm_dots(size=0.05,alpha=0.4) +
      tm_shape(flmnh_sites) +
-    tm_dots("dataset",size=0.1) +
+    tm_dots("dataset",size=0.1,palette="Set1") +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
               legend.bg.color="white",
               legend.bg.alpha=0.9,
               legend.width=0.4,
-              legend.text.size=0.5,
+              legend.text.size=0.9,
               main.title= 'Sites from which Neotoma specimens come', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
