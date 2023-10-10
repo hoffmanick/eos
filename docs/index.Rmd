@@ -380,7 +380,9 @@ neotoma2::plotLeaflet(diats)
 
 ## Where, if anywhere, are the specimens held?
 
-My first strategy here is to get the full "repository specimens" table (which connects dataset ids to repository ids) and filter it just for those datasets connected to sites in Florida. This leads to 159 datasets in repositories. But it's unclear that there are actually specimens in these repositories...
+### Strategy 1: Start from 'Repository Specimens' Table
+
+My first strategy here is to get the full "repository specimens" table - a table with 6404 observations linking dataset ids to repository ids. I filter this table just for those datasets connected to sites in Florida. Using this strategy, I find that there are 159 datasets from sites in Florida linked to repositories. 
 
 ```{r repos, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -442,7 +444,7 @@ names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recd
 
 ```
 
-The following table shows which institutions are the largest holders of Floridian paleoecological specimens (by strategy 1). 
+The following table counts the number of datasets from Florida held by each relevant repository. Most of them are held by the Florida Museum of Natural History.
 
 <br>
 
@@ -528,7 +530,7 @@ datatable(reps,rownames = FALSE)
 ```
 
 
-For those institutions which are stewarding Floridian paleoecological specimens, what kinds of specimens are they holding?
+Below, I map the Florida sites from which datasets linked to repositories derive, and I color code them by dataset type.
 
 ```{r map repos, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -623,7 +625,7 @@ tm_shape(bg)+
 
 The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. I was surprised to learn this. Apparently they belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
 
-The smaller stewards on our specimen list all hold vertebrate fauna. The map below shows where these specimens derive from.
+The smaller repositories all hold vertebrate fauna. The map below shows the sites from which these vertebrate datasets derive.
 
 ```{r others,echo=FALSE,include=TRUE,message = FALSE}
 
@@ -641,12 +643,94 @@ tm_shape(bg)+
               title.bg.color = "white", panel.label.height=1)
 
 ```
-Unfortunately, when I do a Tilia call to find the specimen IDs associated with these datasets, none show up - there are no specimens listed for these datasets, even though the datasets are connected to repositories in the repositoryspecimens table.
+#### No Specimens here
+
+When I do a Tilia call to find the specimen IDs associated with these datasets, none show up. There are no specimens listed for these datasets, even though the datasets are connected to repositories in the repository specimens table. My interpretation is that although Neotoma knows that the datasets contain specimens held by these repositories, it just doesn't know anything in particular about these specimens.
+
+To double check that there are really no specimens connected to these datasets, I grab the repository specimens and get all specimens associated with each dataset id through a Tilia call. Of the 6404 rows in repository specimens (representing 6255 distinct datasets because some datasets are linked to multiple repositories), only 112 distinct datasets (130 rows because multiple repositories) have specimens associated with them through the Tilia call. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. Even though none of these specimens are from sites in Florida, nine of them are held by the Florida Museum of Natural History. These nine specimen are deer teeth from Guatemala.
+
+```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
 
 
-## Other strategy for specimens
+sitelist = content(GET("https://api.neotomadb.org/v2.0/data/datasets/4575,4593,4594,4595,4635,5365,5562,6060,6290,6636,6790,6896,6985,7063,7112,7131,7202,7536,7561,7686,11999,13091,19832,19860,19862,20569,24656,24693,25520,25904,26226,27337,32390,32654,32682,32684,32688,32690,32696,32712,32732,33381,33807,36732,36794,38910,38915,39066,39070,39167,39171,39174,39175,39176,39183,39189,39195,39200,39203,39211,39213,39223,39225,39227,39229,39231,39233,39235,39236,39237,39239,39241,39243,39245,39247,39248,39250,39254,39255,39257,39259,39260,39262,39264,39266,39267,39270,39272,39274,39321,39323,39325,39334,39336,39338,39340,39989,39992,39994,39996,40023,40025,40053,40805,41142,41249,41267,47115,48618,48619,49214,49232/sites"))$data
 
-My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to filter that table for sites from Florida. However, in this case I find that there are no specimens from sites in Florida, of the 435 sites listed here. And only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
+
+
+fullspec_sites = as.data.frame(matrix(nrow=25,ncol=6))
+for (i in seq(1,25)) {
+  for (j in seq(1,6)) {
+      if (!is.null(sitelist[[i]][[j]])) {
+      fullspec_sites[i,j] = sitelist[[i]][[j]]
+    }
+  }}
+names(fullspec_sites) = names(sitelist[[1]])
+
+fullspec_sites_n = as.data.frame(get_sites(fullspec_sites$siteid)) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+
+bg_less = osm.raster(fullspec_sites_n)
+
+
+tm_shape(bg_less)+
+    tm_rgb() +
+    tm_shape(fullspec_sites_n) +
+    tm_dots(size=0.15,alpha=1) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'Specimen Sites from Repository Specimens', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+fullspecs = read.csv("fullspecs.csv")
+
+
+fl_specs = fullspecs %>% filter(repository=="Florida Museum of Natural History")
+
+deer_where = get_sites(datasetid=40805) %>% 
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+lats = c(22.7,22.7,11.4,11.4,17.355) %>%
+  as.data.frame()
+longs = c(-93.6,-84.55, -93.6,-84.55,-90.32) %>%
+  as.data.frame()
+
+names(lats) = c("lat")
+names(longs) = c("long")
+
+gu_bb = cbind(lats,longs) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+datatable(fl_specs[c(3,5,6,13,18)],rownames = FALSE)
+
+
+bg_small = osm.raster(gu_bb)
+
+
+tm_shape(bg_small)+
+    tm_rgb() +
+    tm_shape(deer_where) +
+    tm_dots(size=0.1) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'La Joyanca', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+```
+
+### Strategy 2: Start with the specimens table
+
+My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to filter that table for sites from Florida. I find that there are no specimens from sites in Florida, of the 435 sites listed here. This is consistent with what I found above. Only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
 
 ```{r specimens, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -664,8 +748,6 @@ datspecs = read.csv("datspecs.csv")
 
 ```{r specimens-from-florida, echo=FALSE,include=TRUE,message = FALSE}
 
-
-fullspecs = read.csv("fullspecs.csv")
 
 fl_specs = specsamples %>%
   filter(siteid %in% as.numeric(stof_sites$siteid))
@@ -707,72 +789,50 @@ flmnh_spec_info = inner_join(flmnh_specs, fullspecs, by = join_by(datasetid,spec
 datatable(flmnh_spec_info[c(7,12,13,20,25)],rownames = FALSE)
 
 ```
+Even though these datasets are associated with specimens and associated with the Florida Museum of Natural History, for the two datasets that are not Joyanca deer teeth, these specimens are actually held in three other repositories: the Texas Memorial Museum, Lander University, and the South Carolina State Museum. This is because these datasets are linked to multiple repositories in the repository specimens table, and there is only information about the specimens held at the places that are not the Florida Museum of Natural History for those two other datasets. 
 
-One problem here is that the repository hosting the specimens according to the specimens table (specimen -> site -> dataset -> repository)is the Florida Museum of Natural History - but according to the repository specimens table there are some discrepancies. I think two of these datasets may be associated with multiple repositories, but only have specimens connected to them from the non-FLMNH repository.
 
 ``` {r map-specs-2, echo=FALSE,include=TRUE,message = FALSE}
+
+flmnh_site1 = get_sites(datasetid=39325) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "mixotoxodon")
+
+
+flmnh_site2 = get_sites(datasetid=40805) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "deer")
+
+
+flmnh_site3 = get_sites(datasetid=13091) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "mammoth")
+
+flmnh_sites = rbind(flmnh_site1,flmnh_site2) %>%
+  rbind(flmnh_site3)
 
 tm_shape(bg_big)+
     tm_rgb() +
     tm_shape(specsites_df) +
     tm_dots(size=0.05,alpha=0.4) +
+     tm_shape(flmnh_sites) +
+    tm_dots("dataset",size=0.1) +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
               legend.bg.color="white",
               legend.bg.alpha=0.9,
               legend.width=0.4,
               legend.text.size=0.5,
-              main.title= 'Neotoma Spec sites: from Specimens', 
+              main.title= 'Sites from which Neotoma specimens come', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
 
 
 ```
 
-Then I try a third strategy. I grab the repository specimens and get all specimens associated with each dataset id through a Tilia call. There are 6404 rows in repository specimens, but only 112 of these datasets have specimens associated with them through the Tilia call. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. 9 of these specimens are held by the Florida Museum of Natural History.
-
-```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
-
-
-sitelist = content(GET("https://api.neotomadb.org/v2.0/data/datasets/4575,4593,4594,4595,4635,5365,5562,6060,6290,6636,6790,6896,6985,7063,7112,7131,7202,7536,7561,7686,11999,13091,19832,19860,19862,20569,24656,24693,25520,25904,26226,27337,32390,32654,32682,32684,32688,32690,32696,32712,32732,33381,33807,36732,36794,38910,38915,39066,39070,39167,39171,39174,39175,39176,39183,39189,39195,39200,39203,39211,39213,39223,39225,39227,39229,39231,39233,39235,39236,39237,39239,39241,39243,39245,39247,39248,39250,39254,39255,39257,39259,39260,39262,39264,39266,39267,39270,39272,39274,39321,39323,39325,39334,39336,39338,39340,39989,39992,39994,39996,40023,40025,40053,40805,41142,41249,41267,47115,48618,48619,49214,49232/sites"))$data
-
-
-
-fullspec_sites = as.data.frame(matrix(nrow=25,ncol=6))
-for (i in seq(1,25)) {
-  for (j in seq(1,6)) {
-      if (!is.null(sitelist[[i]][[j]])) {
-      fullspec_sites[i,j] = sitelist[[i]][[j]]
-    }
-  }}
-names(fullspec_sites) = names(sitelist[[1]])
-
-fullspec_sites_n = as.data.frame(get_sites(fullspec_sites$siteid)) %>%
-  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
-
-
-bg_less = osm.raster(fullspec_sites_n)
-
-
-tm_shape(bg_less)+
-    tm_rgb() +
-    tm_shape(fullspec_sites_n) +
-    tm_dots(size=0.15,alpha=1) +
-    tm_layout(legend.position=c("LEFT","BOTTOM"),
-              legend.bg.color="white",
-              legend.bg.alpha=0.9,
-              legend.width=0.4,
-              legend.text.size=0.5,
-              main.title= 'Neotoma Spec Sites: repo spec', 
-              main.title.position = "center",
-              title.bg.color = "white", panel.label.height=1)
-
-
-fl_specs = fullspecs %>% filter(repository=="Florida Museum of Natural History")
-
-datatable(fl_specs[c(3,5,6,13,18)],rownames = FALSE)
-```
-
-One thing I'm realizing is that there are both specimens unconnected to datasets (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repositorydatasets).
+One thing I'm realizing is that there are both specimens unconnected to datasets (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 
 
 ## Querying for Contact Information
 
