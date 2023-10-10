@@ -833,7 +833,7 @@ tm_shape(bg_big)+
 
 ```
 
-One thing I'm realizing is that there are both specimens unconnected to datasets (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 
+One thing I'm realizing is that there are both specimens unconnected to repositories (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 
 
 ## Querying for Contact Information
 
