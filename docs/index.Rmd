@@ -682,7 +682,7 @@ tm_shape(bg_less)+
               legend.bg.alpha=0.9,
               legend.width=0.4,
               legend.text.size=0.5,
-              main.title= 'Specimen Sites from Repository Specimens', 
+              main.title= 'Dataset Sites associated with specimens\n from Repository Specimens', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
 
