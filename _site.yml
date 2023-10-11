@@ -1,15 +1,12 @@
 name: "Reckoning with Neotoma: EOS"
 navbar:
-  title: "PSY 525.001"
+  title: "Pages"
   left:
     - text: "Neotoma for Kitty"
       href: index.html
     - text: "Neotoma for Seminole"
       href: about.html
-  right:
-    - text: "Site info"
-      href: site-info.html
-output_dir: "docs"
+output_dir: "."
 output:
   html_document:
     theme: flatly
