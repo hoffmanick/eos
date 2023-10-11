@@ -1,5 +1,5 @@
 ---
-title: "Neotoma's Floridian Paleoecological Records"
+title: "Neotoma for Kitty"
 author: "Nick Hoffman"
 date: "September 21, 2023"
 output:
@@ -56,7 +56,7 @@ table tr th :last-child, table tr td :last-child {
 
 ## Introduction
 
-This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. If you would like to explore these records or other Neotoma data further, we are happy to help with that, so please reach out! This page is for Kitty, to help give a picture of what Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
+This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help give a picture of what Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
 
 ```{r setup, include=FALSE,warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE,fig.align = 'center')
