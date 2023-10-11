@@ -1,88 +1,16 @@
-name: "PSY 525.001 Spring 2020"
+name: "Reckoning with Neotoma: EOS"
 navbar:
   title: "PSY 525.001"
   left:
-    - text: "Home"
+    - text: "Neotoma for Kitty"
       href: index.html
-    - text: "About"
+    - text: "Neotoma for Seminole"
       href: about.html
-    - text: "Schedule"
-      href: schedule.html
-    - text: "Assignments"
-      href: assignments.html
-    - text: "Evaluation"
-      href: evaluation.html
-    - text: "Resources"
-      href: resources.html
-    - text: "Lectures"
-      menu:
-        - text: "Week 1: 2020-01-14"
-          href: lectures/2020-01-14.html
-        - text: "Week 2: 2020-01-21"
-          href: lectures/2020-01-21.html
-        - text: "Week 3: 2020-01-28"
-          href: lectures/2020-01-28.html
-        - text: "Week 4: 2020-02-04"
-          href: lectures/2020-02-04.html
-        - text: "Week 5: 2020-02-11"
-          href: lectures/2020-02-11.html
-        - text: "Week 6: 2020-02-18"
-          href: lectures/2020-02-18.html
-        - text: "Week 7: 2020-02-25"
-          href: lectures/2020-02-25.html
-        - text: "Week 8: 2020-03-03"
-          href: lectures/2020-03-03-no-shiny.html
-        - text: "Week 9: 2020-03-17"
-          href: lectures/2020-03-17.html
-        - text: "Week 10: 2020-03-24"
-          href: lectures/2020-03-24.html
-        - text: "Week 11: 2020-03-31"
-          href: lectures/2020-03-31.html
-        - text: "Week 12: 2020-04-07"
-          href: lectures/2020-04-07.html
-        - text: "Week 13: 2020-04-14"
-          href: lectures/2020-04-14.html
-    - text: "Students"
-      href: students.html
-    - text: "How-to"
-      menu:
-        - text: "RStudio server"
-          href: how_to/rstudio-server-pro.html
-        - text: "Jupyter notebook server"
-          href: how_to/jupyter-notebooks-psu.html
-        - text: "Google Colaboratory"
-          href: how_to/google-colaboratory.html
-        - text: "Evaluate different RMarkdown themes"
-          href: how_to/evaluating-themes.html
-        - text: "Make a website with R Markdown"
-          href: how_to/make-website-with-rstudio.html
-        - text: "Use R Markdown formatting"
-          href: how_to/sample-rmarkdown-document.html
-        - text: "Embed 'child' R Markdown documents"
-          href: how_to/embed-rmarkdown-docs.html
-        - text: "Make reports that take parameters"
-          href: how_to/reports-with-parameters.html
-        - text: "Use Python in R Markdown"
-          href: how_to/python-in-rmarkdown.html
-        - text: "Install Python locally"
-          href: how_to/install-python.html
-        - text: "Interact with Box.com API"
-          href: how_to/interact-with-box.html
-        - text: "Interact with the Qualtrics API"
-          href: how_to/interact-with-qualtrics.html
-        - text: "Interact with the Google Drive API"
-          href: how_to/interact-with-google-drive.html
-        - text: "Interact with the U.S. Census API"
-          href: how_to/interact-with-census.html
   right:
     - text: "Site info"
       href: site-info.html
-    - icon: ion-social-github
-      href: https://github.com/psu-psychology/psy-525-reproducible-research-2020
 output_dir: "docs"
 output:
   html_document:
     theme: flatly
     highlight: textmate
-    include:
-      after_body: footer.html
