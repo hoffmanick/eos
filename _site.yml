@@ -1,6 +1,6 @@
 name: "Reckoning with Neotoma: EOS"
 navbar:
-  title: "Pages"
+  title: "Neotoma Readers"
   left:
     - text: "Neotoma for Kitty"
       href: index.html
