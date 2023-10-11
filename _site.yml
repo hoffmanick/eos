@@ -3,7 +3,7 @@ navbar:
   title: "Neotoma Readers"
   left:
     - text: "Neotoma for Kitty"
-      href: kitty.html
+      href: index.html
     - text: "Neotoma for Seminole"
       href: seminole.html
 output_dir: "docs"
