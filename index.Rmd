@@ -708,7 +708,7 @@ tm_shape(bg_small)+
 
 ```
 
-### Strategy 2: Start with the specimens table
+### Strategy 2: Start from the 'Specimens' table
 
 My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen. Then I filter that table for sites from Florida. I find that there are no specimens from sites in Florida, of the 435 sites listed here. This is consistent with what I found above. 
 
