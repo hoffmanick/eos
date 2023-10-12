@@ -58,9 +58,9 @@ table tr th :last-child, table tr td :last-child {
 
 This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help paint a picture of what records Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
 
-I also created two csv files for Kitty (below). "Publication authors" lists every publication that Neotoma knows about concerning vertebrate fauna datasets from Florida, along with the relevant datasets and authors. Since a publication can concern multiple datasets and have multiple authors, a particular publication will often show up multiple times in this table. If, for instance, a publication has three authors and concerns two datasets, there will actually be six rows in the table for that publication, one for each combination of dataset and author.
+I also created two csv files for Kitty (below). "Publication Authors" lists every publication that Neotoma knows about concerning vertebrate fauna datasets from Florida, along with the relevant datasets and authors. Since a publication can concern multiple datasets and have multiple authors, a particular publication will often show up multiple times in this table. If, for instance, a publication has three authors and concerns two datasets, there will actually be six rows in the table for that publication, one for each combination of dataset and author.
 
-"Site Contacts" lists the contact information known by Neotoma and associated with people connected to every site in Florida from which vertebrate datasets have been collected.
+"Site Contacts" lists the contact information known by Neotoma and associated with people connected to every site in Florida from which vertebrate datasets have been collected. Because a particular person may have worked at multiple sites, some contacts are repeated in this table, for each site where they've worked.
 
 <ul class="downloads">
           <li><a href="florida_pub_authors.csv">Download <strong>Publication Authors</strong></a></li>
