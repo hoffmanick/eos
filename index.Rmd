@@ -54,6 +54,11 @@ table tr th :last-child, table tr td :last-child {
 }
 </style>
 
+<ul class="downloads">
+          <li><a href="{{site.baseurl}}/florida_pub_authors.csv">Download <strong>Publication Authors</strong></a></li>
+          <li><a href="{{site.baseurl}}/florida_site_contacts.csv">Download <strong>Site Contacts</strong></a></li>
+        </ul>
+        
 ## Introduction
 
 This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help paint a picture of what records Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
