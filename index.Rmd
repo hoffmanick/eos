@@ -56,7 +56,7 @@ table tr th :last-child, table tr td :last-child {
 
 ## Introduction
 
-This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help give a picture of what Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
+This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help paint a picture of what records Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
 
 ```{r setup, include=FALSE,warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE,fig.align = 'center')
@@ -243,25 +243,6 @@ sum_dt %>%
 
 ```
 
-From the above table and bar graph, we can see that the most abundant datasets in Florida are vertebrate fauna. 
-
-<p>Also abundant are:</p> <ul>
-<li>pollen surface samples,</li> 
-<li>stratigraphic pollen (here labeled "pollen": i.e., pollen sampled at different strata of a sedimentary core extracted from a lake),</li>
-<li>water chemistry data, and</li> 
-<li>various kinds of diatom data.</li>
-</ul>
-
-<p>Not abundant, but still interesting and potentially useful are:</p><ul>
-<li>loss-on-ignition (i.e., how much of your mud can you burn away; a measure of reduced carbon content - potentially a proxy for eutrophication),</li>
-<li>sedimentary charcoal (for reconstructing fire history),</li>
-<li>X-ray fluorescence (for measuring trace elements),</li>
-<li>biomarkers (in this case, sedimentary concentrations of organic molecules used to reconstruct past temperature),</li>
-<li>geochemistry (in this case, trace metals in a sediment core measured mostly by ICP-MS),</li>
-<li>insects, and</li>
-<li>plant macrofossils.</li>
-</ul>
-
 The map below shows how these datasets are distributed.
 
 
@@ -322,11 +303,9 @@ tm_shape(bg)+
 
 ```
 
-We can notice some overlaps in site location across these map panels.
+There are some overlaps in site location across these map panels.
 
-Most strikingly, the diatom and water chemistry maps look the same. Many paleoecologists use sedimentary diatom assemblages as proxies for reconstructing changes in lake chemistry over time. In order to estimate changes in lake chemistry over time based on changes in diatom assemblage over time, these scientists gather information on diatom assemblages at the surface of a lake and their relationship to modern lake chemistry. That is why these two dataset types are coextensive. 
-
-There are other overlaps too. It can be useful to have multiple proxies from the same site; their combination may paint a clearer picture of the past.
+Most strikingly, the diatom and water chemistry maps look the same. Many paleoecologists use sedimentary diatom assemblages as proxies for reconstructing changes in lake chemistry over time. In order to estimate changes in lake chemistry over time based on changes in diatom assemblage over time, these scientists gather information on diatom assemblages at the surface of a lake and their relationship to modern lake chemistry. That is why these two dataset types are coextensive. There are other overlaps too...
 
 The Leaflet plots below enable dynamic exploration of maps for the most common dataset types: vertebrate fauna, diatoms, and pollen. Note that these are site maps. There are fewer sites than datasets because sometimes multiple datasets are collected from the same site, so the numbers here won't match the dataset maps above. Also note that the pollen map below shows sites from which both stratigraphic and surface pollen records were collected.
 
@@ -443,7 +422,7 @@ names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recd
 
 ```
 
-The following table counts the number of datasets from Florida held by each relevant repository. Most of them are held by the Florida Museum of Natural History.
+The following table counts the number of datasets from Florida held by each relevant repository. Most of them are held by the Florida Museum of Natural History. Many are held by the University of Florida too - this is something that I'm unclear about: is there a meaningful difference from the Museum's perspective about a dataset being linked to the Museum specifically, versus the University more generally?
 
 <br>
 
@@ -605,11 +584,10 @@ And the University of Florida, like its constituent museum, holds just vertebrat
 
 ```{r philly, echo=FALSE,include=TRUE,message = FALSE}
 
-
 tm_shape(bg)+
     tm_rgb() +
     tm_shape(repo_phil) +
-    tm_dots("datasettype",size=0.1,palette="Set1") +
+    tm_dots("datasettype",size=0.1,palette="Set1",alpha=0.6) +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
               legend.bg.color="white",
               legend.bg.alpha=0.9,
@@ -645,9 +623,11 @@ tm_shape(bg)+
 
 ### No Specimens here
 
-When I do a Tilia call to find the specimen IDs associated with these datasets, none show up. There are no specimens listed for these datasets, even though the datasets are connected to repositories in the repository specimens table. My interpretation is that although Neotoma knows that the datasets contain specimens held by these repositories, it just doesn't know anything in particular about these specimens.
+When I do a Tilia call (Neotoma's API for developers) to find the specimen IDs associated with these datasets, none show up. There are no specimens listed for these datasets, even though the datasets are connected to repositories in the repository specimens table. Although Neotoma knows that the datasets concern specimens held by these repositories, it just doesn't know anything in particular about these specimens. Data contributors are not required to input that information when they upload data to Neotoma.
 
-To double check that there are really no specimens connected to these datasets, I grab the repository specimens and get all specimens associated with each dataset id through a Tilia call. Of the 6404 rows in repository specimens (representing 6255 distinct datasets because some datasets are linked to multiple repositories), only 112 distinct datasets (130 rows because multiple repositories) have specimens associated with them through the Tilia call. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. Even though none of these specimens are from sites in Florida, nine of them are held by the Florida Museum of Natural History. These nine specimen are deer teeth from Guatemala.
+To double check that there are really no specimens connected to these datasets, I do the same Tilia call on the entire repository specimens table (rather than just the subset of dataset ids associated with Florida sites). Of the 6404 rows in repository specimens (representing 6255 distinct datasets because some datasets are linked to multiple repositories), only 112 distinct datasets (130 rows because multiple repositories) actually have specimens associated with them - roughly 2% of these datasets. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. Even though none of these specimens are from sites in Florida, nine of them are held by the Florida Museum of Natural History. These nine specimen are deer teeth from Guatemala.
+
+The map below shows the 25 sites hosting datasets linked to repositories that are actually associated with those 895 specimens.
 
 ```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -681,7 +661,7 @@ tm_shape(bg_less)+
               legend.bg.alpha=0.9,
               legend.width=0.4,
               legend.text.size=0.5,
-              main.title= 'Dataset Sites associated with specimens\n from Repository Specimens', 
+              main.title= 'Dataset Sites from Repository Specimens\nassociated with specimens', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
 
@@ -730,7 +710,9 @@ tm_shape(bg_small)+
 
 ### Strategy 2: Start with the specimens table
 
-My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen, and to filter that table for sites from Florida. I find that there are no specimens from sites in Florida, of the 435 sites listed here. This is consistent with what I found above. Only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
+My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen. Then I filter that table for sites from Florida. I find that there are no specimens from sites in Florida, of the 435 sites listed here. This is consistent with what I found above. 
+
+The following table ranks repositories by the number of datasets they steward, for only those datasets that are actually linked to specimens in Neotoma. Only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
 
 ```{r specimens, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -785,12 +767,17 @@ flmnh_specs = specimen_dataset_join %>% filter(repositoryid==53) %>%
   mutate(datasetid = as.numeric(datasetid))
 
 flmnh_spec_info = inner_join(flmnh_specs, fullspecs, by = join_by(datasetid,specimenid))
+```
 
-datatable(flmnh_spec_info[c(7,12,13,20,25)],rownames = FALSE)
+And this table shows just those specimens asssociated with datasets which are themselves associated with the Florida Museum of Natural History. Although the mammoth and mixotoxodon specimens are not held by the Florida Museum, they are associated with datasets which are themselves associated with specimens held by the Florida Museum.
+
+``` {r specimens-from-florida-again, echo=FALSE,include=TRUE,message = FALSE}
+datatable(flmnh_spec_info[c(3,7,12,13,20,25)],rownames = FALSE)
 
 ```
 Even though these datasets are associated with specimens and associated with the Florida Museum of Natural History, for the two datasets that are not Joyanca deer teeth, these specimens are actually held in three other repositories: the Texas Memorial Museum, Lander University, and the South Carolina State Museum. This is because these datasets are linked to multiple repositories in the repository specimens table, and there is only information about the specimens held at the places that are not the Florida Museum of Natural History for those two other datasets. 
 
+This last map just shows all the 435 sites that are associated with specimens in the Neotoma database. The sites hosting the three datasets traced in some way to the Florida Museum are highlighted. 
 
 ``` {r map-specs-2, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -832,4 +819,4 @@ tm_shape(bg_big)+
 
 ```
 
-One thing I'm realizing is that there are both specimens unconnected to repositories (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 
+One takeaway here is that there are both specimens unconnected to repositories (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 

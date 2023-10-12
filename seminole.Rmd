@@ -323,7 +323,7 @@ tm_shape(bg)+
 
 ```
 
-We can notice some overlaps in site location across these map panels.
+There are some overlaps in site location across these map panels.
 
 Most strikingly, the diatom and water chemistry maps look the same. Many paleoecologists use sedimentary diatom assemblages as proxies for reconstructing changes in lake chemistry over time. In order to estimate changes in lake chemistry over time based on changes in diatom assemblage over time, these scientists gather information on diatom assemblages at the surface of a lake and their relationship to modern lake chemistry. That is why these two dataset types are coextensive. 
 
@@ -644,21 +644,21 @@ tm_shape(bg)+
 
 ### What kinds of specimens are held by these repositories?
 
-Neotoma maintains a table of specimen data with potentially detailed information on the part of body, maturity, and sex of the animals being stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 159 datasets linked to repositories (see above), there is no information in the database about the particular specimens that constitute these datasets. 
+Neotoma maintains a table of specimen data with potentially detailed information on the body part, maturity, sex, and other characteristics of the animal specimens stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 159 datasets linked to repositories (see above), there is no information in the database about the particular specimens that constitute these datasets. 
 
-In fact, the only specimens Neotoma knows about held by the Florida Museum of Natural History are nine deer teeth from a site in Guatemala. 
+In fact, the only specimens Neotoma knows about held by the Florida Museum of Natural History at all are nine deer teeth from a site in Guatemala. 
 
 
 ## Making Neotoma a better database
 
 We've just gone over the current state of the Neotoma database, with respect to its Florida records. As you saw, there's a lot of great data, but the metadata especially is incomplete in many cases. 
 
-We want to make Neotoma better. It is a living database, with an active and growing community of users, contributors, and stewards. Many in this community are eager to do the work that will make Neotoma more comprehensive, more just, more democratic.
+Neotoma is a living database, with an active and growing community of users, contributors, and stewards. We want to make the database better, and - more fundamentally - we want to broaden our understanding of what it even means for Neotoma to be <i>good</i>. 
 
-The question arises: in what direction would you all like to see the database move? Would you like us to work with the Florida Museum of Natural History, for instance, to make those connections between datasets and specimens that are currently missing? Would you like workshops on how to explore certain kinds of data held by Neotoma? What kinds of collaborations between Neotoma and the Seminole might be productive?
+The question arises: What would making Neotoma better look like from your perspective? Would you like us to work with the Florida Museum of Natural History, for instance, to make those connections between datasets and specimens that are currently missing? Would you like us to host workshops for you on how to explore certain kinds of data held by Neotoma? What kinds of collaborations between Neotoma and the Seminole might be productive?
 
 ## Staying in Touch
 
-If you have any questions about the information presented here, if you would like to learn more about using Neotoma, or to join our Ethical Open Science Research Coordination Network for Past Global Change Data (EOS RCN), if you have some other kind of collaboration in mind, please reach out to Nick Hoffman at <span style="font-weight:bold;">nicholashoffman@ucmerced.edu</span>, or to the EOS RCN at <span style="font-weight:bold;">EthicalOS.RCN@gmail.com</span>.
+If you have any questions about the information presented here, if you would like to learn more about using Neotoma, or if you have some other kind of collaboration in mind, please reach out to Nick Hoffman at <span style="font-weight:bold;">nicholashoffman@ucmerced.edu</span>, or to the EOS RCN at <span style="font-weight:bold;">EthicalOS.RCN@gmail.com</span>.
 
 Thank you for taking the time to read through this short presentation of Neotoma resources! We hope that this is just the beginning.
