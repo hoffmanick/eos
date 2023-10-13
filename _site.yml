@@ -1,11 +1,5 @@
 name: "Reckoning with Neotoma: EOS"
-navbar:
-  title: "Neotoma Readers"
-  left:
-    - text: "Neotoma for Kitty"
-      href: index.html
-    - text: "Neotoma for Seminole"
-      href: seminole.html
+
 output_dir: "docs"
 output:
   html_document:
