@@ -621,9 +621,9 @@ tm_shape(bg)+
 
 ```
 
-The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. I was surprised to learn this. Apparently they belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
+The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. They belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
 
-The smaller repositories all hold vertebrate fauna. The map below shows the sites from which these vertebrate datasets derive.
+The smaller repositories all hold vertebrate fauna. The map below shows the sites from which these vertebrate datasets derive, color-coded by repository.
 
 ```{r others,echo=FALSE,include=TRUE,message = FALSE}
 
@@ -644,21 +644,21 @@ tm_shape(bg)+
 
 ### What kinds of specimens are held by these repositories?
 
-Neotoma maintains a table of specimen data with potentially detailed information on the body part, maturity, sex, and other characteristics of the animal specimens stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 159 datasets linked to repositories (see above), there is no information in the database about the particular specimens that constitute these datasets. 
+Neotoma maintains a table of specimen data with potentially detailed information on the body part, maturity, sex, and other characteristics of the animal specimens stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 159 datasets from sites in Florida linked to repositories (see above), there is actually no information in the database about the particular specimens that constitute these datasets. 
 
 In fact, the only specimens Neotoma knows about held by the Florida Museum of Natural History at all are nine deer teeth from a site in Guatemala. 
 
 
 ## Making Neotoma a better database
 
-We've just gone over the current state of the Neotoma database, with respect to its Florida records. As you saw, there's a lot of great data, but the metadata especially is incomplete in many cases. 
+We've just gone over the current state of the Neotoma database with respect to its Florida records. As you saw, there's a lot of great data, but the metadata especially is incomplete in many cases. 
 
 Neotoma is a living database, with an active and growing community of users, contributors, and stewards. We want to make the database better, and - more fundamentally - we want to broaden our understanding of what it even means for Neotoma to be <i>good</i>. 
 
-The question arises: What would making Neotoma better look like from your perspective? Would you like us to work with the Florida Museum of Natural History, for instance, to make those connections between datasets and specimens that are currently missing? Would you like us to host workshops for you on how to explore certain kinds of data held by Neotoma? What kinds of collaborations between Neotoma and the Seminole might be productive?
+The question arises: What would making Neotoma better look like from the perspective of the Seminole Tribe of Florida? We could, for instance, work with the Florida Museum of Natural History to make those connections between datasets and specimens that are currently missing. We could also host workshops for Seminole scientists on how to make use of Neotoma's data. What might the Seminole Nation hope to get out of collaboration with Neotoma?
 
 ## Staying in Touch
 
-If you have any questions about the information presented here, if you would like to learn more about using Neotoma, or if you have some other kind of collaboration in mind, please reach out to Nick Hoffman at <span style="font-weight:bold;">nicholashoffman@ucmerced.edu</span>, or to the EOS RCN at <span style="font-weight:bold;">EthicalOS.RCN@gmail.com</span>.
+Thank you for taking the time to read through this short presentation of Neotoma resources! If you have any questions about the information presented here, please reach out to Nick Hoffman at <span style="font-weight:bold;">nicholashoffman@ucmerced.edu</span>. 
 
-Thank you for taking the time to read through this short presentation of Neotoma resources! We hope that this is just the beginning.
+ 
