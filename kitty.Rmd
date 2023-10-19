@@ -75,10 +75,6 @@ I also created three csv files for Kitty (below). "Publication Authors" lists ev
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE,fig.align = 'center')
 ```
 
-## About Neotoma
-
-<a href="https://www.cambridge.org/core/journals/quaternary-research/article/neotoma-paleoecology-database-a-multiproxy-international-communitycurated-data-resource/1E1C9EB07ADFF01182BCB69A08E1C755">Neotoma</a> began in 2009 as a federated database constituted by a set of more specialized paleoecological databases. This means that Neotoma brings together paleoecological data from a range of proxy types (e.g., pollen, charcoal, testate amoebae), regions (e.g., North America, Latin America, Europe), and time periods (e.g., Pliocene, Pleistocene, Holocene). Neotoma incorporates data collected over more than 150 years. 
-
 ```{r packages1,echo = FALSE, results = FALSE}
 
 pacman::p_load(neotoma2,tidyverse,sf,leaflet,raster,tmap,tmaptools,osmdata,rosm,httr,jsonlite,flextable)
@@ -94,7 +90,6 @@ library(htmltools)
 
 ```
 
-The Neotoma database is <a href="https://neotoma-manual.readthedocs.io/en/latest/db_design_concepts.html">a relational database</a>, a structure whose primary unit is the <i>entity</i> - essentially a table of data in which rows are observations, and columns are variables. Three important entities in Neotoma are <i>sites</i>, <i>collection units</i>, and <i>datasets</i>. A site is the place that fossil specimens come from, like a particular lake. A collection unit describes the means by which the material from a site was collected. It could be a particular sedimentary core from a lake site. A dataset might be the pollen you counted in the core at each stratigraphic horizon of the sedimentary core. There are other entities in the database too.
 
 
 
@@ -125,9 +120,7 @@ library(DT)
 
 ## Are there any sites in Florida from which Neotoma records derive?
 
-The first question to ask is whether Neotoma even stores any data from the Florida region. 
-
-As a matter of fact, there are 387 sites in Florida for which Neotoma holds paleoecological data. Some of these sites have multiple datasets associated with them, so there are even more than 387 data records.
+There are 432 sites in Florida for which Neotoma holds paleoecological data. Some of these sites have multiple datasets associated with them, so there are even more than 432 data records.
 
 ```{r site-location, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -207,7 +200,7 @@ datatable(stof_sites[c(2,7)],rownames = FALSE)
 
 ## What kinds of data were recorded at these sites?
 
-Now we know there are data concerning Florida held by Neotoma. The next question we might want to answer is what kinds of data these are.
+The following table and graph show what dataset types have been collected from these sites.
 
 <br>
 
@@ -308,7 +301,7 @@ tm_shape(bg)+
 
 There are some overlaps in site location across these map panels.
 
-Most strikingly, the diatom and water chemistry maps look the same. Many paleoecologists use sedimentary diatom assemblages as proxies for reconstructing changes in lake chemistry over time. In order to estimate changes in lake chemistry over time based on changes in diatom assemblage over time, these scientists gather information on diatom assemblages at the surface of a lake and their relationship to modern lake chemistry. That is why these two dataset types are coextensive. There are other overlaps too...
+Most strikingly, the diatom and water chemistry maps look the same. Some paleoecologists build transfer functions that take a sedimentary diatom assemblage as an input and estimate past lake chemistry as an output. These transfer functions require a dataset of surface diatom assemblages at many lakes connected to current lake chemistry at those lakes. That is why these two dataset types are coextensive. There are other overlaps too...
 
 The Leaflet plots below enable dynamic exploration of maps for the most common dataset types: vertebrate fauna, diatoms, and pollen. Note that these are site maps. There are fewer sites than datasets because sometimes multiple datasets are collected from the same site, so the numbers here won't match the dataset maps above. Also note that the pollen map below shows sites from which both stratigraphic and surface pollen records were collected.
 
