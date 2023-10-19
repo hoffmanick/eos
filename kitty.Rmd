@@ -522,7 +522,7 @@ repo_phil = repo_simp %>%
   dplyr::filter(repository=="Academy of Natural Sciences, Philadelphia")
 
 repo_others = repo_map %>%
-  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida"))
+  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida","Yale Peabody Museum"))
 
 repo_flmnh = repo_simp %>%
   dplyr::filter(repository=="Florida Museum of Natural History")
@@ -617,6 +617,11 @@ To double check that there are really no specimens connected to these datasets, 
 The map below shows the 25 sites hosting datasets linked to repositories that are actually associated with those 895 specimens.
 
 ```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
+
+distinct_sets = datasets %>% distinct(datasetid)
+
+
+list_sets =paste0(distinct_sets[[1]],collapse=",")
 
 
 sitelist = content(GET("https://api.neotomadb.org/v2.0/data/datasets/4575,4593,4594,4595,4635,5365,5562,6060,6290,6636,6790,6896,6985,7063,7112,7131,7202,7536,7561,7686,11999,13091,19832,19860,19862,20569,24656,24693,25520,25904,26226,27337,32390,32654,32682,32684,32688,32690,32696,32712,32732,33381,33807,36732,36794,38910,38915,39066,39070,39167,39171,39174,39175,39176,39183,39189,39195,39200,39203,39211,39213,39223,39225,39227,39229,39231,39233,39235,39236,39237,39239,39241,39243,39245,39247,39248,39250,39254,39255,39257,39259,39260,39262,39264,39266,39267,39270,39272,39274,39321,39323,39325,39334,39336,39338,39340,39989,39992,39994,39996,40023,40025,40053,40805,41142,41249,41267,47115,48618,48619,49214,49232/sites"))$data
