@@ -343,7 +343,7 @@ neotoma2::plotLeaflet(diats)
 
 ### Strategy 1: Start from 'Repository Specimens' Table
 
-My first strategy here is to get the full "repository specimens" table - a table with 6404 observations linking dataset ids to repository ids. I filter this table just for those datasets connected to sites in Florida. Using this strategy, I find that there are 159 datasets from sites in Florida linked to repositories. 
+My first strategy here is to get the full "repository specimens" table - a table with 6404 observations linking dataset ids to repository ids. I filter this table just for those datasets connected to sites in Florida. Using this strategy, I find that there are 188 datasets from sites in Florida linked to repositories. 
 
 ```{r repos, echo=FALSE,include=TRUE,message = FALSE}
 
