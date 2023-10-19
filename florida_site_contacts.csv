@@ -1,110 +1,116 @@
-"siteid","url","email","address","fullname","lastname","contactid","firstname","sitename"
-"14429","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+"","siteid","sitename","url","email","address","fullname","lastname","contactid","firstname"
+"1","14429","Port Charlotte","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Port Charlotte"
-"14429",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Port Charlotte"
-"14417","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"2","14429","Port Charlotte",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"3","14417","Haile 7C","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
 206 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C.","Haile 7C"
-"14417","http://people.uncw.edu/emslies","emslies@uncw.edu","University of North Carolina at Wilmington
+USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C."
+"4","14417","Haile 7C","http://people.uncw.edu/emslies","emslies@uncw.edu","University of North Carolina at Wilmington
 Dobo Hall 206
 601 South College Road
 Wilmington, North Carolina 28403-5915
-USA","Emslie, Steven D.","Emslie","2195","Steven D.","Haile 7C"
-"23723","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Emslie, Steven D.","Emslie","2195","Steven D."
+"5","23723","Coleman IIA","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Coleman IIA"
-"16435","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"6","14442","St. Petersburg","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Silver Springs Fauna"
-"16435","http://www.rom.on.ca/collections/curators/seymour.php","kevins@rom.on.ca","Royal Ontario Museum 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"7","14442","St. Petersburg",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"8","14442","St. Petersburg",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"9","16435","Silver Springs Fauna","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+1801 Mountain Road NW
+Albuquerque, NM 87104
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"10","16435","Silver Springs Fauna","http://www.rom.on.ca/collections/curators/seymour.php","kevins@rom.on.ca","Royal Ontario Museum 
 Department of Natural History 
 100 Queen's Park
 Toronto, ON M5S 2C6
-CANADA","Seymour, Kevin L.","Seymour","1694","Kevin L.","Silver Springs Fauna"
-"22003",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M.","Mule Pen Quarry"
-"16579","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+CANADA","Seymour, Kevin L.","Seymour","1694","Kevin L."
+"11","22003","Mule Pen Quarry",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"12","16579","Orange Lake 2A","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Orange Lake 2A"
-"16579","http://www.rom.on.ca/collections/curators/seymour.php","kevins@rom.on.ca","Royal Ontario Museum 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"13","16579","Orange Lake 2A","http://www.rom.on.ca/collections/curators/seymour.php","kevins@rom.on.ca","Royal Ontario Museum 
 Department of Natural History 
 100 Queen's Park
 Toronto, ON M5S 2C6
-CANADA","Seymour, Kevin L.","Seymour","1694","Kevin L.","Orange Lake 2A"
-"14418",NA,NA,NA,"Anderson, Elaine","Anderson","1631","Elaine","Haile XV A (Haile 15A)"
-"14418","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
+CANADA","Seymour, Kevin L.","Seymour","1694","Kevin L."
+"14","14418","Haile XV A (Haile 15A)",NA,NA,NA,"Anderson, Elaine","Anderson","1631","Elaine"
+"15","14418","Haile XV A (Haile 15A)","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
 206 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C.","Haile XV A (Haile 15A)"
-"14418","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C."
+"16","14418","Haile XV A (Haile 15A)","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Haile XV A (Haile 15A)"
-"14418",NA,NA,NA,"Robertson, Jesse S.","Robertson","1636","Jesse S.","Haile XV A (Haile 15A)"
-"14418",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Haile XV A (Haile 15A)"
-"14418","http://www.flmnh.ufl.edu/about-us/people/spotlight/steadman/","dws@flmnh.ufl.edu","Curator of Ornithology; Associate Director for Collections and Research 
+USA","Webb, S. David","Webb","1635","S. David"
+"17","14418","Haile XV A (Haile 15A)",NA,NA,NA,"Robertson, Jesse S.","Robertson","1636","Jesse S."
+"18","14418","Haile XV A (Haile 15A)",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"19","14418","Haile XV A (Haile 15A)","http://www.flmnh.ufl.edu/about-us/people/spotlight/steadman/","dws@flmnh.ufl.edu","Curator of Ornithology; Associate Director for Collections and Research 
 Florida Museum of Natural History
 University of Florida
 PO Box 117800
-Gainesville, FL  32611","Steadman, David W.","Steadman","2635","David W.","Haile XV A (Haile 15A)"
-"14418",NA,NA,NA,"Kinsey, P.E.","Kinsey","4293","P.E.","Haile XV A (Haile 15A)"
-"14418","http://www.nhm.org/site/research-collections/ornithology/staff-biographies","kcampbell@nhm.org","Curator
+Gainesville, FL  32611","Steadman, David W.","Steadman","2635","David W."
+"20","14418","Haile XV A (Haile 15A)",NA,NA,NA,"Kinsey, P.E.","Kinsey","4293","P.E."
+"21","14418","Haile XV A (Haile 15A)","http://www.nhm.org/site/research-collections/ornithology/staff-biographies","kcampbell@nhm.org","Curator
 Ornithology Department
 Natural History Museum of Los Angeles County
 900 Exposition Blvd.
-Los Angeles, California  90007  USA","Campbell, Kenneth E., Jr.","Campbell","6427","Kenneth E.","Haile XV A (Haile 15A)"
-"14418",NA,NA,NA,"Weaver, W. G.","Weaver","11515","W. G.","Haile XV A (Haile 15A)"
-"16533","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+Los Angeles, California  90007  USA","Campbell, Kenneth E., Jr.","Campbell","6427","Kenneth E."
+"22","14418","Haile XV A (Haile 15A)",NA,NA,NA,"Weaver, W. G.","Weaver","11515","W. G."
+"23","16533","North Havana Road","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","North Havana Road"
-"5178","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Webb, S. David","Webb","1635","S. David"
+"24","5178","Haile 14A [Haile XIVA]","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Haile 14A [Haile XIVA]"
-"23646","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"25","23646","Haile 16A","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Haile 16A"
-"23674","https://edocs.uis.edu/druez2/www/index.htm","druez2@uis.edu","Department of Environmental Studies
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"26","23674","Inglis IA [Inglis 1A]","https://edocs.uis.edu/druez2/www/index.htm","druez2@uis.edu","Department of Environmental Studies
 University of Illinois at Springfield
 One University Plaza, MS PAC 308
 Springfield, Illinois  62703-5407
-USA","Ruez, Dennis R., Jr.","Ruez","1627","Dennis R.","Inglis IA [Inglis 1A]"
-"23674","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Ruez, Dennis R., Jr.","Ruez","1627","Dennis R."
+"27","23674","Inglis IA [Inglis 1A]","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
 206 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C.","Inglis IA [Inglis 1A]"
-"23674","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C."
+"28","23674","Inglis IA [Inglis 1A]","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Inglis IA [Inglis 1A]"
-"23674","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
+USA","Webb, S. David","Webb","1635","S. David"
+"29","23674","Inglis IA [Inglis 1A]","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
 San Diego State University
 5500 Campanile Dr.
 San Diego, CA 92182-4614
-USA","Berta, Annalisa","Berta","1640","Annalisa","Inglis IA [Inglis 1A]"
-"23674","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Berta, Annalisa","Berta","1640","Annalisa"
+"30","23674","Inglis IA [Inglis 1A]","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Inglis IA [Inglis 1A]"
-"23674",NA,"cartelle@pucminas.br","Pontifícia Univrsidade Católica
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"31","23674","Inglis IA [Inglis 1A]",NA,"cartelle@pucminas.br","Pontifícia Univrsidade Católica
 Av. Dom José Gaspar, 500
 Coração Eucarístico
 30535-610 - Belo Horizonte, MG
-BRAZIL","Cartelle, Castor","Cartelle","1678","Cástor","Inglis IA [Inglis 1A]"
-"23674",NA,"gerry@zoo.utoronto.ca","Faculty of Community Services and Health Sciences
+BRAZIL","Cartelle, Castor","Cartelle","1678","Cástor"
+"32","23674","Inglis IA [Inglis 1A]",NA,"gerry@zoo.utoronto.ca","Faculty of Community Services and Health Sciences
 George Brown College
 200 King Street East
 Toronto, Ontario, M5A 1J5
@@ -114,223 +120,227 @@ Department of Zoology
 University of Toronto
 25 Harbord Street
 Toronto, Ontario, M5S 3G5
-CANADA","De Iuliis, Gerardo","De Iuliis","1679","Gerardo","Inglis IA [Inglis 1A]"
-"23674",NA,NA,"Florida Museum of Natural History
+CANADA","De Iuliis, Gerardo","De Iuliis","1679","Gerardo"
+"33","23674","Inglis IA [Inglis 1A]",NA,NA,"Florida Museum of Natural History
 University of Florida
 3215 Hull Road
-Gainesville, FL 32611-2710","Quitmyer, Irvy R.","Quitmyer","1760","Irvy R.","Inglis IA [Inglis 1A]"
-"23674","http://people.uncw.edu/emslies","emslies@uncw.edu","University of North Carolina at Wilmington
+Gainesville, FL 32611-2710","Quitmyer, Irvy R.","Quitmyer","1760","Irvy R."
+"34","23674","Inglis IA [Inglis 1A]","http://people.uncw.edu/emslies","emslies@uncw.edu","University of North Carolina at Wilmington
 Dobo Hall 206
 601 South College Road
 Wilmington, North Carolina 28403-5915
-USA","Emslie, Steven D.","Emslie","2195","Steven D.","Inglis IA [Inglis 1A]"
-"23674","http://www.eckerd.edu/academics/biology/faculty/meylan.php","meylanpa@eckerd.edu","Eckerd College
+USA","Emslie, Steven D.","Emslie","2195","Steven D."
+"35","23674","Inglis IA [Inglis 1A]","http://www.eckerd.edu/academics/biology/faculty/meylan.php","meylanpa@eckerd.edu","Eckerd College
 Department of Biology
 4200 54th Avenue South
 St. Petersburg, Florida 33711
-USA","Meylan, Peter Andre","Meylan","3302","Peter Andre","Inglis IA [Inglis 1A]"
-"23674",NA,NA,NA,"Klein, Jean-Georges","Klein","13824","Jean-Georges","Inglis IA [Inglis 1A]"
-"23674",NA,"dfranz@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Meylan, Peter Andre","Meylan","3302","Peter Andre"
+"36","23674","Inglis IA [Inglis 1A]",NA,NA,NA,"Klein, Jean-Georges","Klein","13824","Jean-Georges"
+"37","23674","Inglis IA [Inglis 1A]",NA,"dfranz@flmnh.ufl.edu","Florida Museum of Natural History
 University of Florida
-Gainesville, FL   32611-7800","Franz, Richard","Franz","13842","Richard","Inglis IA [Inglis 1A]"
-"5192",NA,"jgbrown@usgs.gov","Hydrologist
+Gainesville, FL   32611-7800","Franz, Richard","Franz","13842","Richard"
+"38","16208","Withlacoochee River 5G","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+Murray State University 
+Murray, KY 42071
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"39","5192","Little Salt Spring",NA,"jgbrown@usgs.gov","Hydrologist
 U.S. Geological Survey
 520 N. Park Avenue, Suite 221
 Tucson, AZ 85719
-USA","Brown, James G.","Brown","7372","James G.","Little Salt Spring"
-"22524","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Brown, James G.","Brown","7372","James G."
+"40","22524","Joshua Creek","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Joshua Creek"
-"14439",NA,NA,NA,"Anderson, Elaine","Anderson","1631","Elaine","Santa Fe River 8A"
-"14439","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Webb, S. David","Webb","1635","S. David"
+"41","14439","Santa Fe River 8A",NA,NA,NA,"Anderson, Elaine","Anderson","1631","Elaine"
+"42","14439","Santa Fe River 8A","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Santa Fe River 8A"
-"14439",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Santa Fe River 8A"
-"14439","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Webb, S. David","Webb","1635","S. David"
+"43","14439","Santa Fe River 8A",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"44","14439","Santa Fe River 8A","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Santa Fe River 8A"
-"14439",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Santa Fe River 8A"
-"14439",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M.","Santa Fe River 8A"
-"17854",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Branford"
-"17854",NA,"asanders@charlestonmuseum.org","The Charleston Museum
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"45","14439","Santa Fe River 8A",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"46","14439","Santa Fe River 8A",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"47","17854","Branford",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"48","17854","Branford",NA,"asanders@charlestonmuseum.org","The Charleston Museum
 360 Meeting Street
 Charleston, SC 29403
-USA","Sanders, Albert E.","Sanders","1735","Albert E.","Branford"
-"22365","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Sanders, Albert E.","Sanders","1735","Albert E."
+"49","22365","Punta Gorda","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Punta Gorda"
-"14436","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
+USA","Webb, S. David","Webb","1635","S. David"
+"50","14436","Santa Fe River 15A","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
 San Diego State University
 5500 Campanile Dr.
 San Diego, CA 92182-4614
-USA","Berta, Annalisa","Berta","1640","Annalisa","Santa Fe River 15A"
-"14436","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Berta, Annalisa","Berta","1640","Annalisa"
+"51","14436","Santa Fe River 15A","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Santa Fe River 15A"
-"14436","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"52","14436","Santa Fe River 15A","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Santa Fe River 15A"
-"14436",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Santa Fe River 15A"
-"14436",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M.","Santa Fe River 15A"
-"23623","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"53","14436","Santa Fe River 15A",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"54","14436","Santa Fe River 15A",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"55","23623","Cypress Springs","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Cypress Springs"
-"16410",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Saber Tooth Cave"
-"16410",NA,"asanders@charlestonmuseum.org","The Charleston Museum
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"56","16410","Saber Tooth Cave",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"57","16410","Saber Tooth Cave",NA,"asanders@charlestonmuseum.org","The Charleston Museum
 360 Meeting Street
 Charleston, SC 29403
-USA","Sanders, Albert E.","Sanders","1735","Albert E.","Saber Tooth Cave"
-"16410",NA,NA,NA,"Parmalee, Paul W.","Parmalee","2023","Paul W.","Saber Tooth Cave"
-"16410",NA,"wklippel@utk.edu","University of Tennessee-Knoxville
+USA","Sanders, Albert E.","Sanders","1735","Albert E."
+"58","16410","Saber Tooth Cave",NA,NA,NA,"Parmalee, Paul W.","Parmalee","2023","Paul W."
+"59","16410","Saber Tooth Cave",NA,"wklippel@utk.edu","University of Tennessee-Knoxville
 Department of Anthropology
 502 Strong Hall
 1621 Cumberland Avenue
-Knoxville, TN 37996-1525","Klippel, Walter E.","Klippel","2547","Walter E.","Saber Tooth Cave"
-"16410",NA,NA,"Institute of the Environmental Change and Society
+Knoxville, TN 37996-1525","Klippel, Walter E.","Klippel","2547","Walter E."
+"60","16410","Saber Tooth Cave",NA,NA,"Institute of the Environmental Change and Society
 University of Regina
 Saskatchewan S4S 0A2
-Canada","Simpson, Gavin","Simpson","3026","Gavin","Saber Tooth Cave"
-"22065","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+Canada","Simpson, Gavin","Simpson","3026","Gavin"
+"61","22065","Payne's Prairie [Locality III]","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Payne's Prairie [Locality III]"
-"22065","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Webb, S. David","Webb","1635","S. David"
+"62","22065","Payne's Prairie [Locality III]","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Payne's Prairie [Locality III]"
-"22209","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"63","22209","Pool Branch","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Pool Branch"
-"23649",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Haile 21A Local Fauna"
-"23649","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Webb, S. David","Webb","1635","S. David"
+"64","23649","Haile 21A Local Fauna",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"65","23649","Haile 21A Local Fauna","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Haile 21A Local Fauna"
-"23649",NA,NA,NA,"Linares, Omar J.","Linares","4469","Omar J.","Haile 21A Local Fauna"
-"16059","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"66","23649","Haile 21A Local Fauna",NA,NA,NA,"Linares, Omar J.","Linares","4469","Omar J."
+"67","16059","Waccasassa River 7","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Waccasassa River 7"
-"16759",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Apollo Beach"
-"16759",NA,"asanders@charlestonmuseum.org","The Charleston Museum
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"68","16759","Apollo Beach",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"69","16759","Apollo Beach",NA,"asanders@charlestonmuseum.org","The Charleston Museum
 360 Meeting Street
 Charleston, SC 29403
-USA","Sanders, Albert E.","Sanders","1735","Albert E.","Apollo Beach"
-"14343","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Sanders, Albert E.","Sanders","1735","Albert E."
+"70","14343","Acline Shell Pit","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Acline Shell Pit"
-"14343",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Acline Shell Pit"
-"14435",NA,NA,NA,"Churcher, C.S. (Rufus)","Churcher","1625","C. S. (Rufus)","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Kurtén, Björn Olof Lennartson","Kurtén","1630","Björn Olof Lennartson","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Robertson, Jesse S.","Robertson","1636","Jesse S.","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Santa Fe River 1 (includes 1A & 1B)"
-"14435","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"71","14343","Acline Shell Pit",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"72","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Churcher, C.S. (Rufus)","Churcher","1625","C. S. (Rufus)"
+"73","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Kurtén, Björn Olof Lennartson","Kurtén","1630","Björn Olof Lennartson"
+"74","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Robertson, Jesse S.","Robertson","1636","Jesse S."
+"75","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"76","14435","Santa Fe River 1 (includes 1A & 1B)","http://www.bio.sdsu.edu/faculty/berta.html","aberta@sunstroke.sdsu.edu","Department of Biology
 San Diego State University
 5500 Campanile Dr.
 San Diego, CA 92182-4614
-USA","Berta, Annalisa","Berta","1640","Annalisa","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,"David.Gillette@nau.edu","c/o Janet W. Gillette
+USA","Berta, Annalisa","Berta","1640","Annalisa"
+"77","14435","Santa Fe River 1 (includes 1A & 1B)",NA,"David.Gillette@nau.edu","c/o Janet W. Gillette
 Museum of Northern Arizona
 3101 N. Fort Valley Road
 Flagstaff, AZ 86001
-USA","Gillette, David D.","Gillette","1642","David D.","Santa Fe River 1 (includes 1A & 1B)"
-"14435","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Gillette, David D.","Gillette","1642","David D."
+"78","14435","Santa Fe River 1 (includes 1A & 1B)","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Santa Fe River 1 (includes 1A & 1B)"
-"14435","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"79","14435","Santa Fe River 1 (includes 1A & 1B)","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Brodkorb, Pierce","Brodkorb","1938","Pierce","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M.","Santa Fe River 1 (includes 1A & 1B)"
-"14435",NA,NA,NA,"Weaver, W. G.","Weaver","11515","W. G.","Santa Fe River 1 (includes 1A & 1B)"
-"17852","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"80","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Brodkorb, Pierce","Brodkorb","1938","Pierce"
+"81","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"82","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"83","14435","Santa Fe River 1 (includes 1A & 1B)",NA,NA,NA,"Weaver, W. G.","Weaver","11515","W. G."
+"84","17852","Bradenton 51st Street","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Bradenton 51st Street"
-"5151",NA,NA,NA,"Wickham, H. F.","Wickham","5183","H. F.","Vero"
-"5151",NA,NA,NA,"Young, F. N.","Young","5184","F. N.","Vero"
-"16580","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Webb, S. David","Webb","1635","S. David"
+"85","5151","Vero",NA,NA,NA,"Wickham, H. F.","Wickham","5183","H. F."
+"86","5151","Vero",NA,NA,NA,"Young, F. N.","Young","5184","F. N."
+"87","16580","Orange Springs 1","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Orange Springs 1"
-"16773","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"88","16773","Aucilla River IA","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Aucilla River IA"
-"16039","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Webb, S. David","Webb","1635","S. David"
+"89","16039","Waccasassa River 2","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Waccasassa River 2"
-"22079",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E.","Phosphoria Mine IMC."
-"22079",NA,"asanders@charlestonmuseum.org","The Charleston Museum
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"90","22079","Phosphoria Mine IMC.",NA,NA,NA,"Ray, Clayton E.","Ray","1638","Clayton E."
+"91","22079","Phosphoria Mine IMC.",NA,"asanders@charlestonmuseum.org","The Charleston Museum
 360 Meeting Street
 Charleston, SC 29403
-USA","Sanders, Albert E.","Sanders","1735","Albert E.","Phosphoria Mine IMC."
-"14426","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Sanders, Albert E.","Sanders","1735","Albert E."
+"92","14426","Northport","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Northport"
-"14426",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Northport"
-"14437","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"93","14426","Northport",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"94","14437","Santa Fe River 4A","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Santa Fe River 4A"
-"14437","http://www.flmnh.ufl.edu/directory/cvs/bmacfadd_cv.htm","bmacfadd@flmnh.ufl.edu","University of Florida
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"95","14437","Santa Fe River 4A","http://www.flmnh.ufl.edu/directory/cvs/bmacfadd_cv.htm","bmacfadd@flmnh.ufl.edu","University of Florida
 Florida Museum of Natural History
 218 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","MacFadden, Bruce J.","MacFadden","1715","Bruce J.","Santa Fe River 4A"
-"14437",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B.","Santa Fe River 4A"
-"14437",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M.","Santa Fe River 4A"
-"14437",NA,NA,NA,"Waldrop, J. S.","Waldrop","11460","J. S.","Santa Fe River 4A"
-"21399","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
+USA","MacFadden, Bruce J.","MacFadden","1715","Bruce J."
+"96","14437","Santa Fe River 4A",NA,NA,NA,"Ridgway, R. B.","Ridgway","4472","R. B."
+"97","14437","Santa Fe River 4A",NA,NA,NA,"Hearst, Jonena M.","Hearst","4743","Jonena M."
+"98","14437","Santa Fe River 4A",NA,NA,NA,"Waldrop, J. S.","Waldrop","11460","J. S."
+"99","21399","Leisey Shell Pits","http://www.flmnh.ufl.edu/directory/cvs/rhulbert_cv.htm","rhulbert@flmnh.ufl.edu","Florida Museum of Natural History
 206 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C.","Leisey Shell Pits"
-"21399","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Hulbert, Richard C., Jr.","Hulbert","1634","Richard C."
+"100","21399","Leisey Shell Pits","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Leisey Shell Pits"
-"21399","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Webb, S. David","Webb","1635","S. David"
+"101","21399","Leisey Shell Pits","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Leisey Shell Pits"
-"23648","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"102","23648","Haile 1A","http://www.nmnaturalhistory.org/p3_staff_res_gary.html","gary.morgan1@state.nm.us","New Mexico Museum of Natural History & Science
 1801 Mountain Road NW
 Albuquerque, NM 87104
-USA","Morgan, Gary S.","Morgan","1657","Gary S.","Haile 1A"
-"22718",NA,NA,NA,"Gidley, James Williams","Gidley","4377","James Williams","Country Club Arctodus"
-"22418","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
+USA","Morgan, Gary S.","Morgan","1657","Gary S."
+"103","22718","Country Club Arctodus",NA,NA,NA,"Gidley, James Williams","Gidley","4377","James Williams"
+"104","22418","Suwannee River","http://campus.murraystate.edu/academic/faculty/robert.martin/ram.htm","robert.martin@murraystate.edu","Department of Biological Sciences 
 Murray State University 
 Murray, KY 42071
-USA","Martin, Robert A.","Martin","1708","Robert A.","Suwannee River"
-"16112","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
+USA","Martin, Robert A.","Martin","1708","Robert A."
+"105","16112","Waccasassa River VI","http://www.flmnh.ufl.edu/directory/cvs/webb_cv.htm","webb@flmnh.ufl.edu","Florida Museum of Natural History
 224 Dickinson Hall
 Museum Road & Newell Drive
 Gainesville, FL 32611
-USA","Webb, S. David","Webb","1635","S. David","Waccasassa River VI"
-"16112",NA,NA,NA,"Jones, Cheri A.","Jones","2516","Cheri A.","Waccasassa River VI"
-"16112",NA,NA,NA,"Choate, Jerry R.","Choate","2518","Jerry R.","Waccasassa River VI"
-"16112",NA,NA,NA,"Genoways, Hugh H.","Genoways","2519","Hugh H.","Waccasassa River VI"
+USA","Webb, S. David","Webb","1635","S. David"
+"106","16112","Waccasassa River VI",NA,NA,NA,"Jones, Cheri A.","Jones","2516","Cheri A."
+"107","16112","Waccasassa River VI",NA,NA,NA,"Choate, Jerry R.","Choate","2518","Jerry R."
+"108","16112","Waccasassa River VI",NA,NA,NA,"Genoways, Hugh H.","Genoways","2519","Hugh H."
