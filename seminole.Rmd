@@ -123,7 +123,11 @@ As a matter of fact, there are 387 sites in Florida for which Neotoma holds pale
 ## The bounding box should specified as:
 ## xmin, ymin, xmax, ymax
 
-fl = list(c(-85.497137,30.997536),c(-85.004212,31.003013),c(-84.867289,30.712735),c(-83.498053,30.647012),c(-82.216449,30.570335),c(-82.167157,30.356734),c(-82.046664,30.362211),c(-82.002849,30.564858),c(-82.041187,30.751074),c(-81.948079,30.827751),c(-81.718048,30.745597),c(-81.444201,30.707258),c(-81.383954,30.27458),c(-81.257985,29.787132),c(-80.967707,29.14633),c(-80.524075,28.461713),c(-80.589798,28.41242),c(-80.56789,28.094758),c(-80.381674,27.738757),c(-80.091397,27.021277),c(-80.03115,26.796723),c(-80.036627,26.566691),c(-80.146166,25.739673),c(-80.239274,25.723243),c(-80.337859,25.465826),c(-80.304997,25.383672),c(-80.49669,25.197456),c(-80.573367,25.241272),c(-80.759583,25.164595),c(-81.077246,25.120779),c(-81.170354,25.224841),c(-81.126538,25.378195),c(-81.351093,25.821827),c(-81.526355,25.903982),c(-81.679709,25.843735),c(-81.800202,26.090198),c(-81.833064,26.292844),c(-82.041187,26.517399),c(-82.09048,26.665276),c(-82.057618,26.878877),c(-82.172634,26.917216),c(-82.145249,26.791246),c(-82.249311,26.758384),c(-82.566974,27.300601),c(-82.692943,27.437525),c(-82.391711,27.837342),c(-82.588881,27.815434),c(-82.720328,27.689464),c(-82.851774,27.886634),c(-82.676512,28.434328),c(-82.643651,28.888914),c(-82.764143,28.998453),c(-82.802482,29.14633),c(-82.994175,29.179192),c(-83.218729,29.420177),c(-83.399469,29.518762),c(-83.410422,29.66664),c(-83.536392,29.721409),c(-83.640454,29.885717),c(-84.02384,30.104795),c(-84.357933,30.055502),c(-84.341502,29.902148),c(-84.451041,29.929533),c(-84.867289,29.743317),c(-85.310921,29.699501),c(-85.299967,29.80904),c(-85.404029,29.940487),c(-85.924338,30.236241),c(-86.29677,30.362211),c(-86.630863,30.395073),c(-86.910187,30.373165),c(-87.518128,30.280057),c(-87.37025,30.427934),c(-87.446927,30.510088),c(-87.408589,30.674397),c(-87.633143,30.86609),c(-87.600282,30.997536),c(-85.497137,30.997536))
+## you can query all the sites that fall within a bounding box - a rectangle. 
+## The bounding box should specified as:
+## xmin, ymin, xmax, ymax
+
+fl = list(c(-85.497137,30.997536),c(-85.004212,31.003013),c(-84.867289,30.712735),c(-83.498053,30.647012),c(-82.216449,30.570335),c(-82.167157,30.356734),c(-82.046664,30.362211),c(-82.002849,30.564858),c(-82.041187,30.751074),c(-81.948079,30.827751),c(-81.718048,30.745597),c(-80.0,30.707258),c(-79.5,28.461713),c(-79.5,27.738757),c(-79.5,27.021277),c(-79.5,26.566691),c(-79.846166,25.739673),c(-79.8,25.383672),c(-80.49669,24.197456),c(-80.759583,24.164595),c(-81.077246,24.120779),c(-82.170354,25.224841),c(-82.126538,25.378195),c(-82.233064,26.292844),c(-82.992943,27.437525),c(-83.051774,27.886634),c(-83.618729,29.420177),c(-84.02384,29.80005),c(-85.310921,29.399501),c(-87.518128,30.080057),c(-87.37025,30.427934),c(-87.446927,30.510088),c(-87.408589,30.674397),c(-87.633143,30.86609),c(-87.600282,30.997536),c(-85.497137,30.997536))
 
 
 fl_coords = matrix(nrow=length(fl),ncol=2)
@@ -138,8 +142,7 @@ names(fl_coords) = c("long","lat")
 
 fl_coords2 = fl_coords %>%
   st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84",remove=FALSE) %>%
-  mutate(id=case_when(lat>= 28 ~"FL",
-                      lat < 28 ~ "FL2")) %>%
+  mutate(id="FL") %>%
   group_by(id) %>%
   summarize(geometry = st_combine(geometry)) %>%
   st_cast("POLYGON")
@@ -148,13 +151,9 @@ fl_coords2 = fl_coords %>%
 bb=c(-82.9,27.7,-80.4,28.45)
 
 stof_sites1 = get_sites(loc=fl_coords2[1]$geometry[[1]], all_data=TRUE)
-stof_sites2 = get_sites(loc=fl_coords2[1]$geometry[[2]], all_data=TRUE)
-stof_sites3 = get_sites(loc=bb, all_data=TRUE)
 
-stof_sites = as.data.frame(stof_sites1) %>%
-  rbind(as.data.frame(stof_sites2)) %>%
-  rbind(as.data.frame(stof_sites3)) %>%
-  distinct()
+
+stof_sites = as.data.frame(stof_sites1) 
 stof_sf = stof_sites %>%
   st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
 
@@ -171,8 +170,6 @@ fl_coords = fl_coords %>%
 
 tm_shape(bg)+
     tm_rgb() +
-    tm_shape(fl_coords) +
-    tm_polygons(alpha=0.5) +
     tm_shape(stof_sf) +
     tm_dots(size=0.05,alpha=0.4) +
     tm_layout(legend.position=c("LEFT","BOTTOM"),
@@ -183,6 +180,7 @@ tm_shape(bg)+
               main.title= 'Neotoma Sites in Florida', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
+
 
 ```
 
@@ -209,11 +207,8 @@ Now we know there are data concerning Florida held by Neotoma. The next question
 ``` {r dataset-counts,echo=FALSE,include=TRUE,message=FALSE}
 
 sum1 = summary(stof_sites1)
-sum2 = summary(stof_sites2)
-sum3 = summary(stof_sites3)
 
-sum_all = rbind(sum1,sum2) %>%
-  rbind(sum3)
+sum_all = sum1
 
 sum_dt = sum_all %>% 
   dplyr::filter(types!="geochronologic") %>%
@@ -339,23 +334,15 @@ The Leaflet plots below enable dynamic exploration of maps for the most common d
 
 vert1 = stof_sites1 %>% 
   neotoma2::filter(datasettype %in% c("vertebrate fauna"))
-vert2 = stof_sites2 %>% 
-  neotoma2::filter(datasettype %in% c("vertebrate fauna"))
-vert3 = stof_sites3 %>% 
-  neotoma2::filter(datasettype %in% c("vertebrate fauna"))
-verts=c(vert1,vert2)
-verts=c(verts,vert3)
+
+verts=vert1
 
 neotoma2::plotLeaflet(verts)
 
 poll1 = stof_sites1 %>% 
   neotoma2::filter(datasettype %in% c("pollen","pollen surface sample"))
-poll2 = stof_sites2 %>% 
-  neotoma2::filter(datasettype %in% c("pollen","pollen surface sample"))
-poll3 = stof_sites3 %>% 
-  neotoma2::filter(datasettype %in% c("pollen","pollen surface sample"))
-polls=c(poll1,poll2)
-polls=c(polls,poll3)
+
+polls=poll1
 
 ```
 <h3 style="text-align:center;">Pollen Sites</h3>
@@ -367,12 +354,8 @@ neotoma2::plotLeaflet(polls)
 
 diat1 = stof_sites1 %>% 
   neotoma2::filter(datasettype %in% c("diatom","diatom surface sample","diatom bottom sample"))
-diat2 = stof_sites2 %>% 
-  neotoma2::filter(datasettype %in% c("diatom","diatom surface sample","diatom bottom sample"))
-diat3 = stof_sites3 %>% 
-  neotoma2::filter(datasettype %in%  c("diatom","diatom surface sample","diatom bottom sample"))
-diats=c(diat1,diat2)
-diats=c(diats,diat3)
+
+diats=diat1
 
 
 neotoma2::plotLeaflet(diats)
@@ -380,7 +363,7 @@ neotoma2::plotLeaflet(diats)
 
 ## What repositories steward Neotoma dataset specimens?
 
-There are 159 datasets from sites in Florida linked to repositories. For the most part these are vertebrate fauna datasets. It is uncommon for microfossils (like pollen or charcoal) to be held by institutional repositories, which is why many of the datasets from above don't have links to repositories.
+There are 188 datasets from sites in Florida linked to repositories. For the most part these are vertebrate fauna datasets. It is uncommon for microfossils (like pollen or charcoal) to be held by institutional repositories, which is why many of the datasets from above don't have links to repositories.
 
 ```{r repos, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -555,7 +538,7 @@ repo_phil = repo_simp %>%
   dplyr::filter(repository=="Academy of Natural Sciences, Philadelphia")
 
 repo_others = repo_map %>%
-  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida"))
+  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida","Yale Peabody Museum"))
 
 repo_flmnh = repo_simp %>%
   dplyr::filter(repository=="Florida Museum of Natural History")
