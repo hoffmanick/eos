@@ -58,16 +58,21 @@ table tr th :last-child, table tr td :last-child {
 
 This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help paint a picture of what records Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
 
-I also created three csv files for Kitty (below). "Publication Authors" lists every publication that Neotoma knows about concerning vertebrate fauna datasets from Florida, along with the relevant datasets and authors. Since a publication can concern multiple datasets and have multiple authors, a particular publication will often show up multiple times in this table. If, for instance, a publication has three authors and concerns two datasets, there will actually be six rows in the table for that publication, one for each combination of dataset and author.
+I also created four csv files for Kitty (below). 
+
+"Publication Authors" lists every publication that Neotoma knows about concerning vertebrate fauna datasets from Florida, along with the relevant datasets and authors. Since a publication can concern multiple datasets and have multiple authors, a particular publication will often show up multiple times in this table. If, for instance, a publication has three authors and concerns two datasets, there will actually be six rows in the table for that publication, one for each combination of dataset and author.
 
 "Site Contacts" lists the contact information known by Neotoma and associated with people connected to every site in Florida from which vertebrate datasets have been collected. Because a particular person may have worked at multiple sites, some contacts are repeated in this table, for each site where they've worked.
 
 "Harmonization Table" simply lists the corresponding Neotoma name for every site from Kitty's excel file. The only two sites without definite matches from Kitty's file were Vero 2 and Boynton. Vero 2 likely corresponds to Vero, based on Kitty's note that in the VP archives the site is "called Vero (General Area) and not under Vero 2". There are two vertebrate datasets in Boynton Mound Complex site in Neotoma, so maybe one of those datasets corresponds to the Boyton Mound Complex site and the other to the site simply labeled Boynton?
 
+"Unaccounted Sites" just lists all the vertebrate fauna sites in Neotoma that don't have any corresponding sites in the FaunMap excel sheet that Kitty sent over. 
+
 <ul class="downloads">
           <li><a href="florida_pub_authors.csv">Download <strong>Publication Authors</strong></a></li>
           <li><a href="florida_site_contacts.csv">Download <strong>Site Contacts</strong></a></li>
           <li><a href="harmtable.csv">Download <strong>Harmonization Table</strong></a></li>
+          <li><a href="unaccountedNeoSites.csv">Download <strong>Unaccounted Sites</strong></a></li>
         </ul>
         
 
