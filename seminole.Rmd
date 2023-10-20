@@ -115,7 +115,7 @@ library(DT)
 
 The first question to ask is whether Neotoma even stores any data from the Florida region. 
 
-As a matter of fact, there are 387 sites in Florida for which Neotoma holds paleoecological data. Some of these sites have multiple datasets associated with them, so there are even more than 387 data records.
+As a matter of fact, there are 432 sites in Florida for which Neotoma holds paleoecological data. Some of these sites have multiple datasets associated with them, so there are even more than 432 data records.
 
 ```{r site-location, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -627,7 +627,7 @@ tm_shape(bg)+
 
 ### What kinds of specimens are held by these repositories?
 
-Neotoma maintains a table of specimen data with potentially detailed information on the body part, maturity, sex, and other characteristics of the animal specimens stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 159 datasets from sites in Florida linked to repositories (see above), there is actually no information in the database about the particular specimens that constitute these datasets. 
+Neotoma maintains a table of specimen data with potentially detailed information on the body part, maturity, sex, and other characteristics of the animal specimens stewarded by repositories. However, this table is rather incomplete because data contributors are not required to upload this information when they submit data to Neotoma. So even though Neotoma knows about 188 datasets from sites in Florida linked to repositories (see above), there is actually no information in the database about the particular specimens that constitute these datasets. 
 
 In fact, the only specimens Neotoma knows about held by the Florida Museum of Natural History at all are nine deer teeth from a site in Guatemala. 
 
