@@ -469,7 +469,7 @@ data_id = datasets %>%
   distinct()
 
 repospec_FL = repospec_df %>%
-  filter(datasetid %in% data_id$datasetid)
+  dplyr::filter(datasetid %in% data_id$datasetid)
 
 repo_join = inner_join(repospec_FL, datasets, by="datasetid") %>%
   distinct() %>%
