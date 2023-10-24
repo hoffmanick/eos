@@ -634,7 +634,7 @@ In fact, the only specimens Neotoma knows about held by the Florida Museum of Na
 
 ## Making Neotoma a better database
 
-We've just gone over the current state of the Neotoma database with respect to its Florida records. As you saw, there's a lot of great data, but the metadata especially is incomplete in many cases. 
+We've just gone over the current state of the Neotoma database with respect to its Florida records. As you saw, there's a lot of great data, but the metadata especially are incomplete in many cases. 
 
 Neotoma is a living database, with an active and growing community of users, contributors, and stewards. We want to make the database better, and - more fundamentally - we want to broaden our understanding of what it even means for Neotoma to be <i>good</i>. 
 
