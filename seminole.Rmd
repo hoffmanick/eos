@@ -638,7 +638,7 @@ We've just gone over the current state of the Neotoma database with respect to i
 
 Neotoma is a living database, with an active and growing community of users, contributors, and stewards. We want to make the database better, and - more fundamentally - we want to broaden our understanding of what it even means for Neotoma to be <i>good</i>. 
 
-The question arises: What would making Neotoma better look like from the perspective of the Seminole Tribe of Florida? We could, for instance, work with the Florida Museum of Natural History to make those connections between datasets and specimens that are currently missing. We could also host workshops for Seminole scientists on how to make use of Neotoma's data. What might the Seminole Nation hope to get out of collaboration with Neotoma?
+The question arises: What would making Neotoma better look like from the perspective of the Seminole Tribe of Florida? We could, for instance, work with the Florida Museum of Natural History to make those connections between datasets and specimens that are currently missing. We could also host workshops for Seminole scientists on how to make use of Neotoma's data. What might scientists or other members of the Seminole Nation want from Neotoma?
 
 ## Staying in Touch
 
