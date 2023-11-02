@@ -110,7 +110,7 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 Then I searched for all occurrences of any of those taxa. 
 
-The map below shows the sites they come from, and the table below that shows the sample information on those 28 human samples I found.
+The two maps below (one static, one dynamic) shows the sites they come from, and the table below that shows the sample information on those 28 human samples I found.
 
 ```{r occurrences, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -161,7 +161,10 @@ tm_shape(homo_bg)+
               main.title= 'Sites with Homo Samples in Neotoma', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
-
+```
+<h3 style="text-align:center;">Human Ancestor Sites</h3>
+``` {r another, echo=FALSE,include=TRUE,message = FALSE}
+plotLeaflet(homo_sites_neo) 
 
 datatable(homo_df[c(1,3,4,5,7,8,9,10,11,15)],rownames=FALSE)
 ```
@@ -169,78 +172,9 @@ datatable(homo_df[c(1,3,4,5,7,8,9,10,11,15)],rownames=FALSE)
 I think there must be different conventions going on here for the age ranges. All the negative age values haven't happened yet, if they're meant to correspond to "number of years before 1950." 
 
 
-Below I just separate out the sites that have polygon-shapes when I searched for them with the occurrence API, out of curiosity...
+Below I count the occurrences by database and taxonname.
 
 ```{r polygons, echo=FALSE,include=TRUE,message = FALSE}
+counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(desc(n))
 
-poly = homo_df$occid[str_detect(homo_df$location,"Polygon")]
-
-poly_df = homo_df %>% dplyr::filter(occid %in% poly)
-
-poly_sf = rbind(geojson_sf(poly_df$location[1]),geojson_sf(poly_df$location[2]),geojson_sf(poly_df$location[3]),geojson_sf(poly_df$location[4]),geojson_sf(poly_df$location[5]))
-
-
-poly_bg = osm.raster(poly_sf[[1]][2:4])
-
-
-tm_shape(poly_bg)+
-    tm_rgb() +
-    tm_shape(poly_sf[[1]][2:3]) +
-    tm_polygons(alpha=0.5,col="blue",fill="blue") +
-    tm_layout(
-              main.title= 'first three polygons', 
-              main.title.position = "center",
-              title.bg.color = "white", panel.label.height=1)
-
-
-
-long1 = as.data.frame(c(-79,-77))
-lat1 = as.data.frame(c(35,38)) 
-
-names(long1) = c("long1")
-names(lat1) = c("lat1")
-lat1 = lat1 %>%
-  cbind(long1) %>%
-  st_as_sf(coords=c("long1","lat1"),crs="+proj=longlat +datum=WGS84") %>%
-  rbind(poly_sf[[1]][4])
-
-
-poly_bg2 = osm.raster(lat1)
-
-tm_shape(poly_bg2)+
-    tm_rgb() +
-    tm_shape(poly_sf[[1]][4]) +
-    tm_polygons(alpha=0.5,col="blue",fill="blue") +
-    tm_layout(
-              main.title= 'fourth polygon', 
-              main.title.position = "center",
-              title.bg.color = "white", panel.label.height=1)
-
-
-
-long1 = as.data.frame(c(24,26))
-lat1 = as.data.frame(c(39,41)) 
-
-names(long1) = c("long1")
-names(lat1) = c("lat1")
-lat1 = lat1 %>%
-  cbind(long1) %>%
-  st_as_sf(coords=c("long1","lat1"),crs="+proj=longlat +datum=WGS84") %>%
-  rbind(poly_sf[[1]][5])
-
-
-poly_bg3 = osm.raster(lat1)
-
-tm_shape(poly_bg3)+
-    tm_rgb() +
-    tm_shape(poly_sf[[1]][5]) +
-    tm_polygons(alpha=0.5,col="blue",fill="blue") +
-    tm_layout(
-              main.title= 'fifth polygon', 
-              main.title.position = "center",
-              title.bg.color = "white", panel.label.height=1)
-
-
-
-
-```
+datatable(counttabl,rownames = FALSE)
