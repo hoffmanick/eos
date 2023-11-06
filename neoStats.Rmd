@@ -59,7 +59,7 @@ db_stats = as.data.frame(db_stats)
 names(db_stats) = c("dbName","numSites","numSets","biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
 
 
-datatable(db_stats,rownames=FALSE, caption="Summary Statistics on Neotoma's Constituent Databases")
+datatable(db_stats,rownames=FALSE, caption="Summary Statistics on Neotoma's Constituent Databases",options = list(pageLength = 40))
 ```
 
 
@@ -70,7 +70,8 @@ names(trans) = db_stats[,1]
 
 trans = trans[4:43,] %>%
   mutate_all(as.numeric)
+trans$datattypeSum = rowSums(trans,na.rm=TRUE)
 
-datatable(trans)
+datatable(trans, options = list(pageLength = 40))
 
 ```
