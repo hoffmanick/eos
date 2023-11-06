@@ -61,3 +61,16 @@ names(db_stats) = c("dbName","numSites","numSets","biochemistry","biomarker","ch
 
 datatable(db_stats,rownames=FALSE, caption="Summary Statistics on Neotoma's Constituent Databases")
 ```
+
+
+```{r transpose, echo=FALSE, message=FALSE,include=TRUE}
+trans = t(db_stats) %>%
+  as.data.frame()
+names(trans) = db_stats[,1]
+
+trans = trans[4:43,] %>%
+  mutate_all(as.numeric)
+
+datatable(trans)
+
+```
