@@ -12,12 +12,21 @@ library(httr)
 library(jsonlite)
 library(DT)
 library(tidyverse)
+library(geojsonsf)
+library(sf)
+
+library(rosm)
+library(osmdata)
+library(tmap)
+
 ```
 
 
 ```{r cars, echo=FALSE, message=FALSE,include=TRUE}
 
+
 database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
+
 
 datatypes = c("biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
 
@@ -32,12 +41,61 @@ for (i in seq(1,length(database_list))) {
   db_stats[i,2] = num_sites
   num_datasets = 0
   setlist=c()
+  placeslist = as.data.frame(matrix(ncol=2,nrow=1)) 
+  names(placeslist) = c("long","lat")
+  placeslist$long[1] = 0
+  placeslist$lat[1] = 0
+  placeslist = placeslist %>%
+    st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
   if (length(returns) != 0) {
     for (j in seq(1,length(returns))) {
       num_datasets = num_datasets + length(returns[[j]]$site$datasets)
+      if (!is.null(returns[[j]]$site$geography)) {
+      newplace = geojson_sf(returns[[j]]$site$geography)
+      if (st_geometry_type(newplace$geometry)=="POLYGON") {
+        newplace = st_centroid(newplace)
+      }
+      placeslist = rbind(placeslist,newplace)}
       for (k in seq(1,length(returns[[j]]$site$datasets))) {
         setlist = append(setlist,returns[[j]]$site$datasets[[k]]$datasettype)
       }}
+      placeslist = placeslist[2:length(placeslist[[1]]),]
+      if (length(returns)==1) {
+      bg = osm.raster(placeslist, zoomin=-17)
+      }
+      
+      if (length(returns)!=1) {
+      bg = osm.raster(placeslist)
+      }
+      
+      if (nchar(database_list[i]) >= 45) {
+      title.size = 0.8
+      }
+      
+      
+      if (database_list[i] == "Academy of Natural Sciences of Drexel University") {
+      title.size = 0.5
+      }
+      
+      if (nchar(database_list[i]) < 45) {
+      title.size = 1.1
+      }
+    
+      map = tm_shape(bg)+
+      tm_rgb() +
+      tm_shape(placeslist) +
+      tm_dots(size=0.1,palette="Set3") +
+      tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.5,
+              legend.text.size=5,
+              main.title= paste0(database_list[i]),
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 1.5,
+              main.title.size=title.size)
+      print(map)
       setlist = as.data.frame(setlist) %>% group_by(setlist) %>% count()
       set_wide = setlist %>% pivot_wider(names_from="setlist",values_from="n")
       #print(set_wide)
