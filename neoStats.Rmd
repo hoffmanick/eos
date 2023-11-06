@@ -70,7 +70,7 @@ names(trans) = db_stats[,1]
 
 trans = trans[4:43,] %>%
   mutate_all(as.numeric)
-trans$datattypeSum = rowSums(trans,na.rm=TRUE)
+trans$datatypeSum = rowSums(trans,na.rm=TRUE)
 
 datatable(trans, options = list(pageLength = 40))
 
