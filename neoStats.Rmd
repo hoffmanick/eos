@@ -1,0 +1,63 @@
+---
+title: "Neotoma Database Stats"
+author: "Nick Hoffman"
+date: "2023-11-06"
+output: html_document
+---
+Below are some summary statistics on the Neotoma Constituent Databases.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(jsonlite)
+library(DT)
+library(tidyverse)
+```
+
+
+```{r cars, echo=FALSE, message=FALSE,include=TRUE}
+
+database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
+
+datatypes = c("biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
+
+db_stats = matrix(nrow=length(database_list),ncol = 43)
+
+for (i in seq(1,length(database_list))) {
+  db_stats[i,1] = database_list[i]
+  #print(db_stats[i,1])
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  num_sites= length(returns)
+  db_stats[i,2] = num_sites
+  num_datasets = 0
+  setlist=c()
+  if (length(returns) != 0) {
+    for (j in seq(1,length(returns))) {
+      num_datasets = num_datasets + length(returns[[j]]$site$datasets)
+      for (k in seq(1,length(returns[[j]]$site$datasets))) {
+        setlist = append(setlist,returns[[j]]$site$datasets[[k]]$datasettype)
+      }}
+      setlist = as.data.frame(setlist) %>% group_by(setlist) %>% count()
+      set_wide = setlist %>% pivot_wider(names_from="setlist",values_from="n")
+      #print(set_wide)
+      for (l in seq(1,40)) {
+        if (datatypes[l] %in% names(set_wide)) {
+          place = datatypes[l]
+          selector = set_wide %>% select(all_of(place))
+          #print(selector)
+          db_stats[i,(l+3)] = selector[[1]]
+      }
+      }
+    #print(num_datasets)
+    db_stats[i,3] = num_datasets}
+  if (length(returns) == 0) {
+      db_stats[i,3] = 0
+    }
+  }
+db_stats = as.data.frame(db_stats)
+names(db_stats) = c("dbName","numSites","numSets","biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
+
+
+datatable(db_stats,rownames=FALSE, caption="Summary Statistics on Neotoma's Constituent Databases")
+```

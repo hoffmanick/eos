@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nick Hoffman" />
+
+<meta name="date" content="2023-11-06" />
+
+<title>Neotoma Database Stats</title>
+
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.29/datatables.js"></script>
+<link href="site_libs/dt-core-1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.13.4/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.13.4/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Neotoma Database Stats</h1>
+<h4 class="author">Nick Hoffman</h4>
+<h4 class="date">2023-11-06</h4>
+
+</div>
+
+
+<p>Below are some summary statistics on the Neotoma Constituent
+Databases.</p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-a315825102a1a8ebef89" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-a315825102a1a8ebef89">{"x":{"filter":"none","vertical":false,"caption":"<caption>Summary Statistics on Neotoma's Constituent Databases<\/caption>","data":[["Cooperative Holocene Mapping Project","African Pollen Database","European Pollen Database","Indo-Pacific Pollen Database","Latin American Pollen Database","North American Pollen Database","Pollen Database of Siberia and the Russian Far East","Canadian Pollen Database","FAUNMAP","Neotoma","North American Plant Macrofossil Database","Academy of Natural Sciences of Drexel University","NDSU Insect Database","North American Non-Marine Ostracode Database Project (NANODe)","MioMap","Alaskan Archaeofaunas","French Institute of Pondicherry Palynology and Paleoecology Database","Japanese Pollen Database","Neotoma Midden Database","Chinese Pollen Database","Holocene Perspective on Peatland Biogeochemistry","ANTIGUA","Neotoma Testate Amoebae Database","Deep-Time Palynology Database","Neotoma Biomarker Database","Alpine Pollen Database","Canadian Museum of Nature-Delorme Ostracoda-Surface Samples","Diatom Paleolimnology Data Cooperative (DPDC)","Neotoma Ostracode Database","Faunal Isotope Database","Neotoma Charcoal Data","Pollen Monitoring Programme","PaleoVertebrates of Latin America","St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database","Packrat Middens","Sedimentary aDNA Database"],["0","276","3528","106","832","5421","175","0","4843","550","114","5559","224","561","0","89","1","15","184","154","1","0","4594","7","9","0","4509","652","16","83","57","1","29","153","61","0","0","0"],["0","506","5778","261","1187","7145","346","0","6949","664","120","7184","368","1114","0","147","2","33","539","164","2","0","4621","7","12","0","9002","680","19","119","63","1","42","159","105","0","0","0"],[null,null,null,null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"10",null,null,null,null,null,null,null,null,null,null,null,null,null],[null,"2","57","32","75","28",null,null,null,"24",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"20",null,null,null,null,null,null,null],[null,null,"64",null,null,"31",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"1",null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"1",null,null,null,null,null,null,"3",null,"1205",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"171",null,null,null,null,null,"36",null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,"666",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,"2319",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"253",null,null,null,null,null,"117",null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,"25",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"61",null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"2",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"2","3",null,"12",null,null,null,"31",null,"15",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,"219","1940","101","261","1486","171",null,"2100","78","6","100","144","2",null,"48","1","12","178","7","1",null,"26","1","1",null,null,"11","1","2","2",null,"12","6","44",null,null,null],[null,null,"1","3",null,"1",null,null,null,"1",null,null,"212",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,"12",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"90","3","7","145",null,null,null,"17",null,"13",null,null,null,null,null,"3",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"2",null,"3",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"31",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,"12","1",null,null,null,null,null,"10",null,null,null,null,null,null,null,null,null,null,null,null,null,"8",null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,"11","2",null,"2",null,null,null,null,"1",null,null,null,null,null,"1",null,null,null,"1",null,null,null,null,null,null,null,null,null,null,"9",null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,"3",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"2",null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"11",null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,"1",null,null,null,"552",null,null,null,null,null,null,null,null,null,null,null,null,"4493",null,"4",null,null,null,null,null,null,null,null,null],[null,null,"1","4","1","8",null,null,null,"3",null,"8",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,"1",null,null,null,null,null,"3",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,"2",null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"55","8","2","32",null,null,"2","22","113",null,null,"1",null,null,null,"1","184","2",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,"231","3276","100","275","1984","175",null,null,"26","1",null,null,null,null,"2","1","15","18","7",null,null,null,"6",null,null,null,null,null,null,"1",null,null,null,null,null,null,null],[null,"34","277","2","550","3414",null,null,null,"427",null,null,null,null,null,null,null,null,null,"147",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,"9",null,null,"10",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"1",null,null,null,null,null,null],[null,null,null,"1",null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"82",null,null,"1",null,null,null,null,null],[null,null,"1",null,null,null,null,null,null,"1",null,"3",null,null,null,null,null,null,null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"4",null,null,null,null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,"29",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"4566",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,"4834","16",null,null,null,null,null,"86",null,null,"159",null,null,null,null,null,null,null,null,null,null,"27",null,null,"29",null,null,null,null,null],[null,null,null,null,null,null,null,null,null,"1",null,"2824",null,"559",null,null,null,null,null,null,null,null,null,null,null,null,"4509","245","3",null,null,null,null,null,null,null,null,null],[null,null,null,null,null,"2",null,null,null,"1",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,"2","1",null,"1",null,null,null,"1",null,"3",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>dbName<\/th>\n      <th>numSites<\/th>\n      <th>numSets<\/th>\n      <th>biochemistry<\/th>\n      <th>biomarker<\/th>\n      <th>charcoal<\/th>\n      <th>charcoal surface sample<\/th>\n      <th>chironomid<\/th>\n      <th>cladocera<\/th>\n      <th>diatom<\/th>\n      <th>diatom bottom sample<\/th>\n      <th>diatom surface sample<\/th>\n      <th>diatom top-bottom<\/th>\n      <th>dinoflagellates<\/th>\n      <th>energy dispersive X-ray spectroscopy (EDS/EDX)<\/th>\n      <th>geochemistry<\/th>\n      <th>geochronologic<\/th>\n      <th>insect<\/th>\n      <th>insect modern<\/th>\n      <th>loss-on-ignition<\/th>\n      <th>macrocharcoal<\/th>\n      <th>macroinvertebrate<\/th>\n      <th>Metabarcoding aeDNA<\/th>\n      <th>microcharcoal<\/th>\n      <th>modern biochemistry<\/th>\n      <th>organic carbon<\/th>\n      <th>ostracode<\/th>\n      <th>ostracode surface sample<\/th>\n      <th>paleomagnetic<\/th>\n      <th>physical sedimentology<\/th>\n      <th>phytolith<\/th>\n      <th>plant macrofossil<\/th>\n      <th>pollen<\/th>\n      <th>pollen surface sample<\/th>\n      <th>pollen trap<\/th>\n      <th>specimen stable isotope<\/th>\n      <th>stable isotope<\/th>\n      <th>testate amoebae<\/th>\n      <th>testate amoebae surface sample<\/th>\n      <th>vertebrate fauna<\/th>\n      <th>water chemistry<\/th>\n      <th>X-ray diffraction (XRD)<\/th>\n      <th>X-ray fluorescence (XRF)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
