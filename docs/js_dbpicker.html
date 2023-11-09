@@ -1,0 +1,80 @@
+<style>
+html, body { min-height: 100%; }
+#wheel {
+  animation-name: rotation;
+  animation-duration: 0s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(1080deg);
+  }
+}
+
+  #formm {
+    display:grid;
+    justify-content:center;
+  }
+
+  section {
+    background-color: palegoldenrod;
+  }
+  
+</style>
+<div style="display:grid;grid-template-columns:auto auto;">
+<div id="colleft" style="display:grid;align-content:center;">
+<div style="padding-top:10px;">
+  <h1 style="text-align:center;">Spin the wheel!</h1>
+  <p style="text-align:center;">Sign up for our mailing list to spin the wheel and see what prize you get</p>
+</div>
+
+<iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+  <br>
+  <button type="button" id="a1">Answer1</button>
+  <button type="button" id="a2">Answer2</button>
+<br>
+</div>
+<div id="colright">
+<div style="display:grid;justify-content:center;">
+  <img src="{{site.baseurl}}/images/wheel.png" id="wheel" style="height:460px;margin-top:20px;">
+</div>
+</div>
+</div>
+<script>
+    const image = document.getElementById('wheel');
+    const form = document.getElementById('formm');
+    const a1 = document.getElementById('a1');
+    const a2 = document.getElementById('a2');
+    a2.observeEvent("click", () => {
+      a2.innerHTML = "change"
+    }
+    form.addEventListener('submit', () => {
+    image.style.animationDuration = "2s";
+    var rando;
+    rando = Math.floor(Math.random()*3);
+    setTimeout(function() {
+    if (rando == 0)
+    {
+      image.src = "{{site.baseurl}}/images/hat.png";
+      image.style.animationDuration = "0s";
+    } else if (rando == 1)
+    {
+      image.src = "{{site.baseurl}}/images/shirt.png";
+      image.style.animationDuration = "0s";
+    } else {
+      image.src = "{{site.baseurl}}/images/bottle.png";
+      image.style.animationDuration = "0s";
+    }
+}, 2000);
+   setTimeout(function() {
+   image.src = "{{site.baseurl}}/images/wheel.png";
+   document.getElementById("em").value = "";
+   document.getElementById("nam").value = "";
+}, 5000);
+  });
+</script>
