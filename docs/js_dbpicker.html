@@ -21,6 +21,10 @@ html, body { min-height: 100%; }
     justify-content:center;
   }
 
+  #three, #four, #five, #six {
+    display: none;
+  }
+
   section {
     background-color: palegoldenrod;
   }
@@ -35,9 +39,15 @@ html, body { min-height: 100%; }
 
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
   <br>
-  <button type="button" id="a1">Answer1</button>
-  <button type="button" id="a2">Answer2</button>
+  <div id="thebuttons">
+  <button type="button" id="pollen">Pollen</button>
+  <button type="button" id="other">Other</button>
+  <button type="button" id="three">three</button>
+  <button type="button" id="four">four</button>
+  <button type="button" id="five">five</button>
+  <button type="button" id="six">six</button>
 <br>
+  </div>
 </div>
 <div id="colright">
 <div style="display:grid;justify-content:center;">
@@ -48,10 +58,15 @@ html, body { min-height: 100%; }
 <script>
     const image = document.getElementById('wheel');
     const form = document.getElementById('formm');
-    const a1 = document.getElementById('a1');
-    const a2 = document.getElementById('a2');
+    const pollen = document.getElementById('a1');
+    const other = document.getElementById('a2');
+    const buttons = document.getElementbyId('thebuttons');
     a2.addEventListener('click', () => {
-      a2.innerHTML = "change"
+      pollen.innerHTML = "Biomarkers";
+      other.innerHTML = "Charcoal";
+      pollen.id = "biomarkers";
+      other.id = "charcoal";
+      three.css("display", "grid");
     })
     form.addEventListener('submit', () => {
     image.style.animationDuration = "2s";
