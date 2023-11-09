@@ -21,7 +21,7 @@ html, body { min-height: 100%; }
     justify-content:center;
   }
 
-  #three, #four, #five, #six, #seven, #eight, #nine, #ten, #eleven {
+  #three, #four, #five, #six, #seven, #eight, #nine, #ten, #eleven, #answer {
     display: none;
   }
 
@@ -53,6 +53,7 @@ html, body { min-height: 100%; }
   <button type="button" id="eleven">six</button>
 <br>
   </div>
+  <div id="answer"> <p id="answertext">Upload to Charcoal</p> </div>
 </div>
 <div id="colright">
 <div style="display:grid;justify-content:center;">
@@ -70,6 +71,12 @@ html, body { min-height: 100%; }
     const four = document.getElementById('four');
     const five = document.getElementById('five');
     const six = document.getElementById('six');
+    const seven = document.getElementById('seven');
+    const eight = document.getElementById('eight');
+    const nine = document.getElementById('nine');
+    const ten = document.getElementById('ten');
+    const eleven = document.getElementById('eleven');
+    const answer = document.getElementById('answer');
     other.addEventListener('click', () => {
       pollen.innerHTML = "Biomarkers";
       other.innerHTML = "Charcoal";
@@ -103,6 +110,21 @@ html, body { min-height: 100%; }
       ten.id = "vertebrate";
       eleven.id = "water";
       
+    })
+
+    charcoal.addEventListener("click", () => {
+      biomarkers.style.display = "none";
+      charcoal.style.display = "none";
+      diatoms.style.display = "none";
+      dinoflagellates.style.display = "none";
+      insects.style.display = "none";
+      ostracodes.style.display = "none";
+      plant.style.display = "none";
+      stable.style.display = "none";
+      testate.style.display = "none";
+      vertebrate.style.display = "none";
+      water.style.display = "none";
+      answer.style.diplsay = "block";
     })
     form.addEventListener('submit', () => {
     image.style.animationDuration = "2s";
