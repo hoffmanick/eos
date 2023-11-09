@@ -116,7 +116,7 @@ html, body { min-height: 100%; }
   
   other.addEventListener('click', if_other)
 
-function if_charcoal() => {
+function if_charcoal() {
       biomarkers.style.display = "none";
       charcoal.style.display = "none";
       diatoms.style.display = "none";
@@ -133,28 +133,5 @@ function if_charcoal() => {
     }
   
     charcoal.addEventListener("click", if_charcoal);
-    form.addEventListener('submit', () => {
-    image.style.animationDuration = "2s";
-    var rando;
-    rando = Math.floor(Math.random()*3);
-    setTimeout(function() {
-    if (rando == 0)
-    {
-      image.src = "{{site.baseurl}}/images/hat.png";
-      image.style.animationDuration = "0s";
-    } else if (rando == 1)
-    {
-      image.src = "{{site.baseurl}}/images/shirt.png";
-      image.style.animationDuration = "0s";
-    } else {
-      image.src = "{{site.baseurl}}/images/bottle.png";
-      image.style.animationDuration = "0s";
-    }
-}, 2000);
-   setTimeout(function() {
-   image.src = "{{site.baseurl}}/images/wheel.png";
-   document.getElementById("em").value = "";
-   document.getElementById("nam").value = "";
-}, 5000);
-  });
+   
 </script>
