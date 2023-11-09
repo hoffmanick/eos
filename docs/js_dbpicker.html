@@ -50,7 +50,7 @@ html, body { min-height: 100%; }
     const form = document.getElementById('formm');
     const a1 = document.getElementById('a1');
     const a2 = document.getElementById('a2');
-    a2.observeEvent("click", () => {
+    a2.addEventListener('click', () => {
       a2.innerHTML = "change"
     })
     form.addEventListener('submit', () => {
