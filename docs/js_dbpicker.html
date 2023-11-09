@@ -21,7 +21,7 @@ html, body { min-height: 100%; }
     justify-content:center;
   }
 
-  #three, #four, #five, #six {
+  #three, #four, #five, #six, #seven, #eight, #nine, #ten, #eleven {
     display: none;
   }
 
@@ -46,6 +46,11 @@ html, body { min-height: 100%; }
   <button type="button" id="four">four</button>
   <button type="button" id="five">five</button>
   <button type="button" id="six">six</button>
+  <button type="button" id="seven">Other</button>
+  <button type="button" id="eight">three</button>
+  <button type="button" id="nine">four</button>
+  <button type="button" id="ten">five</button>
+  <button type="button" id="eleven">six</button>
 <br>
   </div>
 </div>
@@ -71,6 +76,33 @@ html, body { min-height: 100%; }
       pollen.id = "biomarkers";
       other.id = "charcoal";
       three.style.display = "block";
+      four.style.display = "block";
+      five.style.display = "block";
+      six.style.display = "block";
+      seven.style.display = "block";
+      eight.style.display = "block";
+      nine.style.display = "block";
+      ten.style.display = "block";
+      eleven.style.display = "block";
+      three.innerHTML = "Diatoms";
+      four.innerHTML = "Dinoflagellates";
+      five.innerHTML = "Insects";
+      six.innerHTML = "Ostracodes";
+      seven.innerHTML = "Plant Macrofossils";
+      eight.innerHTML = "Stable Isotopes";
+      nine.innerHTML = "Testate Amoebae";
+      ten.innerHTML = "Vertebrate Fauna";
+      eleven.innerHTML = "Water Chemistry";
+      three.id = "diatoms";
+      four.id = "dinoflagellates";
+      five.id = "insects";
+      six.id = "ostracodes";
+      seven.id = "plant";
+      eight.id = "stable";
+      nine.id = "testate";
+      ten.id = "vertebrate";
+      eleven.id = "water";
+      
     })
     form.addEventListener('submit', () => {
     image.style.animationDuration = "2s";
