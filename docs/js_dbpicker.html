@@ -40,8 +40,8 @@ html, body { min-height: 100%; }
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
   <br>
   <div id="thebuttons">
-  <button type="button" id="pollen">Pollen</button>
-  <button type="button" id="other">Other</button>
+  <button type="button" id="one">Pollen</button>
+  <button type="button" id="two">Other</button>
   <button type="button" id="three">three</button>
   <button type="button" id="four">four</button>
   <button type="button" id="five">five</button>
@@ -64,8 +64,8 @@ html, body { min-height: 100%; }
 <script>
     const image = document.getElementById('wheel');
     const form = document.getElementById('formm');
-    const pollen = document.getElementById('pollen');
-    const other = document.getElementById('other');
+    const one = document.getElementById('one');
+    const two = document.getElementById('two');
     const buttons = document.getElementById('thebuttons');
     const three = document.getElementById('three');
     const four = document.getElementById('four');
@@ -79,10 +79,8 @@ html, body { min-height: 100%; }
     const answer = document.getElementById('answer');
 
   function if_other() {
-      pollen.innerHTML = "Biomarkers";
-      other.innerHTML = "Charcoal";
-      pollen.id = "biomarkers";
-      other.id = "charcoal";
+      one.innerHTML = "Biomarkers";
+      two.innerHTML = "Charcoal";
       three.style.display = "block";
       four.style.display = "block";
       five.style.display = "block";
@@ -101,20 +99,11 @@ html, body { min-height: 100%; }
       nine.innerHTML = "Testate Amoebae";
       ten.innerHTML = "Vertebrate Fauna";
       eleven.innerHTML = "Water Chemistry";
-      three.id = "diatoms";
-      four.id = "dinoflagellates";
-      five.id = "insects";
-      six.id = "ostracodes";
-      seven.id = "plant";
-      eight.id = "stable";
-      nine.id = "testate";
-      ten.id = "vertebrate";
-      eleven.id = "water";
-      charcoal.removeEventListener("click", if_other);
+      two.removeEventListener("click", if_other);
   }
       
   
-  other.addEventListener('click', if_other)
+  two.addEventListener('click', if_other)
 
 function if_charcoal() {
       biomarkers.style.display = "none";
@@ -132,6 +121,6 @@ function if_charcoal() {
       
     }
   
-    charcoal.addEventListener("click", if_charcoal);
+    two.addEventListener("click", if_charcoal);
    
 </script>
