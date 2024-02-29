@@ -1,0 +1,512 @@
+---
+title: "The FAUNMAP Constituent Database"
+
+output:
+  html_document:
+    df_print: paged
+    highlight: pygment
+    keep_md: yes
+    number_sections: no
+    theme: journal
+editor_options:
+    chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(jsonlite)
+library(DT)
+library(tidyverse)
+library(geojsonsf)
+library(sf)
+library(sfheaders)
+
+library(rosm)
+library(osmdata)
+library(tmap)
+library(leaflet)
+library(ggplot2)
+library(neotoma2)
+```
+
+
+```{r cars, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+#, 
+database_list = c("FAUNMAP")
+
+
+datatypes = c("biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
+
+db_stats = matrix(nrow=length(database_list),ncol = 43)
+idx_datasets =0
+datasets_mat =  matrix(nrow=1000000,ncol=1)
+for (i in seq(1,length(database_list))) {
+  db_stats[i,1] = database_list[i]
+  #print(db_stats[i,1])
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  num_sites= length(returns)
+  db_stats[i,2] = num_sites
+  num_datasets = 0
+  setlist=c()
+  placeslist = as.data.frame(matrix(ncol=5,nrow=1)) 
+  names(placeslist) = c("siteid","sitename","sitedescription","long","lat")
+  placeslist$long[1] = 0
+  placeslist$lat[1] = 0
+  placeslist$siteid[1] = 0
+  placeslist$sitename[1] = 0
+  placeslist$sitedescription[1] = 0
+  placeslist = placeslist %>%
+    st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
+  if (length(returns) != 0) {
+    for (j in seq(1,length(returns))) {
+      num_datasets = num_datasets + length(returns[[j]]$site$datasets)
+      if (!is.null(returns[[j]]$site$geography) & !is.null(returns[[j]]$site$sitedescription)) {
+      newplace = geojson_sf(returns[[j]]$site$geography) %>% 
+        cbind(as.data.frame(returns[[j]]$site[1:3]))
+      if (st_geometry_type(newplace$geometry)=="POLYGON" & !is.null(returns[[j]]$site$sitedescription)) {
+        newplace = st_centroid(newplace) 
+      }
+      placeslist = rbind(placeslist,newplace)}
+      
+      if (!is.null(returns[[j]]$site$geography) & is.null(returns[[j]]$site$sitedescription)) {
+      newplace = geojson_sf(returns[[j]]$site$geography) %>% 
+        cbind(as.data.frame(returns[[j]]$site[1:2])) %>%
+        cbind(as.data.frame(""))
+      names(newplace) = names(placeslist)
+      if (st_geometry_type(newplace$geometry)=="POLYGON" & is.null(returns[[j]]$site$sitedescription)) {
+        newplace = st_centroid(newplace)
+      names(newplace) = names(placeslist)
+      }
+      placeslist = rbind(placeslist,newplace)}
+      for (k in seq(1,length(returns[[j]]$site$datasets))) {
+        setlist = append(setlist,returns[[j]]$site$datasets[[k]]$datasettype)
+        datasets_mat[idx_datasets] = returns[[j]]$site$datasets[[k]]$datasetid
+        idx_datasets = idx_datasets + 1
+      }}
+      placeslist = placeslist[2:length(placeslist[[1]]),]
+      if (length(returns)==1) {
+      bg = osm.raster(placeslist, zoomin=-17)
+      }
+      
+      if (length(returns)!=1) {
+      bg = osm.raster(placeslist)
+      }
+      
+      if (nchar(database_list[i]) >= 45) {
+      title.size = 0.8
+      }
+      
+      
+      if (database_list[i] == "Academy of Natural Sciences of Drexel University") {
+      title.size = 0.5
+      }
+      
+      if (nchar(database_list[i]) < 45) {
+      title.size = 1.1
+      }
+    
+      map = tm_shape(bg)+
+      tm_rgb() +
+      tm_shape(placeslist) +
+      tm_dots(size=0.1,palette="Set3") +
+      tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.5,
+              legend.text.size=5,
+              main.title= paste0(database_list[i]),
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 1.5,
+              main.title.size=title.size)
+      
+      df = sf_to_df(placeslist) %>%
+        cbind(placeslist$siteid) %>%
+        cbind(placeslist$sitename) %>%
+        cbind(placeslist$sitedescription)
+
+      setlist = as.data.frame(setlist) %>% group_by(setlist) %>% count()
+      set_wide = setlist %>% pivot_wider(names_from="setlist",values_from="n")
+      #print(set_wide)
+      for (l in seq(1,40)) {
+        if (datatypes[l] %in% names(set_wide)) {
+          place = datatypes[l]
+          selector = set_wide %>% select(all_of(place))
+          #print(selector)
+          db_stats[i,(l+3)] = selector[[1]]
+      }
+      }
+    #print(num_datasets)
+    db_stats[i,3] = num_datasets}
+  if (length(returns) == 0) {
+      db_stats[i,3] = 0
+    }
+  }
+db_stats = as.data.frame(db_stats)
+names(db_stats) = c("dbName","numSites","numSets","biochemistry","biomarker","charcoal","charcoal surface sample", "chironomid", "cladocera", "diatom", "diatom bottom sample", "diatom surface sample", "diatom top-bottom", "dinoflagellates", "energy dispersive X-ray spectroscopy (EDS/EDX)", "geochemistry", "geochronologic", "insect", "insect modern", "loss-on-ignition", "macrocharcoal", "macroinvertebrate", "Metabarcoding aeDNA", "microcharcoal", "modern biochemistry", "organic carbon", "ostracode", "ostracode surface sample", "paleomagnetic", "physical sedimentology", "phytolith", "plant macrofossil", "pollen", "pollen surface sample", "pollen trap", "specimen stable isotope", "stable isotope", "testate amoebae", "testate amoebae surface sample", "vertebrate fauna", "water chemistry", "X-ray diffraction (XRD)", "X-ray fluorescence (XRF)")
+
+
+
+db_stats = t(db_stats) %>%
+  as.data.frame()
+
+db_stats$dataset = row.names(db_stats)
+names(db_stats) = c("number","datasets")
+
+db_stats = db_stats %>%
+  dplyr::filter(number != 0)
+
+db_stats = db_stats[c(2,1)]
+
+
+
+```
+
+FAUNMAP is one of the original Neotoma Constituent Databases. FAUNMAP was originally developed by Russ Graham and Ernest Lundelius in the early 1990s with <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=9005144">funding from the NSF</a>. FAUNMAP initially aggregated mammalian occurrences from across the United States for the past 50,000 years. In the late 1990s, the temporal reach of the database was extended to encompass the past five million years. FAUNMAP does contain some data on vertebrate taxa outside mammals (as well as a few plant and invertebrate datasets!), but mammals are its primary focus.
+
+FAUNMAP currently contains `r db_stats$number[3]` datasets from `r db_stats$number[2]` sites from the locations mapped below.
+
+
+```{r dataset-api, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+
+datasets_df = as.data.frame(datasets_mat)
+datasets_df = datasets_df %>% dplyr::filter(!is.na(V1))
+
+
+runs = ceiling(length(datasets_df[[1]]) / 25)
+
+#dataset_calls = list()
+#for (i in seq(runs)) {
+#  print(i)
+#  beg = (i-1)*25
+#  end = i*25
+#  sets_list1 = #paste0(datasets_df$V1[beg:end],collapse=",")
+#  dataset_call1 = #content(GET(paste0('https://api.neotomadb.org/v2.0/d#ata/datasets/',sets_list1)))$data
+#  dataset_calls = append(dataset_call1,dataset_calls)
+#}
+
+
+dataset_info_mat = matrix(ncol = 23, nrow =11957)
+
+#idx_dataset_stuff = 0
+#for (j in seq(1,length(dataset_calls))) {
+  
+#  for (k in seq(1,length(dataset_calls[[j]]$site$datasets))) {
+    
+#    for (m in seq(length(dataset_calls[[j]]$site$datasets[[k]]$datasetpi))) {
+#      idx_dataset_stuff = idx_dataset_stuff + 1
+      
+#      for (n in seq(10)) {
+#      if(!is.null(dataset_calls[[j]]$site[[n]])) {
+#      dataset_info_mat[idx_dataset_stuff,n] = dataset_calls[[j]]$site[[n]]
+#      }}
+#      if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$doi[[1]])) {
+#      dataset_info_mat[idx_dataset_stuff,11] = dataset_calls[[j]]$site$datasets[[k]]$doi[[1]]
+#      }
+      
+      
+#      if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[1]])) {
+#      dataset_info_mat[idx_dataset_stuff,12] = dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[1]]
+#      }
+      
+#        if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[2]])) {
+#      dataset_info_mat[idx_dataset_stuff,13] = dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[2]]
+#      }
+      
+      
+#        if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[3]])) {
+#      dataset_info_mat[idx_dataset_stuff,14] = dataset_calls[[j]]$site$datasets[[k]]$agerange[[1]][[3]]
+#      }
+      
+      
+#        if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$database)) {
+#      dataset_info_mat[idx_dataset_stuff,15] = dataset_calls[[j]]$site$datasets[[k]]$database
+#        }
+      
+#      if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$datasetid)) {
+#      dataset_info_mat[idx_dataset_stuff,16] = dataset_calls[[j]]$site$datasets[[k]]$datasetid
+#      }
+#      if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$datasettype)) {
+#      dataset_info_mat[idx_dataset_stuff,22] = dataset_calls[[j]]$site$datasets[[k]]$datasettype
+#      }
+      
+#        if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$datasetnotes)) {
+#      dataset_info_mat[idx_dataset_stuff,23] = dataset_calls[[j]]$site$datasets[[k]]$datasetnotes
+#      }
+      
+#      for (o in seq(5)) {
+#      if(!is.null(dataset_calls[[j]]$site$datasets[[k]]$datasetpi[[m]][[o]])) {
+#      dataset_info_mat[idx_dataset_stuff,(16+o)] = dataset_calls[[j]]$site$datasets[[k]]$datasetpi[[m]][[o]]
+#      }}
+#    }
+    
+#  }
+#}
+
+
+#dataset_info_df = as.data.frame(dataset_info_mat)
+
+#names(dataset_info_df) = c("siteid","sitename","sitedescription","sitenotes","geography","altitude","collectionunitid","collectionunit","handle","unittype","doi","age_units","ageold","ageyoung","database","datasetid","initials","contactid","firstname","familyname","contactname","datasettype","datasetnotes")
+
+#write.csv(dataset_info_df,"faunmap_dataset_info_df.csv",row.names=FALSE)
+
+
+
+
+#table_calls = list()
+#for (i in seq(2100)) {
+#  print(i)
+#  off=(i-1)*25
+#  table_call1 = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/datasets?limit=25&offset=",off)))$d#ata
+
+#  table_calls = append(table_call1,table_calls)
+#}
+
+
+#table_call_mat = matrix(nrow=length(table_calls),ncol=8)
+#for (i in seq(length(table_calls))) {
+#  for (j in seq(1,8)) {
+#    if (!is.null(table_calls[[i]][[j]])) {
+#      table_call_mat[i,j] = table_calls[[i]][[j]]
+#    }
+#}}
+
+
+#table_call_mat = as.data.frame(table_call_mat)
+
+#names(table_call_mat) = c("datasetid","collectionunitid","datasettypeid","datasetname","notes","recdatecreated","recdatemodified","embargoid")
+
+
+#data_test = left_join(dataset_info_df,table_call_mat)
+
+
+#write.csv(table_call_mat,"neotoma_datasets_mastertable.csv",row.names=FALSE)
+
+#write.csv(data_test,"faunmap_datasets_mastertable.csv",row.names=FALSE)
+
+data_test = read.csv("faunmap_datasets_mastertable.csv")
+
+data_test = data_test %>% mutate(date_create = word(recdatecreated,1,sep="T")) %>% mutate(date_create= ymd(date_create))
+
+data_test_distinct = data_test %>% distinct(datasetid,.keep_all=TRUE)
+list_dates = data_test_distinct %>% group_by(date_create) %>% count() %>% arrange(date_create) 
+list_dates$cumsum = cumsum(list_dates$n)
+
+```
+
+```{r map, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+df$siteid = df$`placeslist$siteid`
+df$sitename = df$`placeslist$sitename`
+df$sitedescription = df$`placeslist$sitedescription`
+
+df = df %>% mutate(pops = paste0("Site ID: ", siteid," \nSite Name: ",sitename,"\n ","Site Description: ",sitedescription))
+
+sites = data_test %>% distinct(siteid)
+all_sites = get_sites(sites$siteid,all_data=TRUE)
+plotLeaflet(all_sites)
+
+#library(mapdeck)
+
+#mapdeck(token = "pk.eyJ1IjoibmhvZmZtYW4xIiwiYSI6ImNscXkycTBiczAxMTkya21rdnBleXQ5dmIifQ.NveskosqzEKOTmypfdUoQw") %>%
+#  add_pointcloud(data=df,lon="x",lat="y",radius=2)
+
+#      leaflet(options = leafletOptions(preferCanvas = TRUE)) %>% addTiles() %>% 
+#      addMarkers(df$x, df$y,popup=df$pops) %>% setView(lng = -85.0, lat = 41.0, zoom = 1)
+
+```
+
+The temporal extent of the FAUNMAP database is a little bimodal: about half the records have a plio-pleistocene time scale, and the other half have a more holocene time scale. (And only 4815 of the 6950 datasets have any time range associated with them at all.)
+
+```{r temp, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+data_test_time = data_test_distinct %>% dplyr::filter(!is.na(ageold)) %>% arrange(desc(ageold))
+data_test_time$index = seq(1,4815)
+
+
+ggplot(data_test_time) +
+  geom_segment(mapping=aes(x=ageold,xend=(ageyoung),y=index,yend=index),color="darkblue") +
+  scale_x_continuous(name="Age Range (Years)",expand=c(0,0)) +
+  scale_y_continuous(name="Dataset Index",limits=c(0,4815),expand=c(0,0)) +
+  theme_bw() +
+  ggtitle("Temporal Extent of FAUNMAP Records: Plio-Pleistocene Scale")
+
+
+ggplot(data_test_time) +
+  geom_segment(mapping=aes(x=ageold,xend=(ageyoung),y=index,yend=index),color="darkblue") +
+  scale_x_continuous(name="Age Range (Years)",expand=c(0,0),limits=c(0,11000)) +
+  scale_y_continuous(name="Dataset Index",limits=c(0,4815),expand=c(0,0)) +
+  theme_bw() +
+  ggtitle("Temporal Extent of FAUNMAP Records: Holocene Scale")
+
+```
+
+Most FAUNMAP datasets are vertebrate fauna or geochronologic, with a few outlying dataset kinds. 
+
+```{r table, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+db_stats = db_stats %>% dplyr::filter(!datasets %in% c('dbName','numSites','numSets')) %>% arrange(desc(as.numeric(number)))
+datatable(db_stats,rownames=FALSE,options = list(pageLength = 40))
+
+```
+
+In 2018, thousands of new datasets were uploaded to FAUNMAP.
+
+```{r next,  echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+ggplot(list_dates) +
+    geom_path(mapping=aes(x=date_create,y=cumsum)) +
+    theme_bw() +
+    ggtitle("Cumulative Dataset Uploads to FAUNMAP") +
+    scale_x_date(name="Date Uploaded", expand=c(0,0)) +
+    scale_y_continuous(name="Cumulative Uploads")
+
+
+data_test_distinct$month_year <- format(as.Date(data_test_distinct$date_create), "%Y-%m")
+
+uploads_by_type = data_test_distinct  %>% group_by(month_year,datasettype) %>% count()
+
+
+ggplot(uploads_by_type) +
+    geom_col(mapping=aes(x=month_year,y=n,fill=datasettype)) +
+    theme_bw() +
+    ggtitle("Uploads to FAUNMAP by Dataset Type") +
+    scale_x_discrete(name="Month and Year", breaks=c("2013-09","2015-03","2018-01","2018-11","2020-06"),labels=c("Sep 2013","Mar 2015","Jan 2018","Nov 2018","Jun 2020")) +
+    scale_y_continuous(name="Number of Records Uploaded") +
+  scale_fill_viridis_d()
+```
+
+Prior to 2018, the researcher associated with the most FAUNMAP datasets was John H. Brumley, who had 29 datasets in the database.
+
+```{r early-up,  echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+
+uploaders_early = data_test %>% dplyr::filter(year(date_create) <2018) %>% group_by(contactid,contactname) %>% count() %>% arrange(desc(n)) %>% drop_na()
+
+
+datatable(uploaders_early,rownames=FALSE)
+
+```
+
+Currently, the researcher with the most data uploaded to FAUNMAP is Charles Richard Harington, who is associated with 259 datasets in the database.
+
+```{r nextnext,  echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+uploaders = data_test %>% group_by(contactid,contactname) %>% count() %>% arrange(desc(n)) %>% drop_na()
+
+datatable(uploaders,rownames=FALSE)
+
+indigTerr = content(GET("https://native-land.ca/wp-content/themes/NLD-2021/files/indigenousTerritories.json"))$features
+
+#854, 1011,1026, 1031, 1034, 1038,1039, 1047 is problematic
+indigTerr_mat = matrix(nrow=length(indigTerr),ncol=4)
+df_mat = matrix(nrow=1000000,ncol=3)
+idx=0
+for (i in seq(1,length(indigTerr))) {
+  if (!is.null(indigTerr[[i]]$properties$Name)) {
+    indigTerr_mat[i,1] = indigTerr[[i]]$properties$Name
+  }
+  if (!is.null(indigTerr[[i]]$properties$ID)) {
+    indigTerr_mat[i,2] = indigTerr[[i]]$properties$ID
+  }
+  if (!is.null(indigTerr[[i]]$properties$Slug)) {
+    indigTerr_mat[i,3] = indigTerr[[i]]$properties$Slug
+  }
+
+  if (length(indigTerr[[(i)]]$geometry$coordinates[[1]][[1]][[2]]) ==1) {
+  for (j in seq(length(indigTerr[[i]]$geometry$coordinates[[1]]))) {
+    idx = idx+1
+    df_mat[idx,1] = indigTerr[[i]]$geometry$coordinates[[1]][[j]][[2]]
+    df_mat[idx,2] = indigTerr[[i]]$geometry$coordinates[[1]][[j]][[1]]
+    df_mat[idx,3] = indigTerr[[i]]$properties$ID
+
+  }
+
+
+  }}
+
+  df_place = as.data.frame(df_mat)
+  names(df_place) = c("lat","long","id")
+  df_place = df_place[1:107969,]
+  place_sf = st_as_sf(df_place,coords=c("long","lat"),crs="+proj=longlat +datum=WGS84") %>% dplyr::group_by(id) %>% 
+  dplyr::summarise() %>%
+  st_cast("POLYGON")
+  
+  indigTerr_mat = as.data.frame(indigTerr_mat)[1:3]
+  names(indigTerr_mat) = c("name","id","slug")
+  
+  indigTerr_mat = indigTerr_mat %>%
+    mutate(id = as.numeric(id))
+  
+  test = left_join(indigTerr_mat,place_sf)
+  
+  empties = test %>% dplyr::filter(st_is_empty(geometry))
+  
+  
+  
+indigTerr_mat2 = matrix(nrow=length(empties[[1]]),ncol=4)
+df_mat2 = matrix(nrow=1000000,ncol=4)
+idx=0
+
+a = which(st_is_empty(test$geometry))
+
+for (i in seq(1,33)) {
+  if (!is.null(indigTerr[[a[[i]]]]$properties$Name)) {
+    indigTerr_mat2[i,1] = indigTerr[[a[[i]]]]$properties$Name
+  }
+  if (!is.null(indigTerr[[a[[i]]]]$properties$ID)) {
+    indigTerr_mat2[i,2] = indigTerr[[a[[i]]]]$properties$ID
+  }
+  if (!is.null(indigTerr[[a[[i]]]]$properties$Slug)) {
+    indigTerr_mat2[i,3] = indigTerr[[a[[i]]]]$properties$Slug
+  }
+
+  for (j in seq(length(indigTerr[[a[[i]]]]$geometry$coordinates))) {
+    for (k in seq(length(indigTerr[[a[[i]]]]$geometry$coordinates[[j]][[1]]))) {
+    idx = idx+1
+    df_mat2[idx,1] = indigTerr[[a[[i]]]]$geometry$coordinates[[j]][[1]][[k]][[2]]
+    df_mat2[idx,2] = indigTerr[[a[[i]]]]$geometry$coordinates[[j]][[1]][[k]][[1]]
+    df_mat2[idx,3] = indigTerr[[a[[i]]]]$properties$ID
+    df_mat2[idx,4] = j
+
+  }}
+}
+
+indigTerr_mat2 = as.data.frame(indigTerr_mat2)
+names(indigTerr_mat2) = c("name","id","slug")
+indigTerr_mat2 = indigTerr_mat2[1:3] %>%
+  mutate(id = as.numeric(id))
+
+df_place2 = as.data.frame(df_mat2)
+  names(df_place2) = c("lat","long","id","pol")
+  df_place2 = df_place2 %>% dplyr::filter(!is.na(lat)) %>%
+    mutate(unique= paste0(id,pol))
+  
+  place_sf2 = st_as_sf(df_place2,coords=c("long","lat"),crs="+proj=longlat +datum=WGS84") %>% dplyr::group_by(id,pol) %>% 
+  dplyr::summarise() %>%
+  st_cast("POLYGON")
+    
+    
+mults = left_join(place_sf2,indigTerr_mat2)    
+
+test = test %>% mutate(pol = 1)
+
+indigTerr_sf = rbind(test,mults)
+
+#write.csv(indigTerr_sf,"indigTerr_sf.csv",row.names=FALSE)
+
+
+#try_ne <- try[!st_is_empty(try), ]
+
+#tm_shape(osm.raster(try)) + tm_rgb() +
+#  tm_shape(try_ne) + tm_polygons(alpha=0.5)
+
+
+## to get places associated with particular points
+# content(GET("https://native-land.ca/api/index.php?maps=languages&position=42.553080,-86.473389"))
+
+    
+```
