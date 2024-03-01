@@ -29,7 +29,6 @@ library(leaflet)
 library(ggplot2)
 library(neotoma2)
 library(stringr)
-library(stringi)
 ```
 
 
