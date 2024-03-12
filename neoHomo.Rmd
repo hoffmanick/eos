@@ -1,7 +1,7 @@
 ---
 title: "Neotoma's Human Records"
 author: "Nick Hoffman"
-date: "October 31st 2023"
+date: "Updated: 3/12/2024"
 output:
   html_document:
     df_print: paged
@@ -56,10 +56,10 @@ table tr th :last-child, table tr td :last-child {
 
 ---
 
-This document shows what records of Homo sapiens I was able to find in Neotoma. My method was first to download the entire "taxa" table (46,302 rows) and find the taxonid for any relevant sounding taxa. The first table below shows the taxa I found.
+This document shows what records of Homo sapiens I was able to find in Neotoma. My method was first to download the whole taxa table and find the taxon id for any relevant sounding taxa. The first table below shows the taxa I found.
 
 
-```{r setup, echo=FALSE,include=TRUE,message = FALSE}
+```{r setup, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
 library(neotoma2)
 library(DT)
@@ -92,7 +92,7 @@ names(taxa_df) = names(taxalist[[1]])
 
 test1 = grep("Homo",taxa_df$taxonname)
 
-homos = taxa_df[c(5571,6261,6262,6631),]
+homos = taxa_df[c(5589,6279,6649,6280),]
 
 datatable(homos[c(1,3,6,7)],rownames = FALSE)
 
@@ -110,7 +110,7 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 Then I searched for all occurrences of any of those taxa. 
 
-The two maps below (one static, one dynamic) shows the sites they come from, and the table below that shows the sample information on those 28 human samples I found.
+The two maps below (one static, one dynamic) shows the sites they come from, and the table below that shows the sample information on those 28 human samples I found at 22 distinct sites.
 
 ```{r occurrences, echo=FALSE,include=TRUE,message = FALSE}
 
@@ -149,15 +149,20 @@ homo_sites_neo = get_sites(c(as.numeric(homo_sites[[1]])))
 homo_sites_sf = as.data.frame(homo_sites_neo) %>%
   st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
 
+homo_full = left_join(homo_sites_sf,homo_df)
 
 homo_bg = osm.raster(homo_sites_sf)
 
 
 tm_shape(homo_bg)+
     tm_rgb() +
-    tm_shape(homo_sites_sf) +
-    tm_dots(size=0.1,alpha=0.4) +
-    tm_layout(
+    tm_shape(homo_full) +
+    tm_dots("database",size=0.1,alpha=0.4,palette=c('black','red','green',"purple")) +
+    tm_layout(legend.position=c("RIGHT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
               main.title= 'Sites with Homo Samples in Neotoma', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
@@ -169,7 +174,6 @@ plotLeaflet(homo_sites_neo)
 datatable(homo_df[c(1,3,4,5,7,8,9,10,11,15)],rownames=FALSE)
 ```
 
-I think there must be different conventions going on here for the age ranges. All the negative age values haven't happened yet, if they're meant to correspond to "number of years before 1950." 
 
 
 Below I count the occurrences by database and taxonname.
@@ -178,3 +182,50 @@ Below I count the occurrences by database and taxonname.
 counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(desc(n))
 
 datatable(counttabl,rownames = FALSE)
+```
+
+Below I list all geopolitical units associated with any of the 22 distinct sites.
+
+
+```{r countries, echo=FALSE,include=TRUE,message = FALSE}
+
+sitestring = paste0(homo_df$siteid,collapse=",")
+
+gps = content(GET(paste0("https://api.neotomadb.org/v2.0/data/sites/",sitestring,"/geopoliticalunits?limit=250&offset=0")))$data
+
+gps_mat = matrix(nrow=52,ncol=6)
+idx_sites = 0
+for (i in seq(length(gps))) {
+  for (j in seq(length(gps[[i]]$geopoliticalunits))) {
+    idx_sites = idx_sites + 1
+    if (!is.null(gps[[i]]$siteid)) {
+    gps_mat[idx_sites,1] = gps[[i]]$siteid}
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[1]])) {
+    gps_mat[idx_sites,2] = gps[[i]]$geopoliticalunits[[j]][[1]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[2]])) {
+    gps_mat[idx_sites,3] = gps[[i]]$geopoliticalunits[[j]][[2]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[3]])) {
+    gps_mat[idx_sites,4] = gps[[i]]$geopoliticalunits[[j]][[3]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[4]])) {
+    gps_mat[idx_sites,5] = gps[[i]]$geopoliticalunits[[j]][[4]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[5]])) {
+    gps_mat[idx_sites,6] = gps[[i]]$geopoliticalunits[[j]][[5]] }
+  }
+}
+
+
+gps_df = as.data.frame(gps_mat)
+
+names(gps_df) = c("siteid","rank","gp_id","gp_name","gp_unit","higher_gp_id")
+
+datatable(gps_df,rownames=FALSE)
+
+gps_sum = gps_df %>% dplyr::filter(rank==1) %>% group_by(gp_name) %>% count() %>% arrange(desc(n))
+```
+
+Lastly, I count the countries the distinct sites are in.
+
+```{r highest, echo=FALSE,include=TRUE,message = FALSE}
+
+datatable(gps_sum,rownames=FALSE)
+```

@@ -137,7 +137,7 @@ db_stats = db_stats[c(2,1)]
 
 FAUNMAP is one of the original Neotoma Constituent Databases. FAUNMAP was originally developed by Russ Graham and Ernest Lundelius in the early 1990s with <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=9005144">funding from the NSF</a>. FAUNMAP initially aggregated mammalian occurrences from across the United States for the past 50,000 years. In the late 1990s, the temporal reach of the database was extended to encompass the past five million years. FAUNMAP does contain some data on vertebrate taxa outside mammals (as well as a few plant and invertebrate datasets!), but mammals are its primary focus.
 
-FAUNMAP currently contains `r db_stats$number[3]` datasets from `r db_stats$number[2]` sites from the locations mapped below.
+FAUNMAP currently contains `r db_stats$number[3]` datasets from `r length(unique(placeslist)[[1]])` sites from the locations mapped below.
 
 
 ```{r dataset-api, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
@@ -264,7 +264,7 @@ datasets_full = left_join(dataset_info_df,table_call_mat)
 
 #write.csv(datasets_full,"faunmap_datasets_mastertable.csv",row.names=FALSE)
 
-#datasets_full = read.csv("faunmap_datasets_mastertable.csv")
+datasets_full = read.csv("faunmap_datasets_mastertable.csv")
 
 datasets_full = datasets_full %>% mutate(date_create = word(recdatecreated,1,sep="T")) %>% mutate(date_create= ymd(date_create))
 
@@ -446,33 +446,47 @@ for (i in seq(1,length(indigTerr))) {
 
   #I turn all those points into an sf polygon, using the territory ID to keep track of which points belong to which polygon. Then I join the sf object to the indigTerr_mat dataframe, using the territory's ID as the column-in-common.
 
-  df_place = as.data.frame(df_mat)
-  names(df_place) = c("lat","long","id")
-  df_place = df_place %>% drop_na()
-  place_sf = st_as_sf(df_place,coords=c("long","lat"),crs="+proj=longlat +datum=WGS84") %>% dplyr::group_by(id) %>% 
-  dplyr::summarise() %>%
-  st_cast("POLYGON")
   
   indigTerr_mat = as.data.frame(indigTerr_mat)[1:3]
   names(indigTerr_mat) = c("name","id","slug")
   
   indigTerr_mat = indigTerr_mat %>%
     mutate(id = as.numeric(id))
+
   
-  full_single_pols = left_join(indigTerr_mat,place_sf)
   
-  empties = full_single_pols %>% dplyr::filter(st_is_empty(geometry))
-  
+df_place = as.data.frame(df_mat) %>% mutate(pol=1)
+  names(df_place) = c("lat","long","id","pol")
+  df_place = df_place %>% dplyr::filter(!is.na(lat)) %>%
+    mutate(unique= paste0(id,pol))
+
+
+sf1 <- sfheaders::sf_polygon(
+    obj = df_place
+    , x = "long"
+    , y = "lat"
+    , keep = T, polygon_id="id"
+) 
+
+sf1 = st_set_crs(sf1,st_crs(placeslist))
+
+
+singles = left_join(sf1,indigTerr_mat)    
+
+empties = singles %>% dplyr::filter(st_is_empty(singles$geometry))
 
   #I repeat the steps outlined above, this time for the 33 Indigenous territories that have multiple polygons associated with them, doing an additional loop through each polygon per territory, and giving a unique integer for each polygon.
+
+empty_find = left_join(indigTerr_mat,sf1)
+
+a = which(st_is_empty(empty_find$geometry))
+
   
 indigTerr_mat2 = matrix(nrow=length(empties[[1]]),ncol=4)
 df_mat2 = matrix(nrow=1000000,ncol=4)
 idx=0
 
-a = which(st_is_empty( full_single_pols$geometry))
-  
-empties = full_single_pols %>% dplyr::filter(st_is_empty( full_single_pols$geometry))
+
 
 for (i in seq(1,33)) {
   if (!is.null(indigTerr[[a[[i]]]]$properties$Name)) {
@@ -505,27 +519,48 @@ df_place2 = as.data.frame(df_mat2)
   names(df_place2) = c("lat","long","id","pol")
   df_place2 = df_place2 %>% dplyr::filter(!is.na(lat)) %>%
     mutate(unique= paste0(id,pol))
-  
-  place_sf2 = st_as_sf(df_place2,coords=c("long","lat"),crs="+proj=longlat +datum=WGS84") %>% dplyr::group_by(id,pol) %>% 
-  dplyr::summarise() %>%
-  st_cast("POLYGON")
+
+
+
+sf2 <- sfheaders::sf_polygon(
+    obj = df_place2
+    , x = "long"
+    , y = "lat" 
+    , keep = T, polygon_id="unique"
+) 
+
+
+
     
   
 #I join all the polygons into one big sf object (indigTerr_sf) and I remove empty geometries (the index for the 33 territories with multipolygons were empty in the original dataframe)
-    
-mults = left_join(place_sf2,indigTerr_mat2)    
 
-full_single_pols = full_single_pols %>% mutate(pol = 1)
+sf2$id = substr(sf2$unique, start = 1, stop = 5)
+sf2 = sf2 %>% mutate(id=as.numeric(id))
+sf2 = st_set_crs(sf2,st_crs(placeslist))
+mults = left_join(sf2,indigTerr_mat2)    
+mults = mults %>% select(id,name,slug,geometry,pol)
 
-indigTerr_sf = rbind(full_single_pols,mults) %>% st_as_sf(crs="+datum=WGS84")
+singles$unique = NA
+mults$unique =NA
 
+sf1 = st_set_crs(sf1,st_crs(placeslist))
+
+indigTerr_sf = rbind(singles,mults) %>% st_as_sf(crs="+proj=longlat +datum=WGS84")
 #write.csv(indigTerr_sf,"indigTerr_sf.csv",row.names=FALSE)
 indigTerr_ne = indigTerr_sf[!st_is_empty(indigTerr_sf),]
 
 #but this map below of all the Indigenous territories is a little messed up. For one thing, territories like id = 36,191 and id = 39,156 are clearly being drawn "in the wrong direction." They're on the edges of the world map but drawn like they stretch across the entire world. More generally, the polygons here don't really look the same as they do on the native-land.ca website... Australia looks pretty good. But the polygons on top of Greenland and the Canadian Arctic look bad... which makes me think there's something wrong with the method I used above. Maybe the wrong datum/CRS? Not sure...
 
-tm_shape(osm.raster(indigTerr_ne)) + tm_rgb() +
-  tm_shape(indigTerr_ne) + tm_polygons(alpha=0.5)
+lats=c(-88,-85,83,87)
+longs=c(-176,176,-170,172)
+
+world= as.data.frame(lats) %>% cbind(as.data.frame(longs))
+names(world) = c("lat","long")
+
+world = st_as_sf(world,coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
+tm_shape(osm.raster(world)) +tm_rgb() + 
+tm_shape(indigTerr_ne[which(st_is_valid(indigTerr_ne)),]) + tm_polygons(alpha=0.5)
 
 
 ## So that motivated approach #2. This approach is much slower and more computationally expensive but I feel more confident in the results. Instead of getting all the Indigenous territories in a single API call, I use a different API, where native-land will give you all the territories associated with a particular point. I run this call 4- or 5000 times on all the sites in FAUNMAP! It takes hours, so I log the results in a csv and I have this method commented out here.
@@ -582,6 +617,20 @@ Site 24GF250 is the site claimed by the most nations: the eastern and western Da
 distinct_indig = distinct_indig %>% mutate(indigName = (stri_unescape_unicode(gsub("<U\\+(....)>", "\\\\u\\1", distinct_indig$indigName))))
 distinct_list = distinct_indig %>% ungroup() %>% group_by(sitename) %>% count() %>% arrange(desc(n))
 
+
+indig_sites = st_filter(placeslist,indigTerr_ne) 
+indig_sites = indig_sites %>% unique()
+
+sects = st_intersects(indig_sites,placeslist)
+sect_mat = matrix(nrow=length(sects),ncol=100)
+for (el in seq(length(sects))) {
+  for (place in seq(length(sects[[el]]))) {
+    sect_mat[el,place] = sects[[el]][[place]]
+  }
+}
+
+sect_mat = as.data.frame(sect_mat)
+sect_mat = 
 
 datatable(distinct_list,rownames=FALSE,options = list(pageLength = 10), caption="Number of nations claiming the land of a Neotoma site")
 
