@@ -90,9 +90,9 @@ taxa_df = as.data.frame(taxa_df)
 
 names(taxa_df) = names(taxalist[[1]])
 
-test1 = grep("Homo",taxa_df$taxonname)
+test1 = grep("Homo ",taxa_df$taxonname)
 
-homos = taxa_df[c(5589,6279,6649,6280),]
+homos = taxa_df[c(grep("Homo ",taxa_df$taxonname),grep("^Homo$", taxa_df$taxonname),grep("^Homini", taxa_df$taxonname)),]
 
 datatable(homos[c(1,3,6,7)],rownames = FALSE)
 
