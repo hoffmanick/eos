@@ -1,0 +1,810 @@
+---
+title: "Neotoma for Kitty"
+author: "Nick Hoffman"
+date: "September 21, 2023"
+output:
+  html_document:
+    df_print: paged
+    highlight: pygment
+    keep_md: yes
+    number_sections: no
+    theme: journal
+editor_options:
+    chunk_output_type: inline
+---
+
+<style type="text/css">
+p {
+  font-size:18px;
+}
+
+ul {
+  font-size:18px;
+}
+
+li {
+  font-size:18px;
+}
+table {
+   padding: 0;border-collapse: collapse;
+   layout: fixed;
+   width: 90%; }
+table tr {
+   border-top: 1px solid #cccccc;
+   background-color: white;
+   margin: 0;
+   padding: 0; }
+table tr:nth-child(2n) {
+   background-color: #f8f8f8; }
+table tr th {
+   font-weight: bold;
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr td {
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr th :first-child, table tr td :first-child {
+   margin-top: 0; }
+table tr th :last-child, table tr td :last-child {
+   margin-bottom: 0; }
+.html-widget {
+    margin: auto;
+}
+</style>
+
+## Introduction
+
+This page will use the R package <span style="font-weight:bold;">Neotoma2</span> and the <a href="https://api.neotomadb.org/api-docs/#/Contact%20metadata/get_v2_0_data_sites__siteid__contacts">Neotoma API</a> to briefly survey paleoecological records from the Florida region held by the Neotoma Paleoecology Database. This page is for Kitty, to help paint a picture of what records Neotoma has - for the purposes of Neotoma/ZAN crosstalk and Neotoma/FAUNMAP work.
+
+I also created three csv files for Kitty (below). "Publication Authors" lists every publication that Neotoma knows about concerning vertebrate fauna datasets from Florida, along with the relevant datasets and authors. Since a publication can concern multiple datasets and have multiple authors, a particular publication will often show up multiple times in this table. If, for instance, a publication has three authors and concerns two datasets, there will actually be six rows in the table for that publication, one for each combination of dataset and author.
+
+"Site Contacts" lists the contact information known by Neotoma and associated with people connected to every site in Florida from which vertebrate datasets have been collected. Because a particular person may have worked at multiple sites, some contacts are repeated in this table, for each site where they've worked.
+
+"Harmonization Table" simply lists the corresponding Neotoma name for every site from Kitty's excel file. The only two sites without definite matches from Kitty's file were Vero 2 and Boynton. Vero 2 likely corresponds to Vero, based on Kitty's note that in the VP archives the site is "called Vero (General Area) and not under Vero 2". There are two vertebrate datasets in Boynton Mound Complex site in Neotoma, so maybe one of those datasets corresponds to the Boyton Mound Complex site and the other to the site simply labeled Boynton?
+
+<ul class="downloads">
+          <li><a href="florida_pub_authors.csv">Download <strong>Publication Authors</strong></a></li>
+          <li><a href="florida_site_contacts.csv">Download <strong>Site Contacts</strong></a></li>
+          <li><a href="harmtable.csv">Download <strong>Harmonization Table</strong></a></li>
+        </ul>
+        
+
+```{r setup, include=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE,fig.align = 'center')
+```
+
+```{r packages1,echo = FALSE, results = FALSE}
+
+pacman::p_load(neotoma2,tidyverse,sf,leaflet,raster,tmap,tmaptools,osmdata,rosm,httr,jsonlite,flextable)
+
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(flextable)
+
+library(rosm)
+library(osmdata)
+library(htmltools)
+
+```
+
+
+
+
+```{r packages, results=FALSE, message= FALSE,echo=FALSE,include=TRUE}
+
+
+devtools::install_github('NeotomaDB/neotoma2')
+
+library(neotoma2)
+
+pacman::p_load(neotoma2,tidyverse,sf,leaflet,raster,tmap,tmaptools,osmdata,rosm,httr,jsonlite,DT)
+
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(raster)
+library(tmap)
+library(tmaptools)
+library(osmdata)
+library(rosm)
+library(httr)
+library(jsonlite)
+library(rmarkdown)
+library(DT)
+
+```
+
+
+## Are there any sites in Florida from which Neotoma records derive?
+
+There are 432 sites in Florida for which Neotoma holds paleoecological data. Some of these sites have multiple datasets associated with them, so there are even more than 432 data records.
+
+```{r site-location, echo=FALSE,include=TRUE,message = FALSE}
+
+## you can query all the sites that fall within a bounding box - a rectangle. 
+## The bounding box should specified as:
+## xmin, ymin, xmax, ymax
+
+fl = list(c(-85.497137,30.997536),c(-85.004212,31.003013),c(-84.867289,30.712735),c(-83.498053,30.647012),c(-82.216449,30.570335),c(-82.167157,30.356734),c(-82.046664,30.362211),c(-82.002849,30.564858),c(-82.041187,30.751074),c(-81.948079,30.827751),c(-81.718048,30.745597),c(-80.0,30.707258),c(-79.5,28.461713),c(-79.5,27.738757),c(-79.5,27.021277),c(-79.5,26.566691),c(-79.846166,25.739673),c(-79.8,25.383672),c(-80.49669,24.197456),c(-80.759583,24.164595),c(-81.077246,24.120779),c(-82.170354,25.224841),c(-82.126538,25.378195),c(-82.233064,26.292844),c(-82.992943,27.437525),c(-83.051774,27.886634),c(-83.618729,29.420177),c(-84.02384,29.80005),c(-85.310921,29.399501),c(-87.518128,30.080057),c(-87.37025,30.427934),c(-87.446927,30.510088),c(-87.408589,30.674397),c(-87.633143,30.86609),c(-87.600282,30.997536),c(-85.497137,30.997536))
+
+
+fl_coords = matrix(nrow=length(fl),ncol=2)
+
+for(i in seq(1,length(fl))) {
+  fl_coords[i,1] = fl[[i]][1]
+  fl_coords[i,2] = fl[[i]][2]
+}
+
+fl_coords = as.data.frame(fl_coords)
+names(fl_coords) = c("long","lat")
+
+fl_coords2 = fl_coords %>%
+  st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84",remove=FALSE) %>%
+  mutate(id="FL") %>%
+  group_by(id) %>%
+  summarize(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+
+bb=c(-82.9,27.7,-80.4,28.45)
+
+stof_sites1 = get_sites(loc=fl_coords2[1]$geometry[[1]], all_data=TRUE)
+
+
+stof_sites = as.data.frame(stof_sites1) 
+stof_sf = stof_sites %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+bg = osm.raster(stof_sf)
+
+bb = c(-83,27.5,-80,28.5)
+
+fl_coords = fl_coords %>%
+  st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84",remove=FALSE) %>%
+  mutate(id= "fl") %>%
+  group_by(id) %>%
+  summarize(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(stof_sf) +
+    tm_dots(size=0.05,alpha=0.4) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'Neotoma Sites in Florida', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+```
+
+Below is a table of all the site names and descriptions of the area recorded by researchers who collected data from those sites. 
+<br>
+
+```{r dt, echo=FALSE,include=TRUE,message = FALSE}
+
+datatable(stof_sites[c(2,7)],rownames = FALSE)
+
+## Use the plotLeaflet function to dynamically plot the sites you found. 
+
+#neotoma2::plotLeaflet(stof_sites) %>%
+#  leaflet::addRectangles(map=.,lng1=stof_bbox[1],lat1=stof_bbox[2],lng2=stof_bbox[3],lat2=stof_bbox[4],color="green")
+
+```
+
+## What kinds of data were recorded at these sites?
+
+The following table and graph show what dataset types have been collected from these sites.
+
+<br>
+
+``` {r dataset-counts,echo=FALSE,include=TRUE,message=FALSE}
+
+sum1 = summary(stof_sites1)
+
+sum_all = sum1
+
+sum_dt = sum_all %>% 
+  dplyr::filter(types!="geochronologic") %>%
+  mutate(types = case_when(types=="diatom bottom sample" ~ "diatom",
+                   types=="diatom surface sample" ~ "diatom",
+                   TRUE ~ types)) %>%
+  group_by(types) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+datatable(sum_dt,rownames = FALSE,options = list(pageLength = 15))
+
+library(ggplot2)
+
+library(forcats)
+
+sum_dt$types = fct_reorder(sum_dt$types, sum_dt$n,.desc=TRUE)
+sum_dt %>%
+  ggplot(aes(x = types, y = n,fill=types)) +
+  geom_col() +
+  labs(x = "Data Type",y="Count", title="Dataset Counts") +
+  theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  scale_y_continuous(expand =expansion(mult = c(0, .05))) +
+  scale_fill_viridis_d(option="H")
+
+
+```
+
+The map below shows how these datasets are distributed.
+
+
+```{r mapping-datasets-by-type, echo=FALSE,include=TRUE,message = FALSE,out.width = "95%",out.height="95%"}
+
+
+
+merged_df = merge(stof_sites,sum_all,by='siteid')
+
+library(sf)
+
+stof_sf = merged_df %>%
+  st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
+
+
+
+stof_sf_simplified = stof_sf %>%
+  mutate(types = case_when(
+    types == "diatom surface sample" ~ "diatom",
+    types == "diatom bottom sample" ~ "diatom",
+    TRUE ~ types
+  ))
+
+tops = stof_sf_simplified %>%
+  group_by(types) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(n=6)
+
+stof_simp = stof_sf_simplified %>%
+  dplyr::filter(types %in% tops$types)
+
+stof_simp = stof_simp %>%
+  filter(types!="geochronologic")
+
+library(rosm)
+library(osmdata)
+bg = osm.raster(stof_sf)
+
+library(tmap)
+
+stof_simp$types <- factor(stof_simp$types, levels = c("vertebrate fauna","pollen","pollen surface sample","diatom","water chemistry"))
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(stof_simp) +
+    tm_dots(size=0.1,palette="Set3") +
+    tm_facets(by=c("types"), ncol  = 3,  free.coords=FALSE) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.5,
+              legend.text.size=5,
+              main.title= 'Datasets Map', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1)
+
+```
+
+There are some overlaps in site location across these map panels.
+
+Most strikingly, the diatom and water chemistry maps look the same. Some paleoecologists build transfer functions that take a sedimentary diatom assemblage as an input and estimate past lake chemistry as an output. These transfer functions require a dataset of surface diatom assemblages at many lakes connected to current lake chemistry at those lakes. That is why these two dataset types are coextensive. There are other overlaps too...
+
+The Leaflet plots below enable dynamic exploration of maps for the most common dataset types: vertebrate fauna, diatoms, and pollen. Note that these are site maps. There are fewer sites than datasets because sometimes multiple datasets are collected from the same site, so the numbers here won't match the dataset maps above. Also note that the pollen map below shows sites from which both stratigraphic and surface pollen records were collected.
+
+
+<h3 style="text-align:center;">Vertebrate Fauna Sites</h3>
+```{R vertmap, echo=FALSE,include=TRUE,message = FALSE, }
+
+# Use the plotLeaflet function to dynamically plot the sites you found. 
+
+vert1 = stof_sites1 %>% 
+  neotoma2::filter(datasettype %in% c("vertebrate fauna"))
+
+verts=vert1
+
+neotoma2::plotLeaflet(verts)
+
+poll1 = stof_sites1 %>% 
+  neotoma2::filter(datasettype %in% c("pollen","pollen surface sample"))
+
+polls=poll1
+
+```
+<h3 style="text-align:center;">Pollen Sites</h3>
+```{r poll-map,echo=FALSE,include=TRUE,message = FALSE}
+neotoma2::plotLeaflet(polls)
+```
+<h3 style="text-align:center;">Diatom Sites</h3>
+```{r diatom-map,echo=FALSE,include=TRUE,message = FALSE}
+
+diat1 = stof_sites1 %>% 
+  neotoma2::filter(datasettype %in% c("diatom","diatom surface sample","diatom bottom sample"))
+diats=diat1
+
+
+neotoma2::plotLeaflet(diats)
+```
+
+## Where, if anywhere, are the specimens held?
+
+### Strategy 1: Start from 'Repository Specimens' Table
+
+My first strategy here is to get the full "repository specimens" table - a table with 6404 observations linking dataset ids to repository ids. I filter this table just for those datasets connected to sites in Florida. Using this strategy, I find that there are 188 datasets from sites in Florida linked to repositories. 
+
+```{r repos, echo=FALSE,include=TRUE,message = FALSE}
+
+
+repos = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryinstitutions&limit=2500&offset=0"))$data
+
+repo_df = matrix(ncol=6,nrow=length(repos))
+
+for (i in seq(1,length(repos))) {
+  if(!is.null(repos[[i]][[1]])) {
+  repo_df[i,1] = repos[[i]][[1]]}
+  if(!is.null(repos[[i]][[2]])) {
+  repo_df[i,2] = repos[[i]][[2]]}
+  if(!is.null(repos[[i]][[3]])) {
+  repo_df[i,3] = repos[[i]][[3]]}
+  if(!is.null(repos[[i]][[4]])) {
+  repo_df[i,4] = repos[[i]][[4]]}
+  if(!is.null(repos[[i]][[5]])) {
+  repo_df[i,5] = repos[[i]][[5]]}
+  if(!is.null(repos[[i]][[6]])) {
+  repo_df[i,6] = repos[[i]][[6]]}
+}
+
+repo_df = repo_df %>%
+  as.data.frame()
+
+
+
+names(repo_df) = c("repositoryid","acronym","repository","notes","recdatecreated","recdatemodified")
+
+```
+
+
+```{r repo-to-spec, warning= FALSE, echo=FALSE,include=TRUE,message = FALSE}
+
+repospec = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryspecimens&limit=9055&offset=0"))$data
+
+repospec_df = matrix(ncol=5,nrow=length(repospec))
+
+for (i in seq(1,length(repospec))) {
+  if(!is.null(repospec[[i]][[1]])) {
+  repospec_df[i,1] = repospec[[i]][[1]]}
+  if(!is.null(repospec[[i]][[2]])) {
+  repospec_df[i,2] = repospec[[i]][[2]]}
+  if(!is.null(repospec[[i]][[3]])) {
+  repospec_df[i,3] = repospec[[i]][[3]]}
+  if(!is.null(repospec[[i]][[4]])) {
+  repospec_df[i,4] = repospec[[i]][[4]]}
+  if(!is.null(repospec[[i]][[5]])) {
+  repospec_df[i,5] = repospec[[i]][[5]]}
+}
+
+repospec_df = repospec_df %>%
+  as.data.frame()
+
+
+
+names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recdatemodified")
+
+```
+
+The following table counts the number of datasets from Florida held by each relevant repository. Most of them are held by the Florida Museum of Natural History. Many are held by the University of Florida too - this is something that I'm unclear about: is there a meaningful difference from the Museum's perspective about a dataset being linked to the Museum specifically, versus the University more generally?
+
+<br>
+
+```{r mapping-collections, echo=FALSE,include=TRUE,message = FALSE}
+
+
+sites = sum_all %>%  
+  as.data.frame() %>%
+  dplyr::select(siteid) %>%
+  distinct()
+
+site_sets = content(GET(paste0("https://api.neotomadb.org/v2.0/data/sites/",paste(sites[[1]],collapse=",")
+,"/datasets_elc")))$data
+
+len = rep(0,length(site_sets))
+for(i in seq(1,length(site_sets))) {
+  len[i] = length(site_sets[[i]]$dataset)
+}
+
+datasets = matrix(nrow=sum(len+1),ncol=6)
+
+for (i in seq(1,length(site_sets))) {
+  for (j in seq(1,len[i])) {
+    idx = sum(len[1:i])+j-len[i]
+    if(!is.null(site_sets[[i]]$dataset[[j]]$datasetid)) {
+    datasets[idx,1] = site_sets[[i]]$dataset[[j]]$datasetid}
+    if(!is.null(site_sets[[i]]$dataset[[j]]$datasettype)) {
+    datasets[idx,2] = site_sets[[i]]$dataset[[j]]$datasettype}
+    if(!is.null(site_sets[[i]]$dataset[[j]]$datasetnotes)) {
+    datasets[idx,3] = site_sets[[i]]$dataset[[j]]$datasetnotes}
+    if(!is.null(site_sets[[i]]$dataset[[j]]$database)) {
+    datasets[idx,4] = site_sets[[i]]$dataset[[j]]$database}
+    if(!is.null(site_sets[[i]]$dataset[[j]]$doi)) {
+    datasets[idx,5] = site_sets[[i]]$dataset[[j]]$doi}
+    if(!is.null(site_sets[[i]]$site$siteid)) {
+    datasets[idx,6] =site_sets[[i]]$site$siteid}
+  }
+}
+
+datasets = as.data.frame(datasets[1:sum(len),])
+names(datasets) = c("datasetid","datasettype","notes","database","doi","siteid")
+
+bases = datasets %>% group_by(database) %>% count() %>% arrange(desc(n)) %>%
+  mutate(database = case_when(
+    is.na(database) ~ "Missing",
+    TRUE ~ database
+  ))
+
+
+```
+
+```{r linking-sets-repos, echo=FALSE,include=TRUE,message = FALSE}
+
+data_id = datasets %>% 
+  dplyr::select(datasetid) %>%
+  distinct()
+
+repospec_FL = repospec_df %>%
+  filter(datasetid %in% data_id$datasetid)
+
+repo_join = inner_join(repospec_FL, datasets, by="datasetid") %>%
+  distinct() %>%
+  inner_join(repo_df, by = "repositoryid") %>%
+  distinct() %>%
+  inner_join(stof_sites, by ="siteid") %>%
+  distinct()
+  
+```
+
+``` {r count-repos, echo=FALSE,include=TRUE,message = FALSE}
+
+reps = repo_join %>% dplyr::select(datasetid,repository) %>%
+  distinct() %>%
+  group_by(repository) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  mutate(repository = case_when(
+    is.na(repository) ~ "Missing",
+    TRUE ~ repository
+  ))
+
+datatable(reps,rownames = FALSE)
+```
+
+
+Below, I map the Florida sites from which datasets linked to repositories derive, and I color code them by dataset type.
+
+```{r map repos, echo=FALSE,include=TRUE,message = FALSE}
+
+repo_map = repo_join %>% 
+  dplyr::filter(!is.na(lat)) %>%
+  dplyr::select(datasettype,database,repository,sitename,lat,long) %>%
+  distinct() %>%
+  st_as_sf(coords=c("long","lat"),crs="+proj=latlong +datum=WGS84")
+
+##filter for 4 biggest repositories
+
+
+bigrepo = repo_join %>% dplyr::select(datasetid,repository) %>%
+  distinct() %>%
+  group_by(repository) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(n=4)
+
+repo_simp = repo_map %>%
+  dplyr::filter(repository %in% bigrepo$repository)
+
+repo_phil = repo_simp %>%
+  dplyr::filter(repository=="Academy of Natural Sciences, Philadelphia")
+
+repo_others = repo_map %>%
+  dplyr::filter(repository %in% c("Florida State Museum","American Museum of Natural History","National Museum of Natural History","University of South Florida","Yale Peabody Museum"))
+
+repo_flmnh = repo_simp %>%
+  dplyr::filter(repository=="Florida Museum of Natural History")
+
+
+repo_uf = repo_simp %>%
+  dplyr::filter(repository=="University of Florida")
+
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(repo_flmnh) +
+    tm_dots("datasettype",size=0.1,palette="Set1") +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.text.size=0.8,
+              main.title= 'Florida Museum of Natural History Holdings', 
+              main.title.position = "center",
+      
+              title.bg.color = "white", panel.label.height=1)
+
+```
+
+All the specimens at the Florida Museum of Natural History are vertebrate fauna.
+
+```{r uf,echo=FALSE,include=TRUE,message = FALSE}
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(repo_uf) +
+    tm_dots("datasettype",size=0.1,palette="Set1") +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.text.size=0.8,
+              main.title= 'University of Florida Holdings', 
+              main.title.position = "center",
+      
+              title.bg.color = "white", panel.label.height=1)
+
+```
+
+And the University of Florida, like its constituent museum, holds just vertebrate fauna. 
+
+
+```{r philly, echo=FALSE,include=TRUE,message = FALSE}
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(repo_phil) +
+    tm_dots("datasettype",size=0.1,palette="Set1",alpha=0.6) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.text.size=0.8,
+              main.title= 'Academy of Natural Sciences, Philadelphia Holdings', 
+              main.title.position = "center",
+        
+              title.bg.color = "white", panel.label.height=1)
+
+
+```
+
+The Academy of Natural Sciences in Philadelphia actually holds diatom specimens deriving from Florida. I was surprised to learn this. Apparently they belong to Drexel University's <a href="https://ansp.org/research/systematics-evolution/diatom-herbarium/">Diatom Herbarium</a>.
+
+The smaller repositories all hold vertebrate fauna. The map below shows the sites from which these vertebrate datasets derive.
+
+```{r others,echo=FALSE,include=TRUE,message = FALSE}
+
+tm_shape(bg)+
+    tm_rgb() +
+    tm_shape(repo_others) +
+    tm_dots("repository",size=0.1,palette="Set1") +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.text.size=0.8,
+              main.title= 'Other Repositories', 
+              main.title.position = "center",
+      
+              title.bg.color = "white", panel.label.height=1)
+
+```
+
+### No Specimens here
+
+When I do a Tilia call (Neotoma's API for developers) to find the specimen IDs associated with these datasets, none show up. There are no specimens listed for these datasets, even though the datasets are connected to repositories in the repository specimens table. Although Neotoma knows that the datasets concern specimens held by these repositories, it just doesn't know anything in particular about these specimens. Data contributors are not required to input that information when they upload data to Neotoma.
+
+To double check that there are really no specimens connected to these datasets, I do the same Tilia call on the entire repository specimens table (rather than just the subset of dataset ids associated with Florida sites). Of the 6404 rows in repository specimens (representing 6255 distinct datasets because some datasets are linked to multiple repositories), only 112 distinct datasets (130 rows because multiple repositories) actually have specimens associated with them - roughly 2% of these datasets. Of the 895 specimens connected to these 112 datasets, they are from 25 sites, none of which are in Florida. Even though none of these specimens are from sites in Florida, nine of them are held by the Florida Museum of Natural History. These nine specimen are deer teeth from Guatemala.
+
+The map below shows the 25 sites hosting datasets linked to repositories that are actually associated with those 895 specimens.
+
+```{r datasets-from-sites, echo=FALSE,include=TRUE,message = FALSE}
+
+distinct_sets = datasets %>% distinct(datasetid)
+
+
+list_sets =paste0(distinct_sets[[1]],collapse=",")
+
+
+sitelist = content(GET("https://api.neotomadb.org/v2.0/data/datasets/4575,4593,4594,4595,4635,5365,5562,6060,6290,6636,6790,6896,6985,7063,7112,7131,7202,7536,7561,7686,11999,13091,19832,19860,19862,20569,24656,24693,25520,25904,26226,27337,32390,32654,32682,32684,32688,32690,32696,32712,32732,33381,33807,36732,36794,38910,38915,39066,39070,39167,39171,39174,39175,39176,39183,39189,39195,39200,39203,39211,39213,39223,39225,39227,39229,39231,39233,39235,39236,39237,39239,39241,39243,39245,39247,39248,39250,39254,39255,39257,39259,39260,39262,39264,39266,39267,39270,39272,39274,39321,39323,39325,39334,39336,39338,39340,39989,39992,39994,39996,40023,40025,40053,40805,41142,41249,41267,47115,48618,48619,49214,49232/sites"))$data
+
+
+
+fullspec_sites = as.data.frame(matrix(nrow=25,ncol=6))
+for (i in seq(1,25)) {
+  for (j in seq(1,6)) {
+      if (!is.null(sitelist[[i]][[j]])) {
+      fullspec_sites[i,j] = sitelist[[i]][[j]]
+    }
+  }}
+names(fullspec_sites) = names(sitelist[[1]])
+
+fullspec_sites_n = as.data.frame(get_sites(fullspec_sites$siteid)) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+
+bg_less = osm.raster(fullspec_sites_n)
+
+
+tm_shape(bg_less)+
+    tm_rgb() +
+    tm_shape(fullspec_sites_n) +
+    tm_dots(size=0.15,alpha=1) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'Dataset Sites from Repository Specimens\nassociated with specimens', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+fullspecs = read.csv("fullspecs.csv")
+
+
+fl_specs = fullspecs %>% filter(repository=="Florida Museum of Natural History")
+
+deer_where = get_sites(datasetid=40805) %>% 
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+lats = c(22.7,22.7,11.4,11.4,17.355) %>%
+  as.data.frame()
+longs = c(-93.6,-84.55, -93.6,-84.55,-90.32) %>%
+  as.data.frame()
+
+names(lats) = c("lat")
+names(longs) = c("long")
+
+gu_bb = cbind(lats,longs) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+datatable(fl_specs[c(3,5,6,13,18)],rownames = FALSE)
+
+
+bg_small = osm.raster(gu_bb)
+
+
+tm_shape(bg_small)+
+    tm_rgb() +
+    tm_shape(deer_where) +
+    tm_dots(size=0.1) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.5,
+              main.title= 'La Joyanca', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+```
+
+### Strategy 2: Start from the 'Specimens' table
+
+My second strategy is to grab the entire specimens table (3351 observations) and get the sample id, collection unit id, analysis unit id, and site id associated with each specimen. Then I filter that table for sites from Florida. I find that there are no specimens from sites in Florida, of the 435 sites listed here. This is consistent with what I found above. 
+
+The following table ranks repositories by the number of datasets they steward, for only those datasets that are actually linked to specimens in Neotoma. Only 3 of the datasets actually associated with specimens are held at Florida Museum of Natural History. These three datasets have 13 specimens associated with them.
+
+```{r specimens, echo=FALSE,include=TRUE,message = FALSE}
+
+spec_df.csv = read.csv("spec_df.csv")
+```
+
+
+```{r spec-samples, echo=FALSE,include=TRUE,message = FALSE}
+
+specsamples = read.csv("specsamples.csv")
+
+
+datspecs = read.csv("datspecs.csv")
+```
+
+```{r specimens-from-florida, echo=FALSE,include=TRUE,message = FALSE}
+
+
+fl_specs = specsamples %>%
+  filter(siteid %in% as.numeric(stof_sites$siteid))
+
+specsamples = specsamples %>%
+  mutate(siteid=as.character(siteid))
+
+specsites = get_sites(as.numeric(specsamples$siteid),all_data=TRUE)
+
+specsites_df = as.data.frame(specsites) %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84")
+
+bg_big = osm.raster(specsites_df)
+
+setsites = read.csv("setsites.csv") %>%
+  mutate(datasetid=as.character(datasetid))
+
+test = left_join(setsites,repospec_df) %>%
+  filter(!is.na(repositoryid)) 
+
+test = test %>% dplyr::select(siteid,collectionunitid,datasetid,datasettype,repositoryid) %>%
+  distinct() %>%
+  mutate(siteid = as.character(siteid))
+
+specimen_dataset_join = inner_join(test,specsamples, by=join_by(siteid,collectionunitid))
+
+repo_count = test %>% group_by(repositoryid) %>%
+  count() %>% arrange(desc(n)) %>%
+  left_join(repo_df) %>%
+  dplyr::select(repository,n)
+
+datatable(repo_count[2:3],rownames = FALSE)
+
+flmnh_specs = specimen_dataset_join %>% filter(repositoryid==53) %>%
+  mutate(datasetid = as.numeric(datasetid))
+
+flmnh_spec_info = inner_join(flmnh_specs, fullspecs, by = join_by(datasetid,specimenid))
+```
+
+And this table shows just those specimens asssociated with datasets which are themselves associated with the Florida Museum of Natural History. Although the mammoth and mixotoxodon specimens are not held by the Florida Museum, they are associated with datasets which are themselves associated with specimens held by the Florida Museum.
+
+``` {r specimens-from-florida-again, echo=FALSE,include=TRUE,message = FALSE}
+datatable(flmnh_spec_info[c(3,7,12,13,20,25)],rownames = FALSE)
+
+```
+Even though these datasets are associated with specimens and associated with the Florida Museum of Natural History, for the two datasets that are not Joyanca deer teeth, these specimens are actually held in three other repositories: the Texas Memorial Museum, Lander University, and the South Carolina State Museum. This is because these datasets are linked to multiple repositories in the repository specimens table, and there is only information about the specimens held at the places that are not the Florida Museum of Natural History for those two other datasets. 
+
+This last map just shows all the 435 sites that are associated with specimens in the Neotoma database. The sites hosting the three datasets traced in some way to the Florida Museum are highlighted. 
+
+``` {r map-specs-2, echo=FALSE,include=TRUE,message = FALSE}
+
+flmnh_site1 = get_sites(datasetid=39325) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "mixotoxodon")
+
+
+flmnh_site2 = get_sites(datasetid=40805) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "deer")
+
+
+flmnh_site3 = get_sites(datasetid=13091) %>%
+  as.data.frame() %>%
+  st_as_sf(coords=c("long","lat"), crs="+proj=longlat +datum=WGS84") %>%
+  mutate(dataset = "mammoth")
+
+flmnh_sites = rbind(flmnh_site1,flmnh_site2) %>%
+  rbind(flmnh_site3)
+
+tm_shape(bg_big)+
+    tm_rgb() +
+    tm_shape(specsites_df) +
+    tm_dots(size=0.05,alpha=0.4) +
+     tm_shape(flmnh_sites) +
+    tm_dots("dataset",size=0.1,palette="Set1") +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              legend.width=0.4,
+              legend.text.size=0.9,
+              main.title= 'Sites from which Neotoma specimens come', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1)
+
+
+```
+
+One takeaway here is that there are both specimens unconnected to repositories (2,456 out of 3,351), and datasets with connections to repositories that are unconnected to specimens (6,143 out of 6,255 distinct datasets in repository specimens). 
