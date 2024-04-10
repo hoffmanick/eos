@@ -1,0 +1,661 @@
+---
+title: "Neotoma Resources with Seminole Cultural Affiliation"
+date: "April 2024"
+output:
+  html_document:
+    df_print: paged
+    highlight: pygment
+    keep_md: yes
+    number_sections: no
+    theme: journal
+editor_options:
+    chunk_output_type: inline
+---
+
+<style type="text/css">
+p {
+  font-size:18px;
+}
+
+ul {
+  font-size:18px;
+}
+
+li {
+  font-size:18px;
+}
+table {
+   padding: 0;border-collapse: collapse;
+   layout: fixed;
+   width: 90%; }
+table tr {
+   border-top: 1px solid #cccccc;
+   background-color: white;
+   margin: 0;
+   padding: 0; }
+table tr:nth-child(2n) {
+   background-color: #f8f8f8; }
+table tr th {
+   font-weight: bold;
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr td {
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr th :first-child, table tr td :first-child {
+   margin-top: 0; }
+table tr th :last-child, table tr td :last-child {
+   margin-bottom: 0; }
+.html-widget {
+    margin: auto;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set( echo=FALSE, message=FALSE,include=TRUE, warning=FALSE)
+
+library(geojsonsf)
+library(neotoma2)
+library(tmap)
+library(osmdata)
+library(rosm)
+library(httr)
+library(jsonlite)
+library(DT)
+library(sf)
+library(dplyr)
+sf_use_s2(FALSE)
+
+states = read_sf("cb_2022_us_state_20m.shp")
+
+states = st_transform(states,st_crs(4326))
+
+
+protected_reg= read_sf("protected_reg.shp")
+
+focal_nation = "Seminole"
+
+#poly1_name = "Choctaw Oklahoma"
+#poly2_name = "Chahta Choctaw"
+#poly3_name = "Isle de Jean Charles Biloxi Chitimacha Choctaw"
+
+#nl_list = list(poly1_name, poly2_name, poly3_name)
+
+places_list=as.data.frame(matrix(nrow=0,ncol=0))
+
+
+
+repos = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryinstitutions&limit=2500&offset=0"))$data
+
+repo_df = matrix(ncol=6,nrow=length(repos))
+
+for (i in seq(1,length(repos))) {
+  if(!is.null(repos[[i]][[1]])) {
+  repo_df[i,1] = repos[[i]][[1]]}
+  if(!is.null(repos[[i]][[2]])) {
+  repo_df[i,2] = repos[[i]][[2]]}
+  if(!is.null(repos[[i]][[3]])) {
+  repo_df[i,3] = repos[[i]][[3]]}
+  if(!is.null(repos[[i]][[4]])) {
+  repo_df[i,4] = repos[[i]][[4]]}
+  if(!is.null(repos[[i]][[5]])) {
+  repo_df[i,5] = repos[[i]][[5]]}
+  if(!is.null(repos[[i]][[6]])) {
+  repo_df[i,6] = repos[[i]][[6]]}
+}
+
+repo_df = repo_df %>%
+  as.data.frame()
+
+
+
+names(repo_df) = c("repositoryid","acronym","repository","notes","recdatecreated","recdatemodified")
+
+
+repospec = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryspecimens&limit=9055&offset=0"))$data
+
+repospec_df = matrix(ncol=5,nrow=length(repospec))
+
+for (i in seq(1,length(repospec))) {
+  if(!is.null(repospec[[i]][[1]])) {
+  repospec_df[i,1] = repospec[[i]][[1]]}
+  if(!is.null(repospec[[i]][[2]])) {
+  repospec_df[i,2] = repospec[[i]][[2]]}
+  if(!is.null(repospec[[i]][[3]])) {
+  repospec_df[i,3] = repospec[[i]][[3]]}
+  if(!is.null(repospec[[i]][[4]])) {
+  repospec_df[i,4] = repospec[[i]][[4]]}
+  if(!is.null(repospec[[i]][[5]])) {
+  repospec_df[i,5] = repospec[[i]][[5]]}
+}
+
+repospec_df = repospec_df %>%
+  as.data.frame()
+
+
+
+names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recdatemodified")
+
+relStates = c()
+
+for (i in seq(length(nl_list))) {
+  whichplace = nl_list[[i]]
+  reformat = gsub(" ", "-", whichplace) %>% tolower()
+  place_sf = geojson_sf(paste0('https://native-land.ca/wp-json/nativeland/v1/api/index.php?maps=territories&name=',reformat))
+  places_list = rbind(places_list,place_sf)
+  assign(paste0("sfpoly_",i),place_sf)
+  
+  place_name = place_sf$Name
+  assign(paste0("name_",i),place_name)
+  hull = st_convex_hull(place_sf)
+  geojson_hull = hull %>% dplyr::select(!c(Name,ID,Slug,description,color)) %>% sf_geojson()
+  returns = content(GET(paste0('https://api.neotomadb.org/v2.0/data/sites?loc=',geojson_hull,'&limit=20000')))$data
+  if(length(returns) > 0) {
+  return_mat = matrix(nrow=20000,ncol=11)
+  idx_sets=0
+  for (every in seq(length(returns))) {
+    for (j in seq(length(returns[[every]]$collectionunits))) {
+      for (k in seq(length(returns[[every]]$collectionunits[[j]]$datasets)))
+        idx_sets = idx_sets + 1
+        for (q in seq(5)) {
+          if(!is.null(returns[[every]][[q]])) {
+            return_mat[idx_sets,q] = returns[[every]][[q]]}}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$handle)) {
+            return_mat[idx_sets,6] = returns[[every]]$collectionunits[[j]]$handle}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$collectionunit)) {
+            return_mat[idx_sets,7] = returns[[every]]$collectionunits[[j]]$collectionunit}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$collectionunitid)) {
+            return_mat[idx_sets,8] = returns[[every]]$collectionunits[[j]]$collectionunitid}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$collectionunittype)) {
+            return_mat[idx_sets,9] = returns[[every]]$collectionunits[[j]]$collectionunittype}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$datasets[[k]]$datasetid)) {
+            return_mat[idx_sets,10] = returns[[every]]$collectionunits[[j]]$datasets[[k]]$datasetid}
+          if(!is.null(returns[[every]]$collectionunits[[j]]$datasets[[k]]$datasettype)) {
+            return_mat[idx_sets,11] = returns[[every]]$collectionunits[[j]]$datasets[[k]]$datasettype}}}
+  
+  return_df = as.data.frame(return_mat)
+  names(return_df) = c("siteid","sitename","sitedescription","geography","altitude","handle","collectionunit","collectionunitid","collectionunittype","datasetid","datasettype")
+  return_df = return_df %>% dplyr::filter(!is.na(geography))
+  
+  
+  return_geom = return_df %>% dplyr::select(geography) 
+  return_geom = st_as_sfc(return_geom$geography, GeoJSON = TRUE, crs = 4326)
+
+  return_sf = st_sf(data=return_df,geometry=return_geom)
+
+  
+  assign(paste0("sf_",i),return_sf)
+  
+  assign(paste0("df_",i),return_df)
+  return_filt = return_sf %>% st_filter(place_sf)
+  return_filt = return_filt %>% mutate(data.datasettype = case_when(data.datasettype == "diatom surface sample" ~ "diatom", data.datasettype == "ostracode surface sample" ~ "ostracode", data.datasettype =="pollen surface sample" ~ "pollen",data.datasettype == "diatom bottom sample" ~ "diatom", TRUE ~ data.datasettype)) %>% dplyr::filter(data.datasettype != "geochronologic")
+  
+  return_filt$types <- factor(return_filt$data.datasettype, levels = c("vertebrate fauna","pollen","water chemistry","diatom","loss-on-ignition","ostracode","macroinvertebrate","specimen stable isotope"))
+
+
+  return_filt = return_filt %>% mutate(geometry = case_when(st_geometry_type(geometry) =="POLYGON" ~ st_centroid(geometry),TRUE ~ geometry))
+
+  assign(paste0("filt_",i),return_filt)
+
+  
+  sets = return_filt %>%   as.data.frame() %>% dplyr::select(data.datasetid) %>% distinct()
+
+  rel_repos = repospec_df %>% dplyr::filter(datasetid %in% sets$data.datasetid) %>% left_join(repo_df,by="repositoryid") %>% left_join(return_filt,by=c("datasetid" = "data.datasetid")) %>% group_by(repository,data.datasettype) %>% count() %>% arrange(desc(n))
+
+
+ rel_repos2 = repospec_df %>% dplyr::filter(datasetid %in% sets$data.datasetid) %>% left_join(repo_df,by="repositoryid") %>% left_join(return_filt,by=c("datasetid" ='data.datasetid'))
+rel_repos2 = st_sf(data=rel_repos2,geometry=rel_repos2$geometry)
+  
+  assign(paste0("repos_table_",i),rel_repos)
+  
+  assign(paste0("repos_sf_",i),rel_repos2)
+  
+  relState = st_filter(states,place_sf)
+  relState = relState$NAME
+  
+  assign(paste0("rel_",i),relState)
+  relStates = append(relStates,relState)
+
+  }
+  }
+
+
+
+
+area = states %>% dplyr::filter(NAME %in% relStates)
+
+
+
+
+
+nl_namelist = paste0(name_2, " and ", name_3)
+
+
+
+
+
+
+```
+
+
+## Introduction
+
+This page will briefly survey paleoecological records from sites with Choctaw cultural affiliation held by the Neotoma Paleoecology Database. This page was created by Nick Hoffman, as a project for the <a href="https://eos-rcn.github.io/web/" target="_blank">Ethical Open Science Research Coordination Network</a> (EOS RCN).The leader of the EOS RCN is Jessica Blois, Professor at UC-Merced. If you would like to explore these records or other Neotoma data further, we are happy to help with that, so please reach out to either of us at nicholashoffman@ucmerced.edu or jblois@ucmerced.edu. 
+
+### About <a href="https://neotomadb.org" target="_blank">Neotoma</a>
+
+<a href="https://neotomadb.org" target="_blank">Neotoma</a> was formed in 2006 as a federated database constituted by a set of more specialized paleoecological databases. This means that Neotoma brings together paleoecological data from a range of proxy types (e.g., pollen, charcoal, testate amoebae), regions (e.g., North America, Latin America, Europe), and time periods (e.g., Pliocene, Pleistocene, Holocene). Neotoma incorporates data collected over more than 150 years.
+
+
+## Neotoma and Native Lands
+
+Neotoma contains records from upwards of 22,000 sites. Many of these sites are affiliated with native lands. A subset of these sites comes from federally recognized reservations in the United States.
+
+
+```{r rez}
+
+rezes = read_sf("tl_2019_us_aiannh.shp")
+
+
+all_pts = read_sf("allNeoPoints.shp")
+
+rezes = st_transform(rezes,st_crs(all_pts$geometry))
+
+
+tm_shape(osm.raster(rezes)) + tm_rgb() +
+  tm_shape(rezes) +
+  tm_fill(col="red") + tm_borders(col="red") +
+  tm_shape(all_pts) +
+  tm_dots(alpha=0.1) +
+  tm_add_legend(type = "fill", 
+                  col = c("red"),
+                  labels = c("Federal Reservation"),
+                  title = "Legend",
+                  border.col="red") +
+  tm_add_legend(type = "symbol", 
+                  col = c("black"),
+                  labels = c("Neotoma Site"),
+                  title = "") +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              main.title= 'All Sites and Reservation Lands',
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1) 
+
+all_pts = read_sf("allNeoPoints.shp")
+
+tribalsites = st_filter(all_pts,rezes)
+
+
+count = tribalsites %>% distinct(siteid)
+
+
+unique_tribalsites = all_pts %>% dplyr::filter(siteid %in% count$siteid) %>% distinct(siteid,.keep_all = TRUE)
+
+unique_rez_info = st_join(unique_tribalsites,rezes) %>% group_by(NAME) %>% count() %>% arrange(desc(n)) %>% st_drop_geometry()
+
+tm_shape(osm.raster(rezes)) + tm_rgb() +
+  tm_shape(rezes) + tm_fill(col="red") + tm_borders(col="red") +
+  tm_shape(tribalsites) + tm_dots(alpha=0.1, col="black") +
+  tm_add_legend(type = "fill", 
+                  col = c("red"),
+                  labels = c("Federal Reservation"),
+                  title = "Legend",
+                  border.col="red") +
+  tm_add_legend(type = "symbol", 
+                  col = c("black"),
+                  labels = c("Neotoma Site"),
+                  title = "") +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              main.title= 'Only Sites on Reservation Lands',
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1) 
+
+
+totalSites = unique_rez_info$n %>% sum()
+
+numberRez = length(unique_rez_info$n)
+
+
+```
+
+The following table counts the number of sites (n) from Neotoma that fall within the borders of federally recognized reservations. Overall, there are `r totalSites` sites on `r numberRez` reservations. The `r focal_nation` reservation has several Neotoma sites. 
+
+
+```{r info}
+
+
+datatable(unique_rez_info, rownames=FALSE)
+
+
+chick_rez = states %>% dplyr::filter(NAME == "Florida")
+
+
+
+chrez_hull = st_convex_hull(chick_rez)
+
+geojson_chrez = chrez_hull %>% dplyr::select(geometry) %>% sf_geojson()
+
+
+chrez_ret = content(GET(paste0('https://api.neotomadb.org/v2.0/data/sites?loc=',geojson_chrez,'&limit=20000')))$data
+
+
+
+chrez_mat = matrix(nrow=236,ncol=11)
+idx_sets=0
+for (i in seq(length(chrez_ret))) {
+  for (j in seq(length(chrez_ret[[i]]$collectionunits))) {
+    for (k in seq(length(chrez_ret[[i]]$collectionunits[[j]]$datasets)))
+      idx_sets = idx_sets + 1
+      for (q in seq(5)) {
+        if(!is.null(chrez_ret[[i]][[q]])) {
+          chrez_mat[idx_sets,q] = chrez_ret[[i]][[q]]}}
+        if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$handle)) {
+          chrez_mat[idx_sets,6] = chrez_ret[[i]]$collectionunits[[j]]$handle
+        }
+        if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$collectionunit)) {
+          chrez_mat[idx_sets,7] = chrez_ret[[i]]$collectionunits[[j]]$collectionunit
+          }
+        if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$collectionunitid)) {
+          chrez_mat[idx_sets,8] = chrez_ret[[i]]$collectionunits[[j]]$collectionunitid
+          }
+        if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$collectionunittype)) {
+          chrez_mat[idx_sets,9] = chrez_ret[[i]]$collectionunits[[j]]$collectionunittype
+        }
+     if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$datasets[[k]]$datasetid)) {
+          chrez_mat[idx_sets,10] = chrez_ret[[i]]$collectionunits[[j]]$datasets[[k]]$datasetid
+        }
+     if(!is.null(chrez_ret[[i]]$collectionunits[[j]]$datasets[[k]]$datasettype)) {
+          chrez_mat[idx_sets,11] = chrez_ret[[i]]$collectionunits[[j]]$datasets[[k]]$datasettype
+        }
+  }
+}
+
+
+chrez_df = as.data.frame(chrez_mat)
+
+names(chrez_df) = c("siteid","sitename","sitedescription","geography","altitude","handle","collectionunit","collectionunitid","collectionunittype","datasetid","datasettype")
+
+
+chrez_df = chrez_df %>% dplyr::filter(!is.na(datasettype))
+
+numRezsites = chrez_df %>% distinct(siteid,.keep_all = TRUE) %>% dplyr::select(siteid,sitename,sitedescription) %>% count()
+numRezsites = numRezsites$n
+
+month_index = as.numeric(format(Sys.Date(), "%m"))
+
+
+months = c("January","February","March","April","May","June","July","August","September","October","November","December")
+
+
+current_month = months[month_index]
+
+
+year = as.numeric(format(Sys.Date(), "%Y"))
+
+
+monthyear = paste0(current_month," ", year)
+
+```
+
+## Neotoma Resources on the `r focal_nation` Reservation
+
+The following map shows the location of Neotoma sites on the `r focal_nation` Reservation. There are (as of `r monthyear`) `r numRezsites` distinct sites, but some of them may be close together, so `r numRezsites` dots are not necessarily distinguishable on the map.
+
+
+```{r chick-rez}
+
+chrez_geom = chrez_df %>% dplyr::select(geography)
+chrez_geom = st_as_sfc(chrez_geom$geography, GeoJSON = TRUE, crs = 4326)
+
+chrez_sf = st_sf(data=chrez_df,geometry=chrez_geom)
+
+chrez_filt = chrez_sf %>% st_filter(chick_rez)
+chrez_filt = chrez_filt %>% mutate(data.datasettype = case_when(data.datasettype == "diatom surface sample" ~ "diatom", data.datasettype == "pollen surface sample" ~ "pollen", TRUE ~ data.datasettype)) %>% dplyr::filter(data.datasettype != "geochronologic")
+  
+chrez_filt$types <- factor(chrez_filt$data.datasettype, levels = c("vertebrate fauna","loss-on-ignition","pollen","water chemistry","diatom"))
+
+
+chrez_filt = chrez_filt %>% mutate(geometry = case_when(st_geometry_type(geometry) =="POLYGON" ~ st_centroid(geometry),TRUE ~ geometry))
+
+ 
+  chrez_counts = chrez_filt %>% st_drop_geometry() %>% group_by(data.datasettype) %>% count() %>% arrange(desc(n)) %>% dplyr::filter(data.datasettype !="geochronologic")
+
+
+rezStates = st_filter(states,chick_rez)
+rezStates = rezStates$NAME
+
+rezprotected2 = st_filter(protected_reg,chick_rez)
+
+tm_shape(osm.raster(chick_rez)) + tm_rgb() + 
+    tm_shape(rezprotected2) + tm_fill(col="Mang_Name") +
+  tm_shape(chick_rez) + tm_borders(col="red",lwd=3,alpha=0.5) +
+
+  tm_shape(chrez_filt) + tm_dots(col="black",size=0.2) +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              main.title= paste0('Neotoma sites on the ',focal_nation,' Reservation'), 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+              main.title.size=1.2,
+               panel.label.size = 2.1)
+
+```
+
+And the following table lists some information about those sites. 
+
+```{r table-sites}
+
+chrez_df %>% distinct(siteid,.keep_all = TRUE) %>% dplyr::select(siteid,sitename,sitedescription) %>% datatable(rownames=FALSE)
+
+
+chrez_filt = chrez_filt %>% mutate(data.datasettype = case_when(data.datasettype == "diatom surface sample" ~ "diatom", TRUE ~ data.datasettype)) %>% dplyr::filter(data.datasettype != "geochronologic")
+
+
+dlist_beginning = paste0(chrez_counts$data.datasettype[1:(length(chrez_counts$data.datasettype)-1)], collapse=", ")
+dlist = paste0(dlist_beginning," and ", chrez_counts$data.datasettype[length(chrez_counts$data.datasettype)])
+  
+```
+
+We can further inspect the sites by the kinds of data they contain. Neotoma sites from the `r focal_nation` Reservation concern `r dlist`.
+
+
+```{r dataset-chick-rez}
+
+
+  tm_shape(osm.raster(chick_rez)) + tm_rgb() +
+    tm_shape(rezprotected2) + tm_fill(col="Mang_Name") +
+  tm_shape(chick_rez) + tm_borders(col="red",lwd=3,alpha=0.5) +
+  tm_shape(chrez_filt) + tm_dots(col="black",size=0.5) + tm_facets(by="types",free.coords=FALSE) +
+  tm_layout(#legend.position=c("LEFT","BOTTOM"),
+              #legend.bg.color="white",
+              #legend.bg.alpha=0.9,
+              #legend.width=0.5,
+              #legend.text.size=5,
+              main.title= 'Sites by Dataset Type', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 1.5)
+ 
+  datatable(chrez_counts,rownames=FALSE)
+
+```
+
+```{r rez-repospec}
+
+
+
+sets3 = chrez_filt %>%  
+  as.data.frame() %>%
+  dplyr::select(data.datasetid) %>%
+  distinct()
+
+
+
+rez_repos = repospec_df %>% dplyr::filter(datasetid %in% sets3$data.datasetid) %>% left_join(repo_df,by="repositoryid") %>% left_join(chrez_filt,by=c("datasetid" = "data.datasetid")) %>% group_by(repository,types) %>% count() %>% arrange(desc(n))
+
+
+
+replist_beginning = paste0(rez_repos$repository[1:(length(rez_repos$repository)-1)], collapse=", ")
+replist = paste0(replist_beginning," and ", rez_repos$repository[length(rez_repos$repository)])
+
+```
+
+Physical specimens are not typically preserved for all types of datasets, and Neotoma doesn't have perfect information about the disposition of the physical specimens even when they do exist. What we do know is that for Neotoma data collected from the `r focal_nation` Reservation, the `r replist` hold physical specimens.
+
+
+```{r breaker}
+
+
+
+datatable(rez_repos,rownames=FALSE)
+
+
+rez_repos2 = repospec_df %>% dplyr::filter(datasetid %in% sets3$data.datasetid) %>% left_join(repo_df,by="repositoryid") %>% left_join(chrez_filt,by=c("datasetid" ='data.datasetid'))
+rez_repos2 = st_sf(data=rez_repos2,geometry=rez_repos2$geometry)
+
+  tm_shape(osm.raster(chick_rez)) + tm_rgb() +
+  tm_shape(rezprotected2) + tm_polygons(col="Mang_Name") +  
+  tm_shape(chick_rez) + tm_borders(col="red",lwd=3, alpha=0.5) +
+  tm_shape(chrez_filt) + tm_dots(col="black",size=0.5) +
+  tm_shape(rez_repos2) + tm_dots(size=0.5,col="data.repository",palette=c("blue","green")) +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              #legend.bg.alpha=0.9,
+              #legend.width=0.5,
+              #legend.text.size=5,
+              main.title= 'Datasets by Holding Repository', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1)
+```
+
+
+```{r cars}
+
+
+
+
+```
+
+
+## Other Neotoma resources with `r focal_nation` Cultural Affiliation
+
+In addition to the Neotoma resources on the `r focal_nation` Reservation, we've used the <a href="https://native-land.ca/resources/api-docs" target="_blank">Native Land API</a> to filter for Neotoma sites on other lands with `r focal_nation` cultural affiliation. As of `r monthyear`, there were no Neotoma resources on the Isle de Jean Charles but the other location with `r focal_nation` cultural affiliation does have Neotoma resources on it. 
+
+
+```{r pressure, ep3=FALSE}
+
+tm_shape(osm.raster(area)) + tm_rgb() + 
+  tm_shape(protected_reg) + tm_fill(col="Mang_Name") +
+  tm_shape(sfpoly_1) + tm_borders(col="red",lwd=3,alpha=0.5) + tm_text("Name",size=1,col="black") +
+  tm_shape(sfpoly_2) + tm_borders(col="lightblue",lwd=5,alpha=0.5) + tm_text("Name",size=1,col="black") +
+  tm_shape(sfpoly_3) +tm_borders(col="violet",lwd=5,alpha=0.5) + tm_text("Name",size=1,col="black") +
+  tm_shape(all_pts) + tm_dots(col="orange") +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              main.title= paste0('Context for Neotoma Sites and ', focal_nation, ' lands'), 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1)
+ 
+```
+
+
+
+```{r repos}
+
+other_sites = df_2 %>% distinct(siteid,.keep_all = TRUE) %>% dplyr::select(siteid,sitename,sitedescription)
+
+other_sites = length(other_sites$siteid)
+```
+
+
+On these other lands with `r focal_nation` cultural affiliation (named `r nl_namelist` on the native-land.ca website), there are `r other_sites` distinct sites with data on a range of proxy types. The repositories associated with the physical specimens for these datasets are more various compared to those on the `r focal_nation` Reservation.
+
+
+```{r chick-filt}
+
+thisOne = 2
+
+pro = st_filter(protected_reg, get(paste0('filt_',thisOne)))
+tm_shape(osm.raster(get(paste0('sfpoly_',thisOne)))) + tm_rgb() +
+    tm_shape(pro) + tm_fill(col="Mang_Name") +
+    tm_shape(get(paste0('sfpoly_',thisOne))) + tm_borders(col="lightblue",lwd=3, alpha=0.5) +
+    tm_shape(get(paste0('filt_',thisOne))) + tm_dots(col="orange",size=0.2) +
+    tm_layout(legend.position=c("LEFT","BOTTOM"),
+        legend.bg.color="white",
+        legend.bg.alpha=0.9,
+        main.title= paste0("Neotoma Sites on ", get(paste0('name_',thisOne))),
+        main.title.position = "center",
+        main.title.size = (19/nchar(get(paste0('name_',thisOne)))+0.15),
+        title.bg.color = "white", panel.label.height=1,
+        panel.label.size = 2.1)
+
+  tm_shape(osm.raster(get(paste0('sfpoly_',thisOne)))) + tm_rgb() +
+    tm_shape(pro) + tm_fill(col="Mang_Name") +
+    tm_shape(get(paste0('sfpoly_',thisOne))) + tm_borders(col="lightblue",lwd=5, alpha=0.5) +
+  tm_shape(get(paste0('filt_',thisOne))) + tm_dots(col="orange",size=0.2) + tm_facets(by="types",free.coords=FALSE) +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=0.9,
+              main.title= 'Sites by Dataset Type', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 1.2)
+ 
+  counts = get(paste0('filt_',thisOne)) %>% st_drop_geometry() %>% group_by(data.datasettype) %>% count() %>% arrange(desc(n)) %>% dplyr::filter(data.datasettype !="geochronologic")
+  datatable(counts,rownames=FALSE)
+  
+  
+  
+datatable(get(paste0('repos_table_',thisOne)),rownames=FALSE)
+
+  tm_shape(osm.raster(area)) + tm_rgb() +
+  tm_shape(pro) + tm_fill(col="Mang_Name") +
+  tm_shape(get(paste0('sfpoly_',thisOne))) + tm_borders(col="lightblue",lwd=3, alpha=0.3) +
+  tm_shape(get(paste0('filt_',thisOne))) + tm_dots(col="orange",size=0.3) +
+  tm_shape(get(paste0('repos_sf_',thisOne))) + tm_dots(size=0.2,col="data.repository") +
+  tm_layout(legend.position=c("LEFT","BOTTOM"),
+              legend.bg.color="white",
+              legend.bg.alpha=1,
+              legend.width=0.55,
+              main.title= 'Datasets by Holding Repository', 
+              main.title.position = "center",
+              title.bg.color = "white", panel.label.height=1,
+               panel.label.size = 2.1)
+
+```
+
+
+```{r agin}
+
+
+#url = parse_url("https://services.arcgis.com/v01gqwM5QqNysAAi/arcgis/rest/services/Fee_Manager/FeatureServer/0/query")
+
+#url$query = list(where="State_Nm = 'TX' AND Shape__Area >= 211000",
+             #   returnGeometry = "true",
+          #      f = "geojson")
+#request=build_url(url)
+#tx_5 = geojson_sf(request)
+
+#tx_1, tx_2, tx_3, tx_4, tx_5
+
+##protected lands sf
+## contains PAD-US data from OK, AL, LA, MS, KS, AR, KY, TN, MO, and TX
+
+
+
+#tm_shape(osm.raster(area)) + tm_rgb() +
+#  tm_shape(protected_reg_southmid) + tm_fill(col="Mang_Name")
+
+```
