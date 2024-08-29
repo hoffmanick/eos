@@ -1,13 +1,16 @@
 ---
-title: "Neotoma's Human Records"
+title: "Data Audit: Neotoma's Human Records"
 author: "Nick Hoffman"
-date: "Updated: 3/12/2024"
+date: "August 2024"
 output:
   html_document:
     df_print: paged
     highlight: pygment
     keep_md: yes
-    number_sections: no
+    toc: true
+    number_sections: true
+    toc_depth: 2
+    toc_float: true
     theme: journal
 editor_options:
     chunk_output_type: inline
@@ -56,7 +59,14 @@ table tr th :last-child, table tr td :last-child {
 
 ---
 
-This document shows what records of Homo sapiens I was able to find in Neotoma. My method was first to download the whole taxa table and find the taxon id for any relevant sounding taxa. The first table below shows the taxa I found.
+# Introduction
+
+The intention of this data audit is to find any records from the Neotoma Paleoecology Database which potentially violate Neotoma's statement of values, especially with respect to Neotoma's goal of aligning with principles of Indigenous data sovereignty. 
+
+# Are any sites in Neotoma located on federal Indigenous lands?
+
+### Method
+We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
 
 
 ```{r setup, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
@@ -72,7 +82,135 @@ library(osmdata)
 library(rosm)
 library(geojsonsf)
 library(stringr)
+sf_use_s2(FALSE)
+```
 
+
+```{r cars,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+## https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about
+setwd("C:/Users/Nick/Documents")
+rezes = read_sf("tl_2019_us_aiannh.shp") %>% dplyr::select(NAME)
+
+canada_rezes = geojson_sf('https://proxyinternet.nrcan.gc.ca/arcgis/rest/services/CLSS-SATC/CLSS_Administrative_Boundaries/MapServer/0/query?outFields=*&where=1%3D1&f=geojson')
+canada_rezes = canada_rezes %>% dplyr::rename('NAME' = 'adminAreaNameEng') %>% dplyr::select(NAME)
+canada_rezes = st_transform(canada_rezes,crs="NAD83")
+
+aust_ipa = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
+aust_ipa = aust_ipa %>% dplyr::select(NAME)
+aust_ipa = st_transform(aust_ipa,crs="NAD83")
+
+rezes = rezes %>% rbind(canada_rezes) %>% rbind(aust_ipa)
+
+#aust_rezes = read_sf("Aboriginal_Communities_Town_Reserves_DPLH_002.shp")
+all_sites = as.data.frame(matrix(ncol=2,nrow=0))
+map_sites = as.data.frame(matrix(ncol=4,nrow=0))
+
+fuzzed_sites = as.data.frame(matrix(ncol=4,nrow=0))
+names(all_sites) = c("NAME","n")
+names(map_sites) = c("siteid","NAME","lon","lat")
+map_sites = st_as_sf(map_sites,coords=c("lon","lat"),crs="NAD83")
+names(fuzzed_sites) = c("lon","lat","siteid","sitename")
+for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)) {
+  db = content(GET(paste0("https://api.neotomadb.org/v2.0/apps/constdb/datasets?dbid=",i)))$data
+  if (length(db) >0) {
+    #print(paste("DB ID:",i))
+    db_mat = matrix(nrow=length(db),ncol=4)
+    for (m in seq(length(db))) {
+      if(!is.null(db[[m]]$coords[[1]])) {
+        db_mat[[m,1]] = db[[m]]$coords[[1]]
+        db_mat[[m,2]] = db[[m]]$coords[[2]]
+        db_mat[[m,3]] = db[[m]]$siteid
+        db_mat[[m,4]] = db[[m]]$sitename
+      }
+    }
+    db_df = as.data.frame(db_mat)
+    names(db_df) = c("lon","lat","siteid","sitename")
+    db_df = db_df %>% drop_na() %>% mutate(lon=as.numeric(lon),lat=as.numeric(lat))
+    fuzzed = db_df %>% dplyr::filter((lon %% 0.25 == 0) & (lat %% 0.25 ==0))
+    if (length(fuzzed[[1]]) != 0 ) {
+      fuzzed_sites = rbind(fuzzed_sites,fuzzed)
+    }
+    db_df = distinct(db_df) %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
+   
+    sites_by_rez = st_join(db_df,rezes) %>% group_by(NAME) %>% count() %>% arrange(desc(n)) %>% drop_na()
+    sites_by_rez_map = st_join(db_df,rezes) %>% drop_na(NAME)
+  #  datatable(st_drop_geometry(sites_by_rez), rownames = FALSE)
+    if(length(sites_by_rez[[1]])!=0) {
+        all_sites = rbind(all_sites,sites_by_rez)
+        map_sites = rbind(map_sites, sites_by_rez_map)
+        assign(paste0('sites_by_rez_',i),st_drop_geometry(sites_by_rez))
+    }
+    }
+}
+
+all_sites = all_sites %>% group_by(NAME) %>% summarize(n=sum(n)) %>% arrange(desc(n)) %>% st_drop_geometry()
+map_sites = map_sites %>% distinct()
+
+fuzzed_sites = fuzzed_sites %>% distinct() %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
+datatable(all_sites,rownames=FALSE)
+
+tm_shape(osm.raster(map_sites)) + tm_rgb() +
+  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+  tm_shape(map_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+  tm_add_legend(type = "fill", 
+                  col = c("blue"),
+                  labels = c("Federal Indigenous land"),
+                  title = "Legend",
+                  border.col="blue") +
+  tm_add_legend(type = "symbol", 
+                  col = c("red"),
+                  labels = c("Neotoma Site"),
+                  title = "",
+                  border.col="red")
+
+map_sites_neo = get_sites(c(as.numeric(map_sites$siteid)),all_data=TRUE)
+plotLeaflet(map_sites_neo)
+
+
+num_fuzzed= length(fuzzed_sites[[1]])
+
+```
+
+### Next Steps
+Our next steps are...
+
+# Are the coordinates for any sites in Neotoma fuzzed?
+
+### Methods
+We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisibl by 0.25. We found `r num_fuzzed` such fuzzed sites. The table below documents their siteids and names, and the map below documents their locations.
+
+```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+
+fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
+
+datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
+tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
+  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+  tm_shape(fuzzed_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+  tm_add_legend(type = "fill", 
+                  col = c("blue"),
+                  labels = c("Federal Indigenous land"),
+                  title = "Legend",
+                  border.col="blue") +
+  tm_add_legend(type = "symbol", 
+                  col = c("red"),
+                  labels = c("Fuzzed Neotoma Site"),
+                  title = "",
+                  border.col="red")
+
+plotLeaflet(fuzzed_sites_neo)
+
+```
+
+### Next steps
+our next steps...
+
+# Are any samples in Neotoma from humans?
+
+### Method
+We downloaded Neotoma's taxa table and selected any taxon IDs which might describe people.(Taxon ID 6359 is Primates, and 6171 is Mammalia.)
+
+```{r get-taxa,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 ## get taxa
 taxalist = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=taxa&limit=75000&offset=0"))$data
 
@@ -106,13 +244,11 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 ```
 
-(FYI, taxonid 6359 is Primates, and 6171 is Mammalia)
 
-Then I searched for all occurrences of any of those taxa. 
+Then we used a Neotoma API to search for any occurrences of those taxon IDs.
 
-The two maps below (one static, one dynamic) shows the sites they come from, and the table below that shows the sample information on those 28 human samples I found at 22 distinct sites.
-
-```{r occurrences, echo=FALSE,include=TRUE,message = FALSE}
+The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma.
+```{r occurrences, echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
 homo_df = matrix(nrow=length(homolist),ncol=15)
 
@@ -163,20 +299,20 @@ tm_shape(homo_bg)+
               legend.bg.alpha=0.9,
               legend.width=0.4,
               legend.text.size=0.5,
-              main.title= 'Sites with Homo Samples in Neotoma', 
+              main.title= 'Sites with samples deriving from humans', 
               main.title.position = "center",
               title.bg.color = "white", panel.label.height=1)
 ```
-<h3 style="text-align:center;">Human Ancestor Sites</h3>
+
 ``` {r another, echo=FALSE,include=TRUE,message = FALSE}
+#<h3 style="text-align:center;">Human Ancestor Sites</h3>
 plotLeaflet(homo_sites_neo) 
 
 datatable(homo_df[c(1,3,4,5,7,8,9,10,11,15)],rownames=FALSE)
 ```
 
 
-
-Below I count the occurrences by database and taxonname.
+Below I count the occurrences by database and taxon.
 
 ```{r polygons, echo=FALSE,include=TRUE,message = FALSE}
 counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(desc(n))
@@ -184,10 +320,9 @@ counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(des
 datatable(counttabl,rownames = FALSE)
 ```
 
-Below I list all geopolitical units associated with any of the 22 distinct sites.
-
 
 ```{r countries, echo=FALSE,include=TRUE,message = FALSE}
+#Below I list all geopolitical units associated with any of the 22 distinct sites.
 
 sitestring = paste0(homo_df$siteid,collapse=",")
 
@@ -218,7 +353,7 @@ gps_df = as.data.frame(gps_mat)
 
 names(gps_df) = c("siteid","rank","gp_id","gp_name","gp_unit","higher_gp_id")
 
-datatable(gps_df,rownames=FALSE)
+#datatable(gps_df,rownames=FALSE)
 
 gps_sum = gps_df %>% dplyr::filter(rank==1) %>% group_by(gp_name) %>% count() %>% arrange(desc(n))
 ```
@@ -228,4 +363,178 @@ Lastly, I count the countries the distinct sites are in.
 ```{r highest, echo=FALSE,include=TRUE,message = FALSE}
 
 datatable(gps_sum,rownames=FALSE)
+
+
 ```
+
+
+### Next steps
+
+Next steps are....
+
+# Are any of Neotoma's radiocarbon dates derived from humans?
+
+### Methods
+
+We searched through two fields (<i>notes</i> and <i>materialdated</i>) from Neotoma's geochronology table for any occurrences of words from the dictionary below. 
+
+```{r geochron,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+#geochrons prep
+geochrons = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=geochronology&count=false&limit=99999&offset=0"))$data
+
+geochron_mat = matrix(nrow=length(geochrons),ncol=14)
+
+for (i in seq(length(geochrons))) {
+  for(j in seq(14) ) {
+    if (!is.null(geochrons[[i]][[j]])) {
+  geochron_mat[i,j] = geochrons[[i]][[j]]
+    }}}
+
+
+geochron_df = as.data.frame(geochron_mat)
+
+
+names(geochron_df) = c("geochronid","sampleid","geochrontypeid","agetypeid","age","errorolder","erroryounger","infinite","delta13c","labnumber","materialdated","notes","recdatecreated","recdatemodified")
+
+#collunits prep
+collunits = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/collectionunits?count=false&limit=99999"))$data
+
+
+collunits_mat = matrix(nrow=length(collunits),ncol=20)
+
+for (i in seq(length(collunits))) {
+  for(j in seq(20) ) {
+    if (!is.null(collunits[[i]][[j]])) {
+  collunits_mat[i,j] = collunits[[i]][[j]]
+    }}}
+
+
+collunits_df = as.data.frame(collunits_mat)
+
+
+names(collunits_df) = c("collectionunitid","handle","siteid","colltypeid","depenvtid","collunitname","colldate","colldevice","gpslatitude","gpslongitude","gpsaltitude","gpserror","waterdepth","substrateid","slopeaspect","slopeangle","location","notes","recdatecreated","recdatemodified")
+
+
+#
+materialtypes = geochron_df %>% dplyr::group_by(materialdated) %>% count()
+
+
+dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People")
+
+## geochrons materialDated
+
+matches_geochron_materialDated <- grep(paste(dictionary,collapse="|"), 
+                        geochron_df[[11]])
+
+geochron_results= geochron_df[matches_geochron_materialDated,]
+
+
+## geochrons notes
+matches_geochron_notes <- grep(paste(dictionary,collapse="|"), 
+                        geochron_df[[12]])
+
+
+geochron_results= rbind(geochron_results, geochron_df[matches_geochron_notes,]) %>% distinct()
+
+
+## collunits  location
+
+matches_collunits_location <- grep(paste(dictionary,collapse="|"), 
+                        collunits_df$location)
+
+
+collunits_results= collunits_df[matches_collunits_location,]
+
+
+## collunits notes
+
+matches_collunits_notes <- grep(paste(dictionary,collapse="|"), 
+                        collunits_df$notes)
+
+collunits_results = rbind(collunits_results,collunits_df[matches_collunits_notes,]) %>% distinct()
+
+
+dictionary = as.data.frame(dictionary)
+dictionary <- dictionary[order(dictionary$dictionary),]
+
+datatable(as.data.frame(dictionary),rownames=FALSE)
+
+
+```
+
+
+Any rows from the geochronology table which contained one of the above words is listed in the table below. Notice that not all of these radiocarbon dates is <i>necessarily</i> problematic, only potentially. Further scrutiny may be needed. (We also checked against CARD's list of radiocarbon dates deriving from human ancestors that are duplicated in Neotoma, and there was agreement between the two lists: all 60 of CARD's records that are also in Neotoma are in the below table.)
+
+```{r geochron-results,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+datatable(geochron_results[c(1,2,5,6,7,10,11,12,14)],rownames=FALSE)
+
+
+
+```
+
+### Next steps
+Actually scrutinizes these records.
+
+
+# Are any of the collection units for Neotoma's records from culturally sensitive areas?
+
+### Methods
+We used the same dictionary from the last query to search through two fields in Neotoma's collection units table (<i>location</i> and <i>notes</i>). Any collection units that returned one of the above words is reproduced below.
+
+ collunits-location, and collunits-notes.
+ 
+```{r collunits,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+
+datatable(collunits_results[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
+
+
+
+depenvtypes = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/depenvttypes?count=false&limit=1000&offset=0"))$data
+
+depenv_mat = matrix(nrow=length(depenvtypes),ncol=length(depenvtypes[[1]]))
+for (i in seq(length(depenvtypes))) {
+  for (j in seq(length(depenvtypes[[1]]))) {
+    if(!is.null(depenvtypes[[i]][[j]])) {
+      depenv_mat[[i,j]] = depenvtypes[[i]][[j]]
+    }
+  }
+}
+
+depenv_df = as.data.frame(depenv_mat)
+names(depenv_df) = c("depenvtid","depenvt","depenvthigherid","recdatecreated","recdatemodified")
+
+archaeological_envs = depenv_df %>% dplyr::filter(depenvthigherid==1)
+
+
+archaeo_collunits = collunits_df %>% dplyr::filter(depenvtid %in% archaeological_envs$depenvtid)
+
+
+number_archaeo_collunits = length(archaeo_collunits[,1])
+```
+
+We also took another approach, wherein we selected any depostional environment IDs that corresponded to archaeological sites (see table below), and filtered for all collection units that corresponded to any of those depositional environment IDs. This returned `r number_archaeo_collunits` results.
+
+```{r depenvtyps, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+datatable(archaeological_envs,rownames=FALSE)
+
+datatable(archaeo_collunits[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
+
+```
+### Next steps
+Need to actually scrutinize these records. 
+
+
+
+
+```{r card-check,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+#I downloaded all of the lab numbers for radiocarbon samples that are affiliated with human ancestors according to CARD (2528), and I searched for any matches with lab numbers from Neotoma's geochron table (60). I display the relevant geochronIDs below. Then I grabbed the geochronIDs for any of the samples I found through the word search above (85), and checked to see if the geochronIDs from CARD were also gotten from my wordsearch above. They all were.
+
+
+```
+
+
