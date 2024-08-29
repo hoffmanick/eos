@@ -17,6 +17,9 @@ editor_options:
 ---
 
 <style type="text/css">
+h2, h3, h4, h5, h6 {
+  counter-reset: section;
+}
 p {
   font-size:18px;
 }
@@ -65,7 +68,7 @@ The intention of this data audit is to find any records from the Neotoma Paleoec
 
 # Are any sites in Neotoma located on federal Indigenous lands?
 
-### Method
+## Method
 We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
 
 
@@ -171,13 +174,13 @@ num_fuzzed= length(fuzzed_sites[[1]])
 
 ```
 
-### Next Steps
+## Next Steps
 Our next steps are...
 
 # Are the coordinates for any sites in Neotoma fuzzed?
 
-### Methods
-We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisibl by 0.25. We found `r num_fuzzed` such fuzzed sites. The table below documents their siteids and names, and the map below documents their locations.
+## Methods
+We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25. We found `r num_fuzzed` such fuzzed sites. The table below documents their siteids and names, and the map below documents their locations.
 
 ```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
@@ -202,12 +205,12 @@ plotLeaflet(fuzzed_sites_neo)
 
 ```
 
-### Next steps
+## Next steps
 our next steps...
 
 # Are any samples in Neotoma from humans?
 
-### Method
+## Method
 We downloaded Neotoma's taxa table and selected any taxon IDs which might describe people.(Taxon ID 6359 is Primates, and 6171 is Mammalia.)
 
 ```{r get-taxa,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
@@ -368,13 +371,13 @@ datatable(gps_sum,rownames=FALSE)
 ```
 
 
-### Next steps
+## Next steps
 
 Next steps are....
 
 # Are any of Neotoma's radiocarbon dates derived from humans?
 
-### Methods
+## Methods
 
 We searched through two fields (<i>notes</i> and <i>materialdated</i>) from Neotoma's geochronology table for any occurrences of words from the dictionary below. 
 
@@ -474,17 +477,15 @@ datatable(geochron_results[c(1,2,5,6,7,10,11,12,14)],rownames=FALSE)
 
 ```
 
-### Next steps
+## Next steps
 Actually scrutinizes these records.
 
 
 # Are any of the collection units for Neotoma's records from culturally sensitive areas?
 
-### Methods
+## Methods
 We used the same dictionary from the last query to search through two fields in Neotoma's collection units table (<i>location</i> and <i>notes</i>). Any collection units that returned one of the above words is reproduced below.
 
- collunits-location, and collunits-notes.
- 
 ```{r collunits,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
 
@@ -524,7 +525,7 @@ datatable(archaeological_envs,rownames=FALSE)
 datatable(archaeo_collunits[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
 
 ```
-### Next steps
+## Next steps
 Need to actually scrutinize these records. 
 
 
