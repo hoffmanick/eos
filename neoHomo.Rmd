@@ -6,10 +6,10 @@ output:
   html_document:
     df_print: paged
     highlight: pygment
-    keep_md: yes
+    keep_md: no
     toc: true
     number_sections: true
-    toc_depth: 2
+    toc_depth: 1
     toc_float: true
     theme: journal
 editor_options:
@@ -62,6 +62,14 @@ table tr th :last-child, table tr td :last-child {
 
 ---
 
+```{r, results='asis', echo = F}
+toc_depth <- rmarkdown::metadata$output$html_document$toc_depth
+sel <- paste0("h",(toc_depth+1):10, collapse = " > span, ")
+cat(paste0("<style>",
+           sel, 
+           " > .header-section-number { display: none; } </style>"))
+```
+
 # Introduction
 
 The intention of this data audit is to find any records from the Neotoma Paleoecology Database which potentially violate Neotoma's statement of values, especially with respect to Neotoma's goal of aligning with principles of Indigenous data sovereignty. 
@@ -85,6 +93,7 @@ library(osmdata)
 library(rosm)
 library(geojsonsf)
 library(stringr)
+library(leaflet)
 sf_use_s2(FALSE)
 ```
 
@@ -133,6 +142,15 @@ for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31
     if (length(fuzzed[[1]]) != 0 ) {
       fuzzed_sites = rbind(fuzzed_sites,fuzzed)
     }
+    fuzzed2 = db_df %>% drop_na(lon) %>% drop_na(lat) %>% dplyr::mutate(lon_decimals = nchar(str_extract(lon, "\\.(\\d+)")) - 1) %>%
+      dplyr::mutate(lat_decimals = nchar(str_extract(lat, "\\.(\\d+)")) - 1) %>%
+      dplyr::mutate(lat_decimals = case_when(is.na(lat_decimals) ~ 0, TRUE ~ lat_decimals)) %>%
+      dplyr::mutate(lon_decimals = case_when(is.na(lon_decimals) ~ 0, TRUE ~ lon_decimals)) %>%
+      dplyr::filter(lon_decimals <= 1 | lat_decimals <= 1) %>%
+      dplyr::select(lon,lat,siteid,sitename)
+        if (length(fuzzed[[2]]) != 0 ) {
+      fuzzed_sites = rbind(fuzzed_sites,fuzzed2) %>% distinct()
+    }
     db_df = distinct(db_df) %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
    
     sites_by_rez = st_join(db_df,rezes) %>% group_by(NAME) %>% count() %>% arrange(desc(n)) %>% drop_na()
@@ -167,7 +185,20 @@ tm_shape(osm.raster(map_sites)) + tm_rgb() +
                   border.col="red")
 
 map_sites_neo = get_sites(c(as.numeric(map_sites$siteid)),all_data=TRUE)
-plotLeaflet(map_sites_neo)
+
+reps = ceiling(length(rezes[[1]])/11)
+colors = rep(c("red","blue","limegreen","purple","yellow","black","orange","skyblue","pink","brown","darkgreen"),reps)
+
+colors = colors[1:length(rezes[[1]])]
+library(rmapshaper)
+test = ms_simplify(rezes)
+
+plotLeaflet(map_sites_neo) %>% 
+  addTiles() %>% 
+  addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
 
 
 num_fuzzed= length(fuzzed_sites[[1]])
@@ -180,7 +211,7 @@ Our next steps are...
 # Are the coordinates for any sites in Neotoma fuzzed?
 
 ## Methods
-We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25. We found `r num_fuzzed` such fuzzed sites. The table below documents their siteids and names, and the map below documents their locations.
+We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or any sites where latitude or the longitude has a precision of 0 or 1 decimal places. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place. We found `r num_fuzzed` such fuzzed sites. The table below documents their siteids and names, and the map below documents their locations.
 
 ```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
@@ -201,7 +232,12 @@ tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
                   title = "",
                   border.col="red")
 
-plotLeaflet(fuzzed_sites_neo)
+plotLeaflet(fuzzed_sites_neo) %>%
+   addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
+
 
 ```
 
@@ -250,7 +286,7 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 Then we used a Neotoma API to search for any occurrences of those taxon IDs.
 
-The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma.
+The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma. Rows colored red are risk category 1 because they come from the United States. Rows colored orange are risk category 2 because they come from elsewhere.
 ```{r occurrences, echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
 homo_df = matrix(nrow=length(homolist),ncol=15)
@@ -309,23 +345,16 @@ tm_shape(homo_bg)+
 
 ``` {r another, echo=FALSE,include=TRUE,message = FALSE}
 #<h3 style="text-align:center;">Human Ancestor Sites</h3>
-plotLeaflet(homo_sites_neo) 
-
-datatable(homo_df[c(1,3,4,5,7,8,9,10,11,15)],rownames=FALSE)
-```
-
-
-Below I count the occurrences by database and taxon.
-
-```{r polygons, echo=FALSE,include=TRUE,message = FALSE}
-counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(desc(n))
-
-datatable(counttabl,rownames = FALSE)
-```
+plotLeaflet(homo_sites_neo) %>%
+   addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
 
 
-```{r countries, echo=FALSE,include=TRUE,message = FALSE}
-#Below I list all geopolitical units associated with any of the 22 distinct sites.
+homo_table = homo_df[c(1,3,4,5,7,8,9,10,11,15)]
+
+
 
 sitestring = paste0(homo_df$siteid,collapse=",")
 
@@ -358,14 +387,46 @@ names(gps_df) = c("siteid","rank","gp_id","gp_name","gp_unit","higher_gp_id")
 
 #datatable(gps_df,rownames=FALSE)
 
-gps_sum = gps_df %>% dplyr::filter(rank==1) %>% group_by(gp_name) %>% count() %>% arrange(desc(n))
+gps_sum1 = gps_df %>% dplyr::filter(rank==1) 
+
+homo_table = left_join(homo_table,gps_sum1,by="siteid") %>% dplyr::rename("country" = "gp_name") %>% dplyr::mutate(country = as.factor(country)) %>% mutate(risk = case_when(country == "United States" ~ 1, TRUE ~ 2))
+
+datatable(homo_table[c(1:10,13,16)],rownames=FALSE) %>% formatStyle(target="row",
+  'country',
+  backgroundColor = styleEqual(c("United States"), c('red'),default="orange")
+)
+
+
+#,fontWeight = 'bold'
 ```
 
-Lastly, I count the countries the distinct sites are in.
+
+```{r polygons, echo=FALSE,include=TRUE,message = FALSE}
+
+
+#Below I count the occurrences by database and taxon.
+
+#counttabl = homo_df %>% group_by(database,taxonname) %>% count() %>% arrange(desc(n))
+
+#gps_sum2 = gps_df %>% dplyr::filter(rank==1) %>% group_by(gp_name) %>% count() %>% arrange(desc(n))
+
+#datatable(counttabl,rownames = FALSE)
+
+```
+
+
+```{r countries, echo=FALSE,include=TRUE,message = FALSE}
+#Below I list all geopolitical units associated with any of the 22 distinct sites.
+
+```
+
 
 ```{r highest, echo=FALSE,include=TRUE,message = FALSE}
 
-datatable(gps_sum,rownames=FALSE)
+
+#Lastly, I count the countries the distinct sites are in.
+
+#datatable(gps_sum2,rownames=FALSE)
 
 
 ```
@@ -423,7 +484,7 @@ names(collunits_df) = c("collectionunitid","handle","siteid","colltypeid","depen
 materialtypes = geochron_df %>% dplyr::group_by(materialdated) %>% count()
 
 
-dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People")
+dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People","cairn","Cairn")
 
 ## geochrons materialDated
 
@@ -469,9 +530,21 @@ datatable(as.data.frame(dictionary),rownames=FALSE)
 
 Any rows from the geochronology table which contained one of the above words is listed in the table below. Notice that not all of these radiocarbon dates is <i>necessarily</i> problematic, only potentially. Further scrutiny may be needed. (We also checked against CARD's list of radiocarbon dates deriving from human ancestors that are duplicated in Neotoma, and there was agreement between the two lists: all 60 of CARD's records that are also in Neotoma are in the below table.)
 
+We assigned risk categories as follows: any references to human bone were assigned risk level 1. Any references to human feces were assigned risk level 2. All other items were given risk level 3. It should be noted that references to bone collagen without taxon are ambiguous and may require reference back to original papers to determine taxonomic source. In particular, the bone collagen from a burial cairn may require further scrutiny.
+
 ```{r geochron-results,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
-datatable(geochron_results[c(1,2,5,6,7,10,11,12,14)],rownames=FALSE)
+geochron_results = geochron_results %>% dplyr::mutate(risk = 
+                                                        case_when(
+                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE)) ~ 1,
+                                         (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2,
+                                         TRUE ~ 3))
+
+datatable(geochron_results[c(1,2,5,6,7,10,11,12,15)],rownames=FALSE) %>% formatStyle(target="row",
+  'risk',
+  backgroundColor = styleEqual(c(1,2,3), c('red','orange','green'),default="white")
+)
+
 
 
 
@@ -526,16 +599,4 @@ datatable(archaeo_collunits[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
 
 ```
 ## Next steps
-Need to actually scrutinize these records. 
-
-
-
-
-```{r card-check,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
-
-#I downloaded all of the lab numbers for radiocarbon samples that are affiliated with human ancestors according to CARD (2528), and I searched for any matches with lab numbers from Neotoma's geochron table (60). I display the relevant geochronIDs below. Then I grabbed the geochronIDs for any of the samples I found through the word search above (85), and checked to see if the geochronIDs from CARD were also gotten from my wordsearch above. They all were.
-
-
-```
-
-
+Need to actually scrutinize these records.
