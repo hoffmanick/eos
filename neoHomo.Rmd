@@ -572,10 +572,67 @@ Any rows from the geochronology table which contained one of the above words is 
 
 We assigned sensitivity categories as follows: any references to human bone were assigned sensitivity level 1. Any references to human feces were assigned sensitivity level 2. References to human graves or burials also merited a 2. All other items were given sensitivity level 3. All publications linked to records in which the material dated was taxon-ambiguous bone collagen were consulted. We found that geochron ID 21255 definitely derives from a human, and geochron IDs 29333, 29334, and 29335 likely derive from humans. These records were therefore categorized as sensitivity level 1.
 
+Below the color-coded table, we count records by their sensitivity and the constituent database of which they are a part.
+
 ```{r geochron-results,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
+samples = list()
+for (i in seq(20)) {
+  val=i*30000 - 30000
+  samples = append(samples,content(GET(paste0('https://api.neotomadb.org/v2.0/data/dbtables/samples?count=false&limit=30000&offset=',val)))$data)
+}
 
-#samples1 = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/samples?count=false&limit=99999&offset=0'))$data
+
+
+sample_mat = matrix(nrow=length(samples),ncol=2)
+
+for (i in seq(length(samples))) {
+    if (!is.null(samples[[i]]$sampleid)) {
+  sample_mat[i,1] = samples[[i]]$sampleid
+    }
+      if (!is.null(samples[[i]]$datasetid)) {
+  sample_mat[i,2] = samples[[i]]$datasetid
+    }}
+
+
+sample_df = as.data.frame(sample_mat)
+
+
+names(sample_df) = c("sampleid","datasetid")
+
+
+sample_filtered = sample_df %>% dplyr::filter(sampleid %in% geochron_results$sampleid) 
+
+sample_topaste = sample_filtered %>% dplyr::select(datasetid) %>% distinct()
+
+ds_info1 = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(sample_topaste[1:25,],collapse=","))))$data
+
+
+ds_info2 = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(sample_topaste[26:length(sample_topaste[,1]),],collapse=","))))$data
+
+ds_info = append(ds_info1,ds_info2)
+
+
+ds_mat = matrix(nrow=length(ds_info),ncol=3)
+
+
+for (i in seq(length(ds_info))) {
+    if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasetid)) {
+  ds_mat[i,1] = ds_info[[i]]$site$datasets[[1]]$datasetid
+    }
+      if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasettype)) {
+  ds_mat[i,2] = ds_info[[i]]$site$datasets[[1]]$datasettype
+      }
+      if (!is.null(ds_info[[i]]$site$datasets[[1]]$database)) {
+  ds_mat[i,3] = ds_info[[i]]$site$datasets[[1]]$database
+    }
+}
+ds_df = as.data.frame(ds_mat)
+
+
+names(ds_df) = c("datasetid","datasettype","database")
+ds_df = ds_df %>% dplyr::mutate(datasetid = as.numeric(datasetid))
+join_df = sample_filtered %>% dplyr::left_join(ds_df)
 
 
 
@@ -663,13 +720,15 @@ datatable(geochron_results[c(1,2,5,6,7,10,11,12,15)],rownames=FALSE) %>% formatS
   backgroundColor = styleEqual(c(1,2,3), c('rgba(255, 0, 0, 0.5)','rgba(255, 165, 0, 0.5)','rgba(0, 255, 0, 0.5)'),default="white")
 )
 
+join_df = join_df %>% dplyr::mutate(sampleid = as.character(sampleid))
+geochron_counter = geochron_results %>% left_join(join_df) %>% group_by(database,sensitivity) %>% count() %>% drop_na() %>% arrange(desc(n))
 
-
+datatable(geochron_counter,rownames=FALSE)
 
 ```
 
 ## Next steps
-Actually scrutinizes these records - publications associated with taxon-ambiguous bone collagen samples. Link these records to constituent databases. Then reach out to stewards of relevant constituent databases.
+Reach out to stewards of relevant constituent databases.
 
 
 # Are any of the collection units for Neotoma's records from culturally sensitive areas?
