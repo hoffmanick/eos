@@ -776,10 +776,74 @@ names(depenv_df) = c("depenvtid","depenvt","depenvthigherid","recdatecreated","r
 
 #number_archaeo_collunits = length(archaeo_collunits[,1])
 ```
-
+Lastly, we counted the number of records by their constituent database and by their sensitivity. Notice that the count here is greater than the total number of collectionunits because constituent databases are linked to datasets, not collection units, and multiple datasets can derive from a single collection unit. (We did exclude the Neotoma datasettype "geochronologic".)
 
 ```{r depenvtyps, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
+
+
+sites = content(GET(paste0("https://api.neotomadb.org/v1.5/data/sites/",paste0(collunits_results$siteid,collapse=","))))$data
+
+
+
+
+
+site_mat = matrix(nrow=length(sites),ncol=length(sites[[1]]))
+for (i in seq(length(sites))) {
+  for (j in seq(length(sites[[1]]))) {
+    if(!is.null(sites[[i]][[j]])) {
+      site_mat[[i,j]] = sites[[i]][[j]]
+    }
+  }
+}
+
+site_df = as.data.frame(site_mat)
+names(site_df) = c("siteid","sitename","sitedescription","geography","altitude","collectionunitid","collectionunit","handle","unittype","datasetid","datasettype")
+
+site_df = site_df %>% dplyr::filter(collectionunitid %in% collunits_results$collectionunitid) 
+datasets = site_df %>% dplyr::filter(datasettype != 'geochronologic') %>% dplyr::select(datasetid) %>% distinct()
+
+ds_list = list()
+for (i in seq(14)) {
+  val = 25*i
+  val0 = val - 24
+  ds_list = append(ds_list,content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(datasets[val0:val,],collapse=","))))$data)
+}
+
+summer=0
+for (i in seq(length(ds_list))) {
+  summer = summer + length(ds_list[[i]]$site$datasets)
+}
+
+ds_mat2 = matrix(nrow=summer,ncol=3)
+
+
+idx= 0
+for (i in seq(length(ds_list))) {
+  for (j in seq(length(ds_list[[i]]$site$datasets))) {
+    idx = idx + 1
+    if (!is.null(ds_list[[i]]$site$datasets[[j]]$datasetid)) {
+  ds_mat2[idx,1] = ds_list[[i]]$site$datasets[[j]]$datasetid
+    }
+      if (!is.null(ds_list[[i]]$site$datasets[[j]]$datasettype)) {
+  ds_mat2[idx,2] = ds_list[[i]]$site$datasets[[j]]$datasettype
+      }
+      if (!is.null(ds_list[[i]]$site$datasets[[j]]$database)) {
+  ds_mat2[idx,3] = ds_list[[i]]$site$datasets[[j]]$database
+      }
+    }
+}
+ds_df2 = as.data.frame(ds_mat2)
+
+
+names(ds_df2) = c("datasetid","datasettype","database")
+
+joiner = left_join(site_df,ds_df2) %>% dplyr::select(collectionunitid,datasetid,datasettype,database)
+
+coll_joined = collunits_results %>% dplyr::left_join(joiner) %>% dplyr::filter(datasettype != "geochronologic") %>% group_by(database,sensitivity) %>% count() %>% arrange(desc(n)) %>% drop_na(database)
+
+
+datatable(coll_joined,rownames=FALSE)
 #We also took another approach, wherein we selected any depostional environment IDs that corresponded to archaeological sites (see table below), and filtered for all collection units that corresponded to any of those depositional environment IDs. This returned `r number_archaeo_collunits` results.
 
 #datatable(archaeological_envs,rownames=FALSE)
