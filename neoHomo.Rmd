@@ -570,18 +570,93 @@ datatable(as.data.frame(dictionary),rownames=FALSE)
 
 Any rows from the geochronology table which contained one of the above words is listed in the table below. Notice that not all of these radiocarbon dates is <i>necessarily</i> problematic, only potentially. Further scrutiny may be needed. (We also checked against CARD's list of radiocarbon dates deriving from human ancestors that are duplicated in Neotoma, and there was agreement between the two lists: all 60 of CARD's records that are also in Neotoma are in the below table.)
 
-We assigned sensitivity categories as follows: any references to human bone were assigned sensitivity level 1. Any references to human feces were assigned sensitivity level 2. All other items were given sensitivity level 3. It should be noted that references to bone collagen without taxon are ambiguous and may require reference back to original papers to determine taxonomic source. In particular, the bone collagen from a burial cairn may require further scrutiny.
+We assigned sensitivity categories as follows: any references to human bone were assigned sensitivity level 1. Any references to human feces were assigned sensitivity level 2. References to human graves or burials also merited a 2. All other items were given sensitivity level 3. All publications linked to records in which the material dated was taxon-ambiguous bone collagen were consulted. We found that geochron ID 21255 definitely derives from a human, and geochron IDs 29333, 29334, and 29335 likely derive from humans. These records were therefore categorized as sensitivity level 1.
 
 ```{r geochron-results,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
 
 #samples1 = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/samples?count=false&limit=99999&offset=0'))$data
 
-geochron_results = geochron_results %>% dplyr::mutate(sensitivity = 
-                                                        case_when(
-                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE)) ~ 1,
-                                         (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2,
-                                         TRUE ~ 3))
+
+
+chronpubs = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/geochronpublications?count=false&limit=99999&offset=0'))$data
+
+
+chronpub_mat = matrix(nrow=length(chronpubs),ncol=4)
+
+for (i in seq(length(chronpubs))) {
+  for(j in seq(4) ) {
+    if (!is.null(chronpubs[[i]][[j]])) {
+  chronpub_mat[i,j] = chronpubs[[i]][[j]]
+    }}}
+
+
+chronpub_df = as.data.frame(chronpub_mat)
+
+
+names(chronpub_df) = c("geochronid","publicationid","recdatecreated","recdatemodified")
+
+
+
+
+geochron_results = geochron_results %>% dplyr::mutate(sensitivity =  case_when(
+                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE))| grepl(21255,geochronid,fixed= TRUE)| grepl(29333,geochronid,fixed= TRUE)| grepl(29334,geochronid,fixed= TRUE)| grepl(29335,geochronid,fixed= TRUE) ~ 1,          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2, grepl("human burial", materialdated, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2,TRUE ~ 3))
+
+
+geochron_investigate = geochron_results %>% dplyr::filter(sensitivity==3 & (grepl("bone",materialdated,fixed=TRUE) | grepl("Bone",materialdated,fixed=TRUE)))
+
+pub_IDs = chronpub_df %>% dplyr::filter(geochronid %in% geochron_investigate$geochronid)
+
+pub_investigate = content(GET(paste0("https://api.neotomadb.org/v2.0/data/publications/",paste0(pub_IDs$publicationid,collapse=","))))$data
+
+
+pub_mat = matrix(nrow=length(pub_investigate),ncol=2)
+
+for (i in seq(length(pub_investigate))) {
+    if (!is.null(pub_investigate[[i]]$publication$publicationid)) {
+  pub_mat[i,1] = pub_investigate[[i]]$publication$publicationid
+    }
+     if (!is.null(pub_investigate[[i]]$publication$citation)) {
+  pub_mat[i,2] = pub_investigate[[i]]$publication$citation
+    }}
+
+
+pub_df = as.data.frame(pub_mat)
+
+
+names(pub_df) = c("publicationid","citation")
+
+newview = left_join(geochron_investigate,chronpub_df,by = join_by(geochronid)) %>% left_join(pub_df) %>% dplyr::select(geochronid,publicationid,citation)
+
+radiocarbon = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/radiocarbon?count=false&limit=99999&offset=0'))$data
+
+
+rc_mat = matrix(nrow=length(radiocarbon),ncol=10)
+
+for (i in seq(length(radiocarbon))) {
+  if (!is.null(radiocarbon[[i]]$geochronid[[1]])) {
+    rc_mat[i,1] = radiocarbon[[i]]$geochronid[[1]]
+  }
+    if (!is.null(radiocarbon[[i]]$radiocarbonmethodid[[1]])) {
+    rc_mat[i,2] = radiocarbon[[i]]$radiocarbonmethodid[[1]]
+  }
+  for(j in seq(6) ) {
+    if (!is.null(radiocarbon[[i]][[(j+2)]])) {
+  rc_mat[i,(j+2)] = radiocarbon[[i]][[(j+2)]]
+    }}
+   for(j in seq(2) ) {
+    if (!is.null(radiocarbon[[i]][[(j+8)]])) {
+  rc_mat[i,(j+8)] = radiocarbon[[i]][[(j+8)]]
+    }}}
+
+
+rc_df = as.data.frame(rc_mat)
+
+
+names(rc_df) = c("geochronid","radiocarbonmethodid","percentc","percentn","delta13c","delta15n","percentcollagen","reservoir","masscmg","cnratio")
+
+
+check = rc_df %>% dplyr::filter(geochronid %in% c(29333,29334,29335))
 
 datatable(geochron_results[c(1,2,5,6,7,10,11,12,15)],rownames=FALSE) %>% formatStyle(target="row",
   'sensitivity',
@@ -600,12 +675,23 @@ Actually scrutinizes these records - publications associated with taxon-ambiguou
 # Are any of the collection units for Neotoma's records from culturally sensitive areas?
 
 ## Methods
-We used the same dictionary from the last query to search through two fields in Neotoma's collection units table (<i>location</i> and <i>notes</i>). Any collection units that returned one of the above words is reproduced below.
+We used the same dictionary from the last query to search through two fields in Neotoma's collection units table (<i>location</i> and <i>notes</i>). Any collection units that returned one of the above words is reproduced below. The records were individually scrutinized categorized subjectively into sensitivity categories.
 
 ```{r collunits,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
 
-datatable(collunits_results[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
+
+
+
+collunits_results = collunits_results %>% dplyr::mutate(sensitivity =                                     case_when(grepl("human burial", notes, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2, grepl("Burial vessel",location,fixed=TRUE)|grepl("Burial objects",location,fixed=TRUE)|grepl("Burial artefacts",location,fixed=TRUE)|grepl("Mound",location,fixed=TRUE)|grepl("Indian camp",notes,fixed=TRUE)|grepl("human habitation",notes,fixed=TRUE)|grepl("by humans",notes,fixed=TRUE) ~ 2,grepl("Human burial",notes,fixed=TRUE)|grepl("cairn",notes,fixed=TRUE)|grepl("Human remains",notes,fixed=TRUE)|grepl("Human and caribou blood",notes,fixed=TRUE) ~ 1,
+                                         TRUE ~ 3))
+
+
+
+datatable(collunits_results[c(1,3,6,7,17,18,20,21)],rownames=FALSE) %>% formatStyle(target="row",
+  'sensitivity',
+  backgroundColor = styleEqual(c(1,2,3), c('rgba(255, 0, 0, 0.5)','rgba(255, 165, 0, 0.5)','rgba(0, 255, 0, 0.5)'),default="white")
+)
 
 
 
@@ -623,22 +709,23 @@ for (i in seq(length(depenvtypes))) {
 depenv_df = as.data.frame(depenv_mat)
 names(depenv_df) = c("depenvtid","depenvt","depenvthigherid","recdatecreated","recdatemodified")
 
-archaeological_envs = depenv_df %>% dplyr::filter(depenvthigherid==1)
+#archaeological_envs = depenv_df %>% dplyr::filter(depenvthigherid==1)
 
 
-archaeo_collunits = collunits_df %>% dplyr::filter(depenvtid %in% archaeological_envs$depenvtid)
+#archaeo_collunits = collunits_df %>% dplyr::filter(depenvtid %in% archaeological_envs$depenvtid)
 
 
-number_archaeo_collunits = length(archaeo_collunits[,1])
+#number_archaeo_collunits = length(archaeo_collunits[,1])
 ```
 
-We also took another approach, wherein we selected any depostional environment IDs that corresponded to archaeological sites (see table below), and filtered for all collection units that corresponded to any of those depositional environment IDs. This returned `r number_archaeo_collunits` results.
 
 ```{r depenvtyps, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
-datatable(archaeological_envs,rownames=FALSE)
+#We also took another approach, wherein we selected any depostional environment IDs that corresponded to archaeological sites (see table below), and filtered for all collection units that corresponded to any of those depositional environment IDs. This returned `r number_archaeo_collunits` results.
 
-datatable(archaeo_collunits[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
+#datatable(archaeological_envs,rownames=FALSE)
+
+#datatable(archaeo_collunits[c(1,2,3,6,7,8,17,18,20)],rownames=FALSE)
 
 ```
 ## Next steps
