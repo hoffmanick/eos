@@ -1,7 +1,7 @@
 ---
 title: "Culturally Sensitive Records in the Neotoma Paleoecology Database"
 author: "Nick Hoffman"
-date: "August 2024"
+date: "September 2024"
 output:
   html_document:
     df_print: paged
@@ -72,7 +72,7 @@ cat(paste0("<style>",
 
 # Introduction
 
-The intention of this data audit is to find any records from the Neotoma Paleoecology Database which potentially violate Neotoma's statement of values, especially with respect to Neotoma's goal of aligning with principles of Indigenous data sovereignty. The authors of this audit are white settler accomplices informed by guidance from theorists of Indigenous data sovereignty, paleo scientists, and other colleagues.
+The intention of this data audit is to find any records from the Neotoma Paleoecology Database which potentially violate Neotoma's statement of values, especially with respect to Neotoma's goal of aligning with principles of Indigenous data sovereignty. The authors of this audit are white researchers informed by guidance from theorists of Indigenous data sovereignty, paleo scientists, and other colleagues.
 
 Note: the following audit contains potentially sensitive information about Indigenous ancestors. Our intent is to expose this information in order to work toward better management in the future.
 
@@ -108,6 +108,7 @@ rezes = read_sf("tl_2019_us_aiannh.shp") %>% dplyr::select(NAME)
 canada_rezes = geojson_sf('https://proxyinternet.nrcan.gc.ca/arcgis/rest/services/CLSS-SATC/CLSS_Administrative_Boundaries/MapServer/0/query?outFields=*&where=1%3D1&f=geojson')
 canada_rezes = canada_rezes %>% dplyr::rename('NAME' = 'adminAreaNameEng') %>% dplyr::select(NAME)
 canada_rezes = st_transform(canada_rezes,crs="NAD83")
+canada_rezes = canada_rezes %>% dplyr::mutate(NAME = str_to_title(NAME))
 
 aust_ipa = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
 aust_ipa = aust_ipa %>% dplyr::select(NAME)
@@ -168,11 +169,44 @@ for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31
     }
 }
 
-all_sites = all_sites %>% group_by(NAME) %>% summarize(n=sum(n)) %>% arrange(desc(n)) %>% st_drop_geometry()
+
+
+
+db_names = c("African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", 
+"Latin American Pollen Database", "North American Pollen Database", 
+"Pollen Database of Siberia and the Russian Far East", "FAUNMAP", "Neotoma", 
+"North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", 
+"NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", 
+"Alaskan Archaeofaunas","French Institute of Pondicherry Palynology and Paleoecology Database" ,"Japanese Pollen Database", "Neotoma Midden Database", 
+"Chinese Pollen Database","Holocene Perspective on Peatland Biogeochemistry" ,"Neotoma Testate Amoebae Database", 
+"Deep-Time Palynology Database", "Neotoma Biomarker Database", 
+"Alpine Palynological Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", 
+"Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", 
+"Faunal Isotope Database", "Neotoma Charcoal Data","Pollen Monitoring Programme", "PaleoVertebrates of Latin America", 
+"St. Croix Watershed Research Station of the Science Museum of Minnesota", 
+"Tropical South American Diatom Database", "Marine Dinoflagellates Database", "Nonmarine Ostracod Distribution in Europe Database","East Asian Nonmarine Ostracod Database") %>% as.data.frame()
+
+
+db_names = db_names %>% cbind(as.data.frame(c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)))
+
+
+names(db_names) = c("db_names","database")
+db_names = db_names %>% dplyr::mutate(database = as.character(database))
+
+
+all_sites = all_sites %>% group_by(NAME) %>% summarize(n=sum(n)) %>% arrange(desc(n)) 
+
+
 map_sites = map_sites %>% distinct()
 
+map_sites_table = map_sites %>% left_join(db_names) %>% dplyr::select(NAME,sitename,datasettype,db_names)%>% rename("database" = "db_names")%>% dplyr::filter(datasettype != "geochronologic") %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
+
 fuzzed_sites = fuzzed_sites %>% distinct() %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
-datatable(all_sites,rownames=FALSE)
+datatable(st_drop_geometry(all_sites,rownames=FALSE))
+
+
+datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
+
 
 tm_shape(osm.raster(map_sites)) + tm_rgb() +
   tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
@@ -224,30 +258,13 @@ fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
 
 fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
 
+fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
 
-db_names = c("African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", 
-"Latin American Pollen Database", "North American Pollen Database", 
-"Pollen Database of Siberia and the Russian Far East", "FAUNMAP", "Neotoma", 
-"North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", 
-"NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", 
-"Alaskan Archaeofaunas","French Institute of Pondicherry Palynology and Paleoecology Database" ,"Japanese Pollen Database", "Neotoma Midden Database", 
-"Chinese Pollen Database","Holocene Perspective on Peatland Biogeochemistry" ,"Neotoma Testate Amoebae Database", 
-"Deep-Time Palynology Database", "Neotoma Biomarker Database", 
-"Alpine Palynological Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", 
-"Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", 
-"Faunal Isotope Database", "Neotoma Charcoal Data","Pollen Monitoring Programme", "PaleoVertebrates of Latin America", 
-"St. Croix Watershed Research Station of the Science Museum of Minnesota", 
-"Tropical South American Diatom Database", "Marine Dinoflagellates Database", "Nonmarine Ostracod Distribution in Europe Database","East Asian Nonmarine Ostracod Database") %>% as.data.frame()
+datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
 
 
-db_names = db_names %>% cbind(as.data.frame(c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)))
 
-
-names(db_names) = c("db_names","database")
-db_names = db_names %>% dplyr::mutate(database = as.character(database))
-
-fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n)
-datatable(st_drop_geometry(fuzzed_by_dbset[]),rownames=FALSE) 
+fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
 
 datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
 tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
@@ -318,7 +335,7 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 Then we used a Neotoma API to search for any occurrences of those taxon IDs.
 
-The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma. Rows colored red are sensitivity level 1 because they come from the United States. Rows colored orange are sensitivity level 2 because they come from elsewhere.
+The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma. Rows colored red are sensitivity level 1 because they come from North America. Rows colored orange are sensitivity level 2 because they come from elsewhere.
 
 It should be noted that lead FAUNMAP steward Jessica Blois has removed all sample-level Homo sapiens occurrences from public access as the Database works on a policy for managing these data.
 
@@ -378,7 +395,7 @@ tm_shape(homo_bg)+
               title.bg.color = "white", panel.label.height=1)
 ```
 
-``` {r another, echo=FALSE,include=TRUE,message = FALSE}
+``` {r another, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 #<h3 style="text-align:center;">Human Ancestor Sites</h3>
 plotLeaflet(homo_sites_neo) %>%
    addPolygons(data = test,
