@@ -79,7 +79,7 @@ Note: the following audit contains potentially sensitive information about Indig
 # Are any sites in Neotoma located on federal Indigenous lands?
 
 ## Method
-We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
+We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous lands in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
 
 
 ```{r setup, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
@@ -118,18 +118,18 @@ rezes = rezes %>% rbind(canada_rezes) %>% rbind(aust_ipa)
 
 #aust_rezes = read_sf("Aboriginal_Communities_Town_Reserves_DPLH_002.shp")
 all_sites = as.data.frame(matrix(ncol=2,nrow=0))
-map_sites = as.data.frame(matrix(ncol=6,nrow=0))
+map_sites = as.data.frame(matrix(ncol=7,nrow=0))
 
-fuzzed_sites = as.data.frame(matrix(ncol=6,nrow=0))
+fuzzed_sites = as.data.frame(matrix(ncol=7,nrow=0))
 names(all_sites) = c("NAME","n")
-names(map_sites) = c("siteid","NAME","lon","lat","datasettype","database")
+names(map_sites) = c("siteid","NAME","lon","lat","datasettype","database","datasetid")
 map_sites = st_as_sf(map_sites,coords=c("lon","lat"),crs="NAD83")
-names(fuzzed_sites) = c("lon","lat","siteid","sitename","datasettype","database")
+names(fuzzed_sites) = c("lon","lat","siteid","sitename","datasettype","database","datasetid")
 for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)) {
   db = content(GET(paste0("https://api.neotomadb.org/v2.0/apps/constdb/datasets?dbid=",i)))$data
   if (length(db) >0) {
     #print(paste("DB ID:",i))
-    db_mat = matrix(nrow=length(db),ncol=6)
+    db_mat = matrix(nrow=length(db),ncol=7)
     for (m in seq(length(db))) {
       if(!is.null(db[[m]]$coords[[1]])) {
         db_mat[[m,1]] = db[[m]]$coords[[1]]
@@ -138,10 +138,11 @@ for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31
         db_mat[[m,4]] = db[[m]]$sitename
         db_mat[[m,5]] = db[[m]]$datasettype[[1]]
         db_mat[[m,6]] = i
+        db_mat[[m,7]] = db[[m]]$datasetid
       }
     }
     db_df = as.data.frame(db_mat)
-    names(db_df) = c("lon","lat","siteid","sitename","datasettype","database")
+    names(db_df) = c("lon","lat","siteid","sitename","datasettype","database","datasetid")
     db_df = db_df %>% drop_na() %>% mutate(lon=as.numeric(lon),lat=as.numeric(lat))
     fuzzed = db_df %>% dplyr::filter((lon %% 0.25 == 0) & (lat %% 0.25 ==0))
     if (length(fuzzed[[1]]) != 0 ) {
@@ -152,7 +153,7 @@ for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31
       dplyr::mutate(lat_decimals = case_when(is.na(lat_decimals) ~ 0, TRUE ~ lat_decimals)) %>%
       dplyr::mutate(lon_decimals = case_when(is.na(lon_decimals) ~ 0, TRUE ~ lon_decimals)) %>%
       dplyr::filter(lon_decimals <= 1 | lat_decimals <= 1) %>%
-      dplyr::select(lon,lat,siteid,sitename,datasettype,database)
+      dplyr::select(lon,lat,siteid,sitename,datasettype,database,datasetid)
         if (length(fuzzed[[2]]) != 0 ) {
       fuzzed_sites = rbind(fuzzed_sites,fuzzed2) %>% distinct()
     }
@@ -205,23 +206,6 @@ fuzzed_sites = fuzzed_sites %>% distinct() %>% st_as_sf(coords=c("lon","lat"),cr
 datatable(st_drop_geometry(all_sites,rownames=FALSE))
 
 
-datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
-
-
-tm_shape(osm.raster(map_sites)) + tm_rgb() +
-  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
-  tm_shape(map_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
-  tm_add_legend(type = "fill", 
-                  col = c("blue"),
-                  labels = c("Federal Indigenous land"),
-                  title = "Legend",
-                  border.col="blue") +
-  tm_add_legend(type = "symbol", 
-                  col = c("red"),
-                  labels = c("Neotoma Site"),
-                  title = "",
-                  border.col="red")
-
 map_sites_neo = get_sites(c(as.numeric(map_sites$siteid)),all_data=TRUE)
 
 reps = ceiling(length(rezes[[1]])/11)
@@ -244,13 +228,79 @@ num_fuzzed= length(fuzzed_sites[[1]])
 
 ```
 
+Next, we counted those Neotoma datasets derived sites which are on federal Indigenous lands by the Neotoma constituent database with which they are associated and the kind of dataset they are.
+
+``` {r add,}
+
+datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
+
+
+#tm_shape(osm.raster(map_sites)) + tm_rgb() +
+#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+#  tm_shape(map_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+#  tm_add_legend(type = "fill", 
+#                  col = c("blue"),
+##                  labels = c("Federal Indigenous land"),
+#                  title = "Legend",
+#                  border.col="blue") +
+#  tm_add_legend(type = "symbol", 
+#                  col = c("red"),
+#                  labels = c("Neotoma Site"),
+#                  title = "",
+#                  border.col="red")
+
+```
+
+
+``` {r any-specs,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+
+#repospec prep
+repospecs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryspecimens&count=false&limit=99999&offset=0"))$data
+
+repospec_mat = matrix(nrow=length(repospecs),ncol=5)
+
+for (i in seq(length(repospecs))) {
+  for(j in seq(5) ) {
+    if (!is.null(repospecs[[i]][[j]])) {
+  repospec_mat[i,j] = repospecs[[i]][[j]]
+    }}}
+
+
+repospec_df = as.data.frame(repospec_mat)
+
+
+names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recdatemodified")
+
+#specimens prep
+specs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=specimens&count=false&limit=99999&offset=0"))$data
+
+spec_mat = matrix(nrow=length(specs),ncol=17)
+
+for (i in seq(length(specs))) {
+  for(j in seq(17) ) {
+    if (!is.null(specs[[i]][[j]])) {
+  spec_mat[i,j] = specs[[i]][[j]]
+    }}
+  }
+
+
+spec_df = as.data.frame(spec_mat)
+
+
+names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid","maturityid","sexid","domesticstatusid","preservative","nisp","repositoryid","specimennr","fieldnr","arctosnr","notes","recdatecreated","recdatemodified")
+
+
+filtered_repospec = repospec_df %>% dplyr::filter(datasetid %in% map_sites$datasetid)
+
+```
+
 ## Next Steps
 Our next steps are...
 
 # Are the coordinates for any sites in Neotoma fuzzed?
 
 ## Methods
-We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or any sites where latitude or the longitude has a precision of 0 or 1 decimal places. If they were, we said they were fuzzed. Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place. We found `r num_fuzzed` such fuzzed sites. One table below documents their siteids and names, the next table counts datasets by the type of dataset and the constituent database from which the dataset derives, and the map below documents their locations.
+We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or whether latitude or the longitude had a precision of 0 or 1 decimal places. We said those sites which met this definiton were fuzzed. (Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place). We found `r num_fuzzed` fuzzed sites. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sitesby the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
 
 ```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
@@ -259,27 +309,28 @@ fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
 fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
 
 fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
+fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
+
+datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
+
 
 datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
 
 
 
-fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
-
-datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
-tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
-  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
-  tm_shape(fuzzed_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
-  tm_add_legend(type = "fill", 
-                  col = c("blue"),
-                  labels = c("Federal Indigenous land"),
-                  title = "Legend",
-                  border.col="blue") +
-  tm_add_legend(type = "symbol", 
-                  col = c("red"),
-                  labels = c("Fuzzed Neotoma Site"),
-                  title = "",
-                  border.col="red")
+#tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
+#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+#  tm_shape(fuzzed_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+#  tm_add_legend(type = "fill", 
+#                  col = c("blue"),
+#                  labels = c("Federal Indigenous land"),
+#                  title = "Legend",
+#                  border.col="blue") +
+#  tm_add_legend(type = "symbol", 
+#                  col = c("red"),
+#                  labels = c("Fuzzed Neotoma Site"),
+#                  title = "",
+#                  border.col="red")
 
 plotLeaflet(fuzzed_sites_neo) %>%
    addPolygons(data = test,
@@ -291,12 +342,12 @@ plotLeaflet(fuzzed_sites_neo) %>%
 ```
 
 ## Next steps
-Our next steps are to refine our definition of fuzzed sites and to speak with constituent database stewards.
+Our next steps are to refine our definition of fuzzed sites.
 
 # Are any samples in Neotoma from humans?
 
 ## Method
-We downloaded Neotoma's taxa table and selected any taxon IDs which might describe people.(Taxon ID 6359 is Primates, and 6171 is Mammalia.)
+We downloaded Neotoma's taxa table and selected any taxon IDs which might describe people. See table below. (Taxon ID 6359 is Primates, and 6171 is Mammalia.)
 
 ```{r get-taxa,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 ## get taxa
@@ -335,9 +386,9 @@ homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,
 
 Then we used a Neotoma API to search for any occurrences of those taxon IDs.
 
-The two maps below show the sites they come from, and the table documents what information there is about those samples from the samples table in Neotoma. Rows colored red are sensitivity level 1 because they come from North America. Rows colored orange are sensitivity level 2 because they come from elsewhere.
+The map below shows the sites where human samples come from, and the table documents what information there is about those samples. Rows colored red are sensitivity level 1 because they come from North America. Rows colored orange are sensitivity level 2 because they come from elsewhere.
 
-It should be noted that lead FAUNMAP steward Jessica Blois has removed all sample-level Homo sapiens occurrences from public access as the Database works on a policy for managing these data.
+It should be noted that lead FAUNMAP steward Jessica Blois has removed all sample-level Homo sapiens occurrences from public access as FAUNMAP works on a policy for managing these data.
 
 ```{r occurrences, echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
@@ -381,18 +432,18 @@ homo_full = left_join(homo_sites_sf,homo_df)
 homo_bg = osm.raster(homo_sites_sf)
 
 
-tm_shape(homo_bg)+
-    tm_rgb() +
-    tm_shape(homo_full) +
-    tm_dots("database",size=0.1,alpha=0.4,palette=c('black','red','green',"purple")) +
-    tm_layout(legend.position=c("RIGHT","BOTTOM"),
-              legend.bg.color="white",
-              legend.bg.alpha=0.9,
-              legend.width=0.4,
-              legend.text.size=0.5,
-              main.title= 'Sites with samples deriving from humans', 
-              main.title.position = "center",
-              title.bg.color = "white", panel.label.height=1)
+#tm_shape(homo_bg)+
+#    tm_rgb() +
+#    tm_shape(homo_full) +
+#    tm_dots("database",size=0.1,alpha=0.4,palette=c('black','red','green',"purple")) +
+#    tm_layout(legend.position=c("RIGHT","BOTTOM"),
+#              legend.bg.color="white",
+#              legend.bg.alpha=0.9,
+#              legend.width=0.4,
+#              legend.text.size=0.5,
+#              main.title= 'Sites with samples deriving from #humans', 
+#              main.title.position = "center",
+#              title.bg.color = "white", panel.label.height=1)
 ```
 
 ``` {r another, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
@@ -491,7 +542,7 @@ datatable(homo_table2)
 
 ## Next steps
 
-Our next steps are to reach out to the lead stewards for the Faunal Isotope Dtabase and PaVeLa, so they can come to a decision about managing these human records in their databases.
+Our next steps are to reach out to the lead stewards for the Faunal Isotope Database, PaVeLa and FAUNMAP, so they can come to a decision about managing these human records in their databases.
 
 # Are any of Neotoma's radiocarbon dates derived from humans?
 
@@ -585,9 +636,9 @@ datatable(as.data.frame(dictionary),rownames=FALSE)
 ```
 
 
-Any rows from the geochronology table which contained one of the above words is listed in the table below. Notice that not all of these radiocarbon dates is <i>necessarily</i> problematic, only potentially. Further scrutiny may be needed. (We also checked against CARD's list of radiocarbon dates deriving from human ancestors that are duplicated in Neotoma, and there was agreement between the two lists: all 60 of CARD's records that are also in Neotoma are in the below table.)
+Any rows from the geochronology table which contained one of the above words is listed in the table below. Notice that not all of these radiocarbon dates are <i>necessarily</i> problematic, only potentially. Further scrutiny may be needed. (We also checked against CARD's list of radiocarbon dates deriving from human ancestors that are duplicated in Neotoma, and there was agreement between the two lists: all 60 of CARD's records that are also in Neotoma are in the below table.)
 
-We assigned sensitivity categories as follows: any references to human bone were assigned sensitivity level 1. Any references to human feces were assigned sensitivity level 2. References to human graves or burials also merited a 2. All other items were given sensitivity level 3. All publications linked to records in which the material dated was taxon-ambiguous bone collagen were consulted. We found that geochron ID 21255 definitely derives from a human, and geochron IDs 29333, 29334, and 29335 likely derive from humans. These records were therefore categorized as sensitivity level 1.
+We assigned sensitivity categories as follows: any references to human bone were assigned sensitivity level 1. Any references to human feces were assigned sensitivity level 2. References to human graves or burials also merited a 2. All other items were given sensitivity level 3. All publications linked to records in which the material dated was taxon-ambiguous bone collagen were consulted. We found that geochron IDs 21255, 29333, 29334, and 29335 definitely derive from humans. These records were therefore categorized as sensitivity level 1.
 
 Below the color-coded table, we count records by their sensitivity and the constituent database of which they are a part.
 
@@ -745,7 +796,7 @@ datatable(geochron_counter,rownames=FALSE)
 ```
 
 ## Next steps
-Reach out to stewards of relevant constituent databases.
+Reach out to stewards of relevant constituent databases and ask them to come to a decision about managing these records.
 
 
 # Are any of the collection units for Neotoma's records from culturally sensitive areas?
@@ -793,7 +844,7 @@ names(depenv_df) = c("depenvtid","depenvt","depenvthigherid","recdatecreated","r
 
 #number_archaeo_collunits = length(archaeo_collunits[,1])
 ```
-Lastly, we counted the number of records by their constituent database and by their sensitivity. Notice that the count here is greater than the total number of collectionunits because constituent databases are linked to datasets, not collection units, and multiple datasets can derive from a single collection unit. (We did exclude the Neotoma datasettype "geochronologic".)
+We counted the number of records by their constituent database and by their sensitivity. Notice that the count here is greater than the total number of collectionunits because constituent databases are linked to datasets, not collection units, and multiple datasets can derive from a single collection unit. (We did exclude the Neotoma datasettype "geochronologic".)
 
 ```{r depenvtyps, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
@@ -869,4 +920,4 @@ datatable(coll_joined,rownames=FALSE)
 
 ```
 ## Next steps
-Need to actually scrutinize these records.
+Our next steps are to reach out to the relevant constituent database stewards for sensitivity levels 1 and 2 and ask them to come to a decision about managing these records.
