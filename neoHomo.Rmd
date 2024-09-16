@@ -230,7 +230,7 @@ num_fuzzed= length(fuzzed_sites[[1]])
 
 Next, we counted those Neotoma datasets derived sites which are on federal Indigenous lands by the Neotoma constituent database with which they are associated and the kind of dataset they are.
 
-``` {r add,}
+``` {r add, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
 datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
 
