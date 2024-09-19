@@ -299,7 +299,7 @@ database_list = c("Cooperative Holocene Mapping Project", "African Pollen Databa
 
 idx=0
 for (i in seq(1,length(database_list))) {
-  print(i)
+  #print(i)
   db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
   returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
   if(length(returns) != 0) {
@@ -320,7 +320,6 @@ for (i in seq(1,length(database_list))) {
 site_mat = matrix(nrow=idx,ncol=5)
 idx=0
 for (i in seq(1,length(database_list))) {
-  print(i)
   db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
   returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
   if(length(returns) != 0) {
@@ -371,7 +370,9 @@ Our next steps are...
 # Are the coordinates for any sites in Neotoma fuzzed?
 
 ## Methods
-According to the Neotoma Manual, "The lat-long box can be used either to circumscribe the areal extent of a site or to provide purposeful imprecision to the site location." We therefore decided to count any bounding boxes for geography, rather than points, as fuzzed sites. Notice that this is a liberal definition - some sites with bounding boxes will have been formatted that way for reasons other than purposeful imprecision. We found `r num_fuzzed` fuzzed sites. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sites by the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
+We count any site whose geography is provided as a bounding box rather a point as fuzzed because according to <a target="_blank" href="https://neotoma-manual.readthedocs.io/en/latest/tables_site.html#sites">the Neotoma Manual</a>, "the lat-long box can be used either to circumscribe the areal extent of a site or to provide purposeful imprecision to the site location."  Notice that this is a liberal definition - some sites with bounding box geographies will have been so formatted for reasons other than purposeful imprecision.  
+
+We found `r num_fuzzed` fuzzed sites using this method. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sites by the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
 
 ```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
