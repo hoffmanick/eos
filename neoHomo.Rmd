@@ -292,6 +292,77 @@ names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid
 
 filtered_repospec = repospec_df %>% dplyr::filter(datasetid %in% map_sites$datasetid)
 
+
+
+database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
+
+
+idx=0
+for (i in seq(1,length(database_list))) {
+  print(i)
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+    for (j in seq(length(returns))) {
+      if(!is.null(returns[[j]]$site$geography)) {
+      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+        }
+        }
+        }
+    }
+  }
+  
+}
+
+
+site_mat = matrix(nrow=idx,ncol=5)
+idx=0
+for (i in seq(1,length(database_list))) {
+  print(i)
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+    for (j in seq(length(returns))) {
+      if(!is.null(returns[[j]]$site$geography)) {
+      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+          if(!is.null(returns[[j]]$site$sitename )) {
+            site_mat[idx,1] = returns[[j]]$site$sitename }
+          if(!is.null(returns[[j]]$site$geography )) {
+            site_mat[idx,2] = returns[[j]]$site$geography }
+          if(!is.null(returns[[j]]$site$siteid )) {
+            site_mat[idx,3] = returns[[j]]$site$siteid }
+          if(!is.null(returns[[j]]$site$datasets[[k]]$datasettype )) {
+            site_mat[idx,4] = returns[[j]]$site$datasets[[k]]$datasettype}
+          if(!is.null(returns[[j]]$site$datasets[[k]]$database )) {
+            site_mat[idx,5] = returns[[j]]$site$datasets[[k]]$database}
+        }
+        }
+        }
+    }
+  }
+  
+}
+
+
+site_df = as.data.frame(site_mat)
+names(site_df)= c("site_name","geography","siteid","datasettype","database")
+
+
+fuzzed_datasets = site_df %>% dplyr::filter(datasettype != "geochronologic")
+
+
+fuzzed_set_counter = fuzzed_datasets %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
+ 
+
+distinct_sites = site_df %>% dplyr::select(site_name,siteid,geography) %>% distinct()
+
+num_fuzzed = length(distinct_sites[[1]])
+
+
 ```
 
 ## Next Steps
@@ -300,21 +371,23 @@ Our next steps are...
 # Are the coordinates for any sites in Neotoma fuzzed?
 
 ## Methods
-We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or whether latitude or the longitude had a precision of 0 or 1 decimal places. We said those sites which met this definiton were fuzzed. (Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place). We found `r num_fuzzed` fuzzed sites. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sitesby the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
+According to the Neotoma Manual, "The lat-long box can be used either to circumscribe the areal extent of a site or to provide purposeful imprecision to the site location." We therefore decided to count any bounding boxes for geography, rather than points, as fuzzed sites. Notice that this is a liberal definition - some sites with bounding boxes will have been formatted that way for reasons other than purposeful imprecision. We found `r num_fuzzed` fuzzed sites. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sites by the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
 
 ```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
-fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
+#We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or whether latitude or the longitude had a precision of 0 or 1 decimal places. We said those sites which met this definition were fuzzed. (Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place).
 
-fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
+#fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
 
-fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
-fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
+#fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
 
-datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
+#fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
+#fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
+
+#datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
 
 
-datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
+#datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
 
 
 
@@ -331,6 +404,16 @@ datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE)
 #                  labels = c("Fuzzed Neotoma Site"),
 #                  title = "",
 #                  border.col="red")
+
+
+
+datatable(fuzzed_datasets[c(1,4,5)],rownames=FALSE)
+
+
+
+datatable(fuzzed_set_counter,rownames=FALSE)
+
+fuzzed_sites_neo = get_sites(c(as.numeric(distinct_sites$siteid)),all_data=TRUE)
 
 plotLeaflet(fuzzed_sites_neo) %>%
    addPolygons(data = test,
@@ -722,10 +805,10 @@ chronpub_df = as.data.frame(chronpub_mat)
 names(chronpub_df) = c("geochronid","publicationid","recdatecreated","recdatemodified")
 
 
-
-
 geochron_results = geochron_results %>% dplyr::mutate(sensitivity =  case_when(
-                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE))| grepl(21255,geochronid,fixed= TRUE)| grepl(29333,geochronid,fixed= TRUE)| grepl(29334,geochronid,fixed= TRUE)| grepl(29335,geochronid,fixed= TRUE) ~ 1,          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2, grepl("human burial", materialdated, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2,TRUE ~ 3))
+                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE))
+| grepl(21255,geochronid,fixed= TRUE)| grepl(29333,geochronid,fixed= TRUE)| grepl(29334,geochronid,fixed= TRUE)| grepl(29335,geochronid,fixed= TRUE)
+ ~ 1,          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2, grepl("human burial", materialdated, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2,TRUE ~ 3))
 
 
 geochron_investigate = geochron_results %>% dplyr::filter(sensitivity==3 & (grepl("bone",materialdated,fixed=TRUE) | grepl("Bone",materialdated,fixed=TRUE)))
