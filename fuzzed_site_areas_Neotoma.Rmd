@@ -1,0 +1,124 @@
+---
+title: "Bounding Box Sites in Neotoma"
+author: "Nick Hoffman"
+date: '2024-09-19'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Table of areas for bounding box sites (area in square Hectometers)
+
+Histogram of areas in square meters, separated in to size classes to make easier to visualize.
+```{r pressure, echo=FALSE,warning=FALSE,message=FALSE}
+
+
+database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
+
+
+library(DT)
+library(tidyverse)
+library(sf)
+library(httr)
+library(jsonlite)
+library(geojsonsf)
+library(units)
+
+idx=0
+for (i in seq(1,length(database_list))) {
+  #print(i)
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+
+    for (j in seq(length(returns))) {
+      
+      if(!is.null(returns[[j]]$site$geography)) {
+              if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+        }
+        }
+    }
+  }}
+  
+}
+
+
+site_mat = matrix(nrow=idx,ncol=5)
+idx=0
+for (i in seq(1,length(database_list))) {
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+    for (j in seq(length(returns))) {
+      if(!is.null(returns[[j]]$site$geography)) {
+              if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+          if(!is.null(returns[[j]]$site$sitename )) {
+            site_mat[idx,1] = returns[[j]]$site$sitename }
+          if(!is.null(returns[[j]]$site$geography )) {
+            site_mat[idx,2] = returns[[j]]$site$geography }
+          if(!is.null(returns[[j]]$site$siteid )) {
+            site_mat[idx,3] = returns[[j]]$site$siteid }
+          if(!is.null(returns[[j]]$site$datasets[[k]]$datasettype )) {
+            site_mat[idx,4] = returns[[j]]$site$datasets[[k]]$datasettype}
+          if(!is.null(returns[[j]]$site$datasets[[k]]$database )) {
+            site_mat[idx,5] = returns[[j]]$site$datasets[[k]]$database}
+        }
+        }
+        
+    }
+  }
+  }
+}
+
+
+site_df = as.data.frame(site_mat)
+names(site_df)= c("site_name","geography","siteid","datasettype","database")
+
+site_df1 = geojson_sf(site_df$geography) %>% cbind(site_df)
+
+areas = site_df1  %>% distinct(site_name,siteid, geometry)
+
+
+test = st_area(areas) %>% as.data.frame()
+names(test) = c("area")
+
+areas = areas %>% cbind(test)
+
+library(ggplot2)
+
+areas = areas %>% mutate(size = case_when(
+  area< units::set_units(5*10^(5), m^2) ~ "small",
+  area >= units::set_units(5*10^(5), m^2) & area< units::set_units(5*10^(7), m^2) ~ "medium",
+  area >= units::set_units(5*10^(7), m^2) & area< units::set_units(5*10^(9), m^2) ~ "large",
+  area >= units::set_units(5*10^(9), m^2) & area< units::set_units(5*10^(90), m^2) ~ "largest"
+                         
+))
+
+
+
+areas = areas %>% mutate(size=fct_relevel(size,c("small","medium","large","largest"))) %>%
+ arrange(size)
+
+
+area_table = areas %>% dplyr::mutate(area = round(area/10000,2))
+
+names(area_table) = c("sitename","siteid","area (hM^2)","size","geometry")
+
+datatable(st_drop_geometry(area_table[1:4])) %>% formatCurrency("area (hM^2)",currency = "", interval = 3, mark = ",")
+
+ggplot(areas) + 
+  geom_histogram(mapping=aes(x=area),bins=600) +
+  facet_wrap(~size,scales="free") +
+  theme_bw() + 
+  ggtitle("areas of bounding box sites in Neotoma")
+
+
+
+
+```
