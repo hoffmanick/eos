@@ -13,7 +13,7 @@ Table of areas for bounding box sites (area in square Hectometers)
 
 Histogram of areas in square meters, separated in to size classes to make easier to visualize.
 ```{r pressure, echo=FALSE,warning=FALSE,message=FALSE}
-
+## https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about
 
 database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
 
@@ -25,6 +25,27 @@ library(httr)
 library(jsonlite)
 library(geojsonsf)
 library(units)
+library(tmap)
+library(rosm)
+library(osmdata)
+library(dplyr)
+
+
+setwd("C:/Users/Nick/Documents")
+rezes = read_sf("tl_2019_us_aiannh.shp") %>% dplyr::select(NAME)
+
+canada_rezes = geojson_sf('https://proxyinternet.nrcan.gc.ca/arcgis/rest/services/CLSS-SATC/CLSS_Administrative_Boundaries/MapServer/0/query?outFields=*&where=1%3D1&f=geojson')
+canada_rezes = canada_rezes %>% dplyr::rename('NAME' = 'adminAreaNameEng') %>% dplyr::select(NAME)
+canada_rezes = st_transform(canada_rezes,crs="NAD83")
+canada_rezes = canada_rezes %>% dplyr::mutate(NAME = str_to_title(NAME))
+
+aust_ipa = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
+aust_ipa = aust_ipa %>% dplyr::select(NAME)
+aust_ipa = st_transform(aust_ipa,crs="NAD83")
+
+rezes = rezes %>% rbind(canada_rezes) %>% rbind(aust_ipa)
+
+
 
 idx=0
 for (i in seq(1,length(database_list))) {
@@ -119,6 +140,34 @@ ggplot(areas) +
   ggtitle("areas of bounding box sites in Neotoma")
 
 
+#tmap_mode("view")
+#tm_shape(osm.raster(areas)) + tm_rgb() +
+#  tm_shape(test) + tm_fill(col=colors) +
+#  tm_shape(areas) + tm_borders(lwd=2) 
+
+
+  
+
+library(leaflet) 
+
+reps = ceiling(length(rezes[[1]])/11)
+colors = rep(c("red","blue","limegreen","purple","yellow","black","orange","skyblue","pink","brown","darkgreen"),reps)
+
+colors = colors[1:length(rezes[[1]])]
+library(rmapshaper)
+test = ms_simplify(rezes)
+test = st_transform(test,crs="WGS84")
+
+
+leaflet() %>%
+     addTiles() %>%
+  addPolygons(data = areas,
+              stroke=TRUE,fillOpacity=0,smoothFactor=0.5,
+              popup= ~site_name, color="black",weight="1") %>%
+   addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
 
 
 ```
