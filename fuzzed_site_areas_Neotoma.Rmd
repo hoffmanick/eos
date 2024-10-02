@@ -161,13 +161,13 @@ test = st_transform(test,crs="WGS84")
 
 leaflet() %>%
      addTiles() %>%
-  addPolygons(data = areas,
-              stroke=TRUE,fillOpacity=0,smoothFactor=0.5,
-              popup= ~site_name, color="black",weight="1") %>%
    addPolygons(data = test,
         stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
         fillColor = ~colors,
-        popup= ~NAME)
+        popup= ~NAME) %>%
+    addPolygons(data = areas,
+              stroke=TRUE,fillOpacity=0.1,fillColor = "white",smoothFactor=0.5,
+              popup= ~site_name, color="black",weight="1") 
 
 
 ```
