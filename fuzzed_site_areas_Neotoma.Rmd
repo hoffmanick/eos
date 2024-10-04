@@ -170,4 +170,124 @@ leaflet() %>%
               popup= ~site_name, color="black",weight="1") 
 
 
+library(ggplot2)
+
+dataset_areas = site_df1 %>% left_join(st_drop_geometry(areas))
+
+fuzz_dataset_count= dataset_areas %>% group_by(datasettype) %>% count() %>% st_drop_geometry() %>% arrange(desc(n))
+
+datatable(fuzz_dataset_count,rownames=FALSE)
+
+over_ten = fuzz_dataset_count %>% dplyr::filter(n >= 10)
+
+
+```
+
+
+Below is a table of all the bounding box sites on (or intersecting) federal Indigenous lands.
+```{r third, echo=FALSE,warning=FALSE}
+
+
+rezes = st_transform(rezes,crs='WGS84')
+sf_use_s2(FALSE)
+sites_on_rez = st_join(areas,rezes) %>% drop_na(NAME)
+
+datatable(st_drop_geometry(sites_on_rez))
+
+```
+
+Are sites that intersect reservations differently sized from sites that don't?
+
+```{r fourth,echo=FALSE,warning=FALSE}
+
+not_on_rez  = areas %>% dplyr::filter(!(siteid %in% sites_on_rez$siteid)) %>% mutate(class="not on federal Indigenous land")
+on_rez = sites_on_rez %>% mutate(class="on federal Indigenous land") %>% dplyr::select(!NAME)
+
+rez_comp = not_on_rez %>% rbind(on_rez)
+
+ggplot(rez_comp) +
+  geom_boxplot(mapping=aes(x=log(area),y=class)) + theme_bw()
+
+
+t.test(as.vector(on_rez$area),as.vector(not_on_rez$area))
+```
+
+The graph below summarizes areas by datasettypes, only for those datasets for which there are more than ten bounding box sites.
+```{r second, echo=FALSE,warning=FALSE}
+
+meds = dataset_areas %>% group_by(datasettype) %>% summarize(med = median(area)) %>% arrange(desc(med))
+
+dataset_areas = dataset_areas %>% dplyr::mutate(datasettype = fct_relevel(datasettype,st_drop_geometry(meds[[1]]))) %>%
+ arrange(datasettype)
+
+over_ten_dataset_areas = dataset_areas %>% dplyr::filter(datasettype %in% over_ten$datasettype)
+ggplot(over_ten_dataset_areas) +
+  geom_boxplot(mapping=aes(x=log(area),y=datasettype)) + theme_bw()
+
+
+```
+
+
+
+Dataset types on federal Indigenous lands versus others?
+
+``` {r fifth, echo=FALSE, warning=FALSE}
+
+dataset_rez_comp = left_join(over_ten_dataset_areas,st_drop_geometry(rez_comp))
+
+
+ggplot(dataset_rez_comp) + 
+  geom_bar(mapping=aes(x=class,fill=datasettype),position="fill")
+
+
+chi_mat_prep = dataset_rez_comp %>% group_by(class, datasettype) %>% count() %>% st_drop_geometry() %>% pivot_wider(names_from="class",values_from="n")
+
+datatable(chi_mat_prep,rownames=FALSE)
+
+chi_mat_prep = chi_mat_prep %>% dplyr::mutate(`on federal Indigenous land` = case_when(
+                                        is.na(`on federal Indigenous land`) ~ 0,
+                                        TRUE ~ `on federal Indigenous land`
+))
+names(chi_mat_prep)= c("datasettype","notIndig","Indig")
+
+chi_mat = chi_mat_prep[c(2,3)]
+
+rownames(chi_mat) = chi_mat_prep$datasettype
+
+
+library(graphics)
+mosaicplot(chi_mat, shade = TRUE, las=2,
+           main = "mosaic plot - dataset types by land tenure")
+
+
+chisq = chisq.test(chi_mat)
+
+library(corrplot)
+corrplot(chisq$residuals, is.cor = FALSE)
+
+areas_by_type_tenure = dataset_rez_comp %>% group_by(datasettype,class) %>% summarize(median = median(area)) %>% st_drop_geometry() %>% arrange(desc(median)) %>% pivot_wider(names_from="class",values_from="median")
+
+areas_by_type_tenure = areas_by_type_tenure %>% mutate(`on federal Indigenous land` = as.vector(`on federal Indigenous land`)) %>% dplyr::mutate(`not on federal Indigenous land` = as.vector(`not on federal Indigenous land`))
+
+
+areas_by_type_tenure= areas_by_type_tenure %>% dplyr::mutate(`on federal Indigenous land` = case_when(
+                                        is.na(`on federal Indigenous land`) ~ 0,
+                                        TRUE ~ `on federal Indigenous land`
+))
+names(areas_by_type_tenure)= c("datasettype","Indig","notIndig")
+
+areas_by_type_tenure1 = areas_by_type_tenure[c(2,3)]
+
+rownames(areas_by_type_tenure1) = areas_by_type_tenure$datasettype
+
+
+mosaicplot(areas_by_type_tenure1, shade = TRUE, las=2,
+           main = "mosaic plot - dataset types by land tenure, area not count")
+
+chisq_area = chisq.test(areas_by_type_tenure1)
+
+
+corrplot(chisq_area$residuals, is.cor = FALSE)
+
+
 ```
