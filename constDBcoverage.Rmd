@@ -1,0 +1,130 @@
+---
+title: "Neotoma Constituent Database Coverage"
+author: "Nick Hoffman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars,echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+
+library(tidyverse)
+library(stringr)
+library(jsonlite)
+wideTable = read.csv("../../recommender_table_wide1022.csv")
+wideTable[is.na(wideTable)] = 0
+
+
+longTable = wideTable %>% pivot_longer(cols=starts_with("t_"), names_to = "Time") %>% 
+  dplyr::filter(value!=0) %>% dplyr::select(!value) %>%
+  pivot_longer(cols=starts_with("pl_"),names_to = "RegionName") %>% dplyr::filter(value!=0) %>% dplyr::select(!value) %>%
+  pivot_longer(cols=starts_with("d_"),names_to = "Dataset") %>% dplyr::filter(value!=0) %>% dplyr::select(!value)
+
+
+longTable = longTable %>%  
+  group_by(Time, RegionName, Dataset) %>%
+  summarize(
+    Database = {
+      db_values <- unique(Database)
+      if (length(db_values) > 1) {
+        paste(paste(db_values[-length(db_values)], collapse = ", "), "or", db_values[length(db_values)])
+      } else {
+        db_values
+      }
+    },
+    .groups = "drop"
+  )
+
+longTable = longTable %>% mutate(Time = case_when(
+                      Time == 't_pre.Quaternary' ~ 'pre-Quaternary',
+                      Time == 't_modern..post.1850.AD.' ~ "modern (post 1850 AD)",
+                      Time == 't_Quaternary' ~ "Quaternary"
+)) %>% mutate(RegionName = str_replace_all(str_sub(RegionName,start=4), "\\.", " ")) %>%
+  mutate(Dataset = str_replace_all(str_sub(Dataset,start=3), "\\.", " ")) %>%
+  mutate(Dataset = case_when(Dataset == "x ray fluorescence diffraction" ~ "x-ray fluorescence/diffraction", Dataset == "loss on ignition" ~ "loss-on-ignition", TRUE ~ Dataset))
+
+
+regions = c("afr", "arct",'far','chin','jap','rest',"atl","eurbig",
+            'cent', 'ala', 'us', 'can',"oceania", "pacoc","southam") %>% as.data.frame()
+regionnames = c("Africa", "the Arctic", "the far East", "China", "Japan", "Asia outside of China  Japan  and the far East", "the Atlantic"
+                , "Europe", "Central America", "Alaska", "the continental United States", "Canada", "Oceania", "the Pacific","South America") %>%
+  as.data.frame() %>% cbind(regions)
+
+names(regionnames) = c("RegionName","Region")
+
+longTable = left_join(longTable,regionnames) %>% mutate(RegionName = case_when(
+  RegionName == "Asia outside of China  Japan  and the far East" ~ "Asia outside of China, Japan, and the far East",
+  TRUE ~ RegionName))
+
+regions = c("afr", "arct",'far','chin','jap','rest',"atl","eurbig",
+            'cent', 'ala', 'us', 'can',"oceania", "pacoc","southam")
+
+datasets = c("biomarker" ,"charcoal" , "diatom" , "dinoflagellates" , "insect" , "sedaDNA" ,"ostracode" ,
+             "plant macrofossil", "pollen","specimen stable isotope","testate amoebae","vertebrate fauna","water chemistry","biochemistry" ,
+"chironomid" ,"cladocera" ,"geochemistry" ,"loss-on-ignition", "macroinvertebrate","organic carbon" , "paleomagnetic" ,
+"physical sedimentology" ,  "phytolith" ,"stable isotope" ,"x-ray fluorescence/diffraction" )
+
+
+times = c( "modern (post 1850 AD)", "Quaternary","pre-Quaternary")
+
+function_mat = matrix(nrow=1125,ncol=3)
+
+idx=0
+for (r in regions) {
+  for (t in times) {
+    for (d in datasets) {
+      idx = idx + 1
+      function_mat[idx,] = c(r,t,d)
+    }
+  }
+}
+
+
+longFull = function_mat %>% as.data.frame()
+
+names(longFull) = c("Region","Time","Dataset")
+
+longFull = longFull %>% left_join(longTable)
+
+
+library(DT)
+
+```
+
+
+
+```{r pressure,echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
+library(stringr)
+
+
+counter = longFull %>% dplyr::mutate(comma_count = str_count(Database,",")) %>% mutate(or_count = str_count(Database, " or ")) %>% mutate(num_db = comma_count+or_count+1)
+
+counter = counter %>% select(!c(comma_count,or_count,Region))
+datatable(counter,rownames=FALSE)
+
+byReg = counter %>% dplyr::group_by(RegionName) %>% summarize(meanNumDB = round(mean(num_db),2)) %>% arrange(desc(meanNumDB))
+datatable(byReg,rownames=FALSE)
+
+
+byTime = counter %>% dplyr::group_by(Time) %>% summarize(meanNumDB = round(mean(num_db),2))%>% arrange(desc(meanNumDB))
+datatable(byTime,rownames=FALSE)
+
+byProxy = counter %>% dplyr::group_by(Dataset) %>% summarize(meanNumDB =round(mean(num_db),2)) %>% arrange(desc(meanNumDB))
+datatable(byProxy,rownames=FALSE)
+
+byRegTime = counter %>% dplyr::group_by(RegionName,Time) %>% summarize(meanNumDB =round(mean(num_db),2)) %>% arrange(desc(meanNumDB))
+datatable(byRegTime,rownames=FALSE)
+
+
+byRegProxy = counter %>% dplyr::group_by(RegionName,Dataset) %>% summarize(meanNumDB = round(mean(num_db),2)) %>% arrange(desc(meanNumDB))
+datatable(byRegProxy,rownames=FALSE)
+
+
+
+
+```
+
