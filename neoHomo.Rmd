@@ -72,14 +72,30 @@ cat(paste0("<style>",
 
 # Introduction
 
-The intention of this data audit is to find any records from the Neotoma Paleoecology Database which potentially violate Neotoma's statement of values, especially with respect to Neotoma's goal of aligning with principles of Indigenous data sovereignty. The authors of this audit are white researchers informed by guidance from theorists of Indigenous data sovereignty, paleo scientists, and other colleagues.
+For stewards of data in which Indigenous peoples have rights (i.e., Indigenous data), ethical data stewardship requires honoring such rights. Theorists of Indigenous data sovereignty are exhorting stewards to honor these rights by aligning with the CARE principles of Indigenous data governance (Kukutai & Taylor, 2016; Carroll, 2020; Taitingfong forthcoming ?). The Neotoma Paleoecology Database is working to align with the CARE principles through its participation in the Ethical Open Science for Past Global Change Data Research Coordination Network.  
 
-Note: the following audit contains potentially sensitive information about Indigenous ancestors. Our intent is to expose this information in order to work toward better management in the future.
+Neotoma holds paleodata of many proxy types (e.g., pollen, vertebrate fauna, diatoms) from across the world (Williams et al 2018). Expertise concerning the different proxies stewarded by Neotoma is distributed among different kinds of specialists (e.g., palynologists, vertebrate paleoecologists, diatomists), and knowledge of all the datasets in Neotoma is likewise distributed. Because they derive from Indigenous lands, or concern the human and nonhuman relations of Indigenous peoples, some of these datasets are Indigenous. But so far, there is no complete record of the extent of these Indigenous data in Neotoma.  
 
-# Are any sites in Neotoma located on federal Indigenous lands?
+In order to achieve alignment with CARE, it is necessary to have a more complete accounting of 1) what Indigenous data Neotoma currently stewards and 2) how Neotoma’s stewardship of those data conforms or not to best practice. We present here an account of our attempt to perform such a data audit, as well as our preliminary findings. 
 
-## Method
-We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous lands in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
+We searched programmatically through Neotoma’s metadata for any sensitive Indigenous data. Such sensitive Indigenous data include those that concern Indigenous ancestors (e.g., human skeletal elements and human-derived radiocarbon dates) or derive from sacred sites (e.g., burial mounds). We also searched for any records in which purposeful imprecision has been introduced into the site coordinates because introducing imprecision is one way to protect sensitive sites. Lastly, we searched for datasets that were collected from federally recognized Indigenous lands, since these may be most relevant to nation building activities of tribal governments. 
+
+We documented sensitive Indigenous records, fuzzed sites, and data from federally recognized Indigenous lands. Although limitations in Neotoma’s metadata led us to systematically undercount or overcount records in different circumstances, we are hopeful that this preliminary inventory will spur us to better steward these data.
+
+
+<i>Note: the following audit contains potentially sensitive information about Indigenous ancestors. Our intent is to expose this information in order to work toward better management in the future.</i>
+
+# Approach
+
+Our audit has two prongs. First, we intend to surface those data which most directly manifest a connection to colonial violence. In the case of Neotoma, these data include records of human skeletal elements from Indigenous lands, as well as radiocarbon dates which derive from such elements. These records stigmatize and objectify Indigenous ancestors. These data also include records from culturally sensitive areas, such as Indigenous burial mounds. Ethical investigation of such sensitive sites requires consultation with local tribal nations and adherence to cultural protocols, which have often been lacking in paleoecological studies to date. Conversely, as part of this first prong, we think it useful to surface those Neotoma records which exemplify CAREful research practice. These include records that introduce purposeful imprecision into site coordinates in order to protect culturally sensitive locations, as well as data deriving from studies which explicitly document a process of collaboration with local tribal nations. The second prong of our audit is meant to surface those Neotoma records which are useful to tribal nations for their self-governance (data for governance subprinciple of CARE). These include any Neotoma records which derive from federal Indigenous lands. 
+
+We searched for the following kinds of records:
+<ol>
+<li>Indigenous ancestors' skeletal material,</li>
+<li>radiocarbon dates derived from Indigenous ancestors,</li>
+<li>records collected from culturally sensitive locations,</li>
+<li>records from locations whose precise coordinates have been fuzzed, and</li>
+<li>records from federally recognized Indigenous lands in the US, Canada, and Australia.</li></ol>
 
 
 ```{r setup, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
@@ -97,12 +113,8 @@ library(geojsonsf)
 library(stringr)
 library(leaflet)
 sf_use_s2(FALSE)
-```
 
-
-```{r cars,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
-## https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about
-setwd("C:/Users/Nick/Documents")
+setwd("../../")
 rezes = read_sf("tl_2019_us_aiannh.shp") %>% dplyr::select(NAME)
 
 canada_rezes = geojson_sf('https://proxyinternet.nrcan.gc.ca/arcgis/rest/services/CLSS-SATC/CLSS_Administrative_Boundaries/MapServer/0/query?outFields=*&where=1%3D1&f=geojson')
@@ -110,8 +122,11 @@ canada_rezes = canada_rezes %>% dplyr::rename('NAME' = 'adminAreaNameEng') %>% d
 canada_rezes = st_transform(canada_rezes,crs="NAD83")
 canada_rezes = canada_rezes %>% dplyr::mutate(NAME = str_to_title(NAME))
 
-aust_ipa = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
-aust_ipa = aust_ipa %>% dplyr::select(NAME)
+aust_ipa1 = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?where=NAME+BETWEEN+%27A%27+AND+%27LZ%27&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&resultOffset=&resultRecordCount=&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&timeReferenceUnknownClient=false&sqlFormat=none&resultType=&featureEncoding=esriDefault&datumTransformation=&f=geojson")
+
+aust_ipa2 = geojson_sf('https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?where=NAME+BETWEEN+%27LZ%27+AND+%27ZZ%27&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&resultOffset=&resultRecordCount=&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&timeReferenceUnknownClient=false&sqlFormat=none&resultType=&featureEncoding=esriDefault&datumTransformation=&f=geojson')
+aust_ipa = aust_ipa1 %>% rbind(aust_ipa2)
+aust_ipa = aust_ipa1 %>% dplyr::select(NAME)
 aust_ipa = st_transform(aust_ipa,crs="NAD83")
 
 rezes = rezes %>% rbind(canada_rezes) %>% rbind(aust_ipa)
@@ -203,7 +218,6 @@ map_sites = map_sites %>% distinct()
 map_sites_table = map_sites %>% left_join(db_names) %>% dplyr::select(NAME,sitename,datasettype,db_names)%>% rename("database" = "db_names")%>% dplyr::filter(datasettype != "geochronologic") %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
 
 fuzzed_sites = fuzzed_sites %>% distinct() %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
-datatable(st_drop_geometry(all_sites,rownames=FALSE))
 
 
 map_sites_neo = get_sites(c(as.numeric(map_sites$siteid)),all_data=TRUE)
@@ -213,46 +227,14 @@ colors = rep(c("red","blue","limegreen","purple","yellow","black","orange","skyb
 
 colors = colors[1:length(rezes[[1]])]
 library(rmapshaper)
-test = ms_simplify(rezes)
+rez2 = rezes %>% dplyr::filter(!NAME %in% c('Murray Lake 4','Nunavut Land Claims Agreement \u2013 Hall Beach Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Bathurst Inlet Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Repulse Bay Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Taloyoak Inuit Owned Lands','Isadore Harry 12','Ochapowace I.r. 71-131','Nunavut Land Claims Agreement \u2013 Arctic Bay Inuit Owned Land'))
+test = ms_simplify(rez2)
 
-plotLeaflet(map_sites_neo) %>% 
-  addTiles() %>% 
-  addPolygons(data = test,
-        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
-        fillColor = ~colors,
-        popup= ~NAME)
 
 fuzzed_sites = fuzzed_sites %>% dplyr::filter(datasettype != "geochronologic")
 
 num_fuzzed= length(fuzzed_sites[[1]])
 
-```
-
-Next, we counted those Neotoma datasets derived sites which are on federal Indigenous lands by the Neotoma constituent database with which they are associated and the kind of dataset they are.
-
-``` {r add, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
-
-datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
-
-
-#tm_shape(osm.raster(map_sites)) + tm_rgb() +
-#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
-#  tm_shape(map_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
-#  tm_add_legend(type = "fill", 
-#                  col = c("blue"),
-##                  labels = c("Federal Indigenous land"),
-#                  title = "Legend",
-#                  border.col="blue") +
-#  tm_add_legend(type = "symbol", 
-#                  col = c("red"),
-#                  labels = c("Neotoma Site"),
-#                  title = "",
-#                  border.col="red")
-
-```
-
-
-``` {r any-specs,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
 
 #repospec prep
 repospecs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryspecimens&count=false&limit=99999&offset=0"))$data
@@ -297,136 +279,13 @@ filtered_repospec = repospec_df %>% dplyr::filter(datasetid %in% map_sites$datas
 database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
 
 
-idx=0
-for (i in seq(1,length(database_list))) {
-  #print(i)
-  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
-  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
-  if(length(returns) != 0) {
-    for (j in seq(length(returns))) {
-      if(!is.null(returns[[j]]$site$geography)) {
-      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
-        for (k in seq(length(returns[[j]]$site$datasets))) {
-          idx = idx + 1
-        }
-        }
-        }
-    }
-  }
-  
-}
 
 
-site_mat = matrix(nrow=idx,ncol=5)
-idx=0
-for (i in seq(1,length(database_list))) {
-  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
-  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
-  if(length(returns) != 0) {
-    for (j in seq(length(returns))) {
-      if(!is.null(returns[[j]]$site$geography)) {
-      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
-        for (k in seq(length(returns[[j]]$site$datasets))) {
-          idx = idx + 1
-          if(!is.null(returns[[j]]$site$sitename )) {
-            site_mat[idx,1] = returns[[j]]$site$sitename }
-          if(!is.null(returns[[j]]$site$geography )) {
-            site_mat[idx,2] = returns[[j]]$site$geography }
-          if(!is.null(returns[[j]]$site$siteid )) {
-            site_mat[idx,3] = returns[[j]]$site$siteid }
-          if(!is.null(returns[[j]]$site$datasets[[k]]$datasettype )) {
-            site_mat[idx,4] = returns[[j]]$site$datasets[[k]]$datasettype}
-          if(!is.null(returns[[j]]$site$datasets[[k]]$database )) {
-            site_mat[idx,5] = returns[[j]]$site$datasets[[k]]$database}
-        }
-        }
-        }
-    }
-  }
-  
-}
 
-
-site_df = as.data.frame(site_mat)
-names(site_df)= c("site_name","geography","siteid","datasettype","database")
-
-
-fuzzed_datasets = site_df %>% dplyr::filter(datasettype != "geochronologic")
-
-
-fuzzed_set_counter = fuzzed_datasets %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
- 
-
-distinct_sites = site_df %>% dplyr::select(site_name,siteid,geography) %>% distinct()
-
-num_fuzzed = length(distinct_sites[[1]])
 
 
 ```
 
-## Next Steps
-Our next steps are...
-
-# Are the coordinates for any sites in Neotoma fuzzed?
-
-## Methods
-We count any site whose geography is provided as a bounding box rather a point as fuzzed because according to <a target="_blank" href="https://neotoma-manual.readthedocs.io/en/latest/tables_site.html#sites">the Neotoma Manual</a>, "the lat-long box can be used either to circumscribe the areal extent of a site or to provide purposeful imprecision to the site location."  Notice that this is a liberal definition - some sites with bounding box geographies will have been so formatted for reasons other than purposeful imprecision.  
-
-We found `r num_fuzzed` fuzzed sites using this method. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sites by the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
-
-```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
-
-#We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or whether latitude or the longitude had a precision of 0 or 1 decimal places. We said those sites which met this definition were fuzzed. (Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place).
-
-#fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
-
-#fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
-
-#fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
-#fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
-
-#datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
-
-
-#datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
-
-
-
-#tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
-#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
-#  tm_shape(fuzzed_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
-#  tm_add_legend(type = "fill", 
-#                  col = c("blue"),
-#                  labels = c("Federal Indigenous land"),
-#                  title = "Legend",
-#                  border.col="blue") +
-#  tm_add_legend(type = "symbol", 
-#                  col = c("red"),
-#                  labels = c("Fuzzed Neotoma Site"),
-#                  title = "",
-#                  border.col="red")
-
-
-
-datatable(fuzzed_datasets[c(1,4,5)],rownames=FALSE)
-
-
-
-datatable(fuzzed_set_counter,rownames=FALSE)
-
-fuzzed_sites_neo = get_sites(c(as.numeric(distinct_sites$siteid)),all_data=TRUE)
-
-plotLeaflet(fuzzed_sites_neo) %>%
-   addPolygons(data = test,
-        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
-        fillColor = ~colors,
-        popup= ~NAME)
-
-
-```
-
-## Next steps
-Our next steps are to refine our definition of fuzzed sites.
 
 # Are any samples in Neotoma from humans?
 
@@ -882,7 +741,6 @@ datatable(geochron_counter,rownames=FALSE)
 ## Next steps
 Reach out to stewards of relevant constituent databases and ask them to come to a decision about managing these records.
 
-
 # Are any of the collection units for Neotoma's records from culturally sensitive areas?
 
 ## Methods
@@ -1005,3 +863,182 @@ datatable(coll_joined,rownames=FALSE)
 ```
 ## Next steps
 Our next steps are to reach out to the relevant constituent database stewards for sensitivity levels 1 and 2 and ask them to come to a decision about managing these records.
+
+
+# Are the coordinates for any sites in Neotoma fuzzed?
+
+## Methods
+We count any site whose geography is provided as a bounding box rather a point as fuzzed because according to <a target="_blank" href="https://neotoma-manual.readthedocs.io/en/latest/tables_site.html#sites">the Neotoma Manual</a>, "the lat-long box can be used either to circumscribe the areal extent of a site or to provide purposeful imprecision to the site location."  Notice that this is a liberal definition - some sites with bounding box geographies will have been so formatted for reasons other than purposeful imprecision.  
+
+We found `r num_fuzzed` fuzzed sites using this method. One table below documents the site names, dataset types, and constituent databases associated with fuzzed sites. The next table counts datasets associated with fuzzed sites by the type of dataset and the constituent database from which the dataset derives, and the map below documents fuzzed site locations.
+
+```{r fuzzed,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+
+#We checked for all sites whether both the latitude and longitude were exactly divisible by 0.25, or whether latitude or the longitude had a precision of 0 or 1 decimal places. We said those sites which met this definition were fuzzed. (Notice that this is a conservative method. There are likely fuzzed sites in Neotoma whose coordinates are not exactly divisible by 0.25, or that have precision greater than 1 decimal place).
+
+#fuzzed_sites_neo = get_sites(c(as.numeric(fuzzed_sites$siteid)),all_data=TRUE)
+
+#fuzzed_by_dbset = fuzzed_sites %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
+
+#fuzzed_by_dbset = fuzzed_by_dbset %>% left_join(db_names) %>% dplyr::select(db_names,datasettype,n) %>% rename("database" = "db_names")
+#fuzzed_sites = fuzzed_sites %>% left_join(db_names) %>% dplyr::select(sitename,datasettype,db_names)%>% rename("database" = "db_names")
+
+#datatable(st_drop_geometry(fuzzed_sites),rownames=FALSE)
+
+
+#datatable(st_drop_geometry(fuzzed_by_dbset),rownames=FALSE) 
+
+
+
+#tm_shape(osm.raster(fuzzed_sites)) + tm_rgb() +
+#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+#  tm_shape(fuzzed_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+#  tm_add_legend(type = "fill", 
+#                  col = c("blue"),
+#                  labels = c("Federal Indigenous land"),
+#                  title = "Legend",
+#                  border.col="blue") +
+#  tm_add_legend(type = "symbol", 
+#                  col = c("red"),
+#                  labels = c("Fuzzed Neotoma Site"),
+#                  title = "",
+#                  border.col="red")
+
+
+
+idx=0
+for (i in seq(1,length(database_list))) {
+  #print(i)
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+    for (j in seq(length(returns))) {
+      if(!is.null(returns[[j]]$site$geography)) {
+      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+        }
+        }
+        }
+    }
+  }
+  
+}
+
+
+
+site_mat = matrix(nrow=idx,ncol=5)
+idx=0
+for (i in seq(1,length(database_list))) {
+  db_format = gsub(" ", '%20', database_list[i], fixed=TRUE)
+  returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/db?limit=10000&offset=0&database=",db_format)))$data
+  if(length(returns) != 0) {
+    for (j in seq(length(returns))) {
+      if(!is.null(returns[[j]]$site$geography)) {
+      if (st_geometry_type(geojson_sf(returns[[j]]$site$geography)) != 'POINT') {
+        for (k in seq(length(returns[[j]]$site$datasets))) {
+          idx = idx + 1
+          if(!is.null(returns[[j]]$site$sitename )) {
+            site_mat[idx,1] = returns[[j]]$site$sitename }
+          if(!is.null(returns[[j]]$site$geography )) {
+            site_mat[idx,2] = returns[[j]]$site$geography }
+          if(!is.null(returns[[j]]$site$siteid )) {
+            site_mat[idx,3] = returns[[j]]$site$siteid }
+          if(!is.null(returns[[j]]$site$datasets[[k]]$datasettype )) {
+            site_mat[idx,4] = returns[[j]]$site$datasets[[k]]$datasettype}
+          if(!is.null(returns[[j]]$site$datasets[[k]]$database )) {
+            site_mat[idx,5] = returns[[j]]$site$datasets[[k]]$database}
+        }
+        }
+        }
+    }
+  }
+  
+}
+
+site_df = as.data.frame(site_mat)
+names(site_df)= c("site_name","geography","siteid","datasettype","database")
+
+
+fuzzed_datasets = site_df %>% dplyr::filter(datasettype != "geochronologic")
+
+
+fuzzed_set_counter = fuzzed_datasets %>% group_by(database,datasettype) %>% count() %>% arrange(desc(n))
+ 
+
+distinct_sites = site_df %>% dplyr::select(site_name,siteid,geography) %>% distinct()
+
+num_fuzzed = length(distinct_sites[[1]])
+
+datatable(fuzzed_datasets[c(1,4,5)],rownames=FALSE)
+
+
+
+datatable(fuzzed_set_counter,rownames=FALSE)
+
+fuzzed_sites_neo = get_sites(c(as.numeric(distinct_sites$siteid)),all_data=TRUE)
+
+plotLeaflet(fuzzed_sites_neo) %>%
+   addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
+
+
+```
+
+## Next steps
+Our next steps are to refine our definition of fuzzed sites.
+
+
+# Are any sites in Neotoma located on federal Indigenous lands?
+
+## Method
+We did a spatial join for every site in Neotoma with a unique site ID to shapefiles of the borders of federal Indigenous lands in <a target="_blank" href="https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-current-american-indian-alaska-native-native-hawaiian-area">the United States</a> and <a target="_blank" href="https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about">Canada</a>, and Indigenous protected areas in <a href="https://fed.dcceew.gov.au/datasets/75c48afce3bb445f9ce58633467e21ed/about" target="_blank">Australia</a>, and we tallied and mapped all those which intersected the borders of federal reservations. See list below.
+
+
+```{r cars,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+## https://hub.arcgis.com/datasets/esrica-tsg::indigenous-lands-of-canada/about
+
+
+datatable(st_drop_geometry(all_sites),rownames=FALSE)
+
+plotLeaflet(map_sites_neo) %>% 
+  addTiles() %>% 
+  addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
+
+```
+
+Next, we counted those Neotoma datasets derived sites which are on federal Indigenous lands by the Neotoma constituent database with which they are associated and the kind of dataset they are.
+
+``` {r add, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+datatable(st_drop_geometry(map_sites_table),rownames=FALSE)
+
+
+#tm_shape(osm.raster(map_sites)) + tm_rgb() +
+#  tm_shape(rezes) + tm_fill(col="blue",alpha=0.8) +
+#  tm_shape(map_sites) + tm_dots(col="red",alpha=0.3,size=0.02,border.alpha=0.3) +
+#  tm_add_legend(type = "fill", 
+#                  col = c("blue"),
+##                  labels = c("Federal Indigenous land"),
+#                  title = "Legend",
+#                  border.col="blue") +
+#  tm_add_legend(type = "symbol", 
+#                  col = c("red"),
+#                  labels = c("Neotoma Site"),
+#                  title = "",
+#                  border.col="red")
+
+```
+
+
+``` {r any-specs,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+
+
+```
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>

@@ -75,6 +75,7 @@ for (i in seq(1,length(database_list))) {
         cbind(as.data.frame(returns[[j]]$site[1:3]))
       if (st_geometry_type(newplace$geometry)=="POLYGON") {
         newplace = st_centroid(newplace) 
+        print(paste0("Polygon siteid: ",returns[[j]]$site$siteid))
       }
       placeslist = rbind(placeslist,newplace)}
       
@@ -84,6 +85,7 @@ for (i in seq(1,length(database_list))) {
         cbind(as.data.frame(""))
       names(newplace) = names(placeslist)
       if (st_geometry_type(newplace$geometry)=="POLYGON" & is.null(returns[[j]]$site$sitedescription)) {
+        print(paste0("Polygon siteid: ",returns[[j]]$site$siteid))
         newplace = st_centroid(newplace)
       names(newplace) = names(placeslist)
       }
@@ -133,15 +135,16 @@ db_stats = db_stats %>%
 
 db_stats = db_stats[c(2,1)]
 
+a = get_sites(c(3545,4258,4259,4668,4865,5889,6014,6476,7528,7550,8584,9950),all_data=T)
 ```
 
 FAUNMAP is one of the original Neotoma Constituent Databases. FAUNMAP was originally developed by Russ Graham and Ernest Lundelius in the early 1990s with <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=9005144">funding from the NSF</a>. FAUNMAP initially aggregated mammalian occurrences from across the United States for the past 50,000 years. In the late 1990s, the temporal reach of the database was extended to encompass the past five million years. FAUNMAP does contain some data on vertebrate taxa outside mammals (as well as a few plant and invertebrate datasets!), but mammals are its primary focus.
 
 FAUNMAP currently contains `r db_stats$number[3]` datasets from `r length(unique(placeslist)[[1]])` sites from the locations mapped below.
-
+items = "clop"
 
 ```{r dataset-api, echo=FALSE, message=FALSE,include=TRUE, warning=FALSE}
-
+print(clop)
 ##take the matrix of dataset ids and types from the first loop, just grab the values that are full (I had made a lot more rows than I would need since I wasn't sure how many rows I would need). Then to get the more specific metadata associated with them, run the Neotoma datasets API on the dataset IDs. I couldn't figure out how to get more than 25 at a time so I ran this call 280ish times in groups of 25.
 
 datasets_df = as.data.frame(datasets_mat)
