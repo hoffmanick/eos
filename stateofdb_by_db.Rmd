@@ -1,0 +1,373 @@
+---
+title: "State of the Database by Constituent db"
+author: "Nick Hoffman"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    highlight: pygment
+    keep_md: no
+    toc: true
+    number_sections: true
+    toc_depth: 1
+    toc_float: true
+    theme: journal
+editor_options:
+    chunk_output_type: inline
+---
+
+<style type="text/css">
+h2, h3, h4, h5, h6 {
+  counter-reset: section;
+}
+p {
+  font-size:18px;
+}
+
+ul {
+  font-size:18px;
+}
+
+li {
+  font-size:18px;
+}
+table {
+   padding: 0;border-collapse: collapse;
+   layout: fixed;
+   width: 90%; }
+table tr {
+   border-top: 1px solid #cccccc;
+   background-color: white;
+   margin: 0;
+   padding: 0; }
+table tr:nth-child(2n) {
+   background-color: #f8f8f8; }
+table tr th {
+   font-weight: bold;
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr td {
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr th :first-child, table tr td :first-child {
+   margin-top: 0; }
+table tr th :last-child, table tr td :last-child {
+   margin-bottom: 0; }
+.html-widget {
+    margin: auto;
+}
+</style>
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(leaflet)
+library(wkb)
+library(dplyr)
+library(sf)
+library(httr)
+library(DT)
+```
+
+
+```{r downloadanaly, message=FALSE,warning=FALSE,echo=FALSE}
+
+analysisunits1 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999"))$data
+
+analysisunits2 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=99999"))$data
+analysisunits3 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=199998"))$data
+analysisunits4 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=299997"))$data
+analysisunits5 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=399996"))$data
+
+
+analysisunits = append(analysisunits1,analysisunits2) %>% append(analysisunits3) %>% append(analysisunits4) %>% append(analysisunits5)
+
+
+analysis_mat = matrix(nrow=length(analysisunits),ncol=11)
+
+for (i in seq(length(analysisunits))) {
+  for(j in seq(11) ) {
+    if (!is.null(analysisunits[[i]][[j]])) {
+  analysis_mat[i,j] = analysisunits[[i]][[j]]
+    }}}
+
+
+analysis_df = as.data.frame(analysis_mat)
+
+
+names(analysis_df) = c("analysisunitid","collectionunitid","analysisunitname","depth","thickness","faciesid","mixed","igsn","notes","datecreated","datemodified")
+
+```
+
+
+```{r download-tables, echo=FALSE,message=FALSE,warning=FALSE}
+
+tables = c("dslinks", "sites", "datasetdatabases","constituentdatabases","collectionunits","datasets")
+
+
+for (i in seq(length(tables))) {
+
+  table = tables[[i]]
+dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+
+
+dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+
+for (i in seq(1,length(dslinks))) {
+  for (j in seq(length(dslinks[[1]]))) {
+    if (!is.null(dslinks[[i]][[j]])) {
+      dsl_df[i,j] = dslinks[[i]][[j]]
+    }
+  }
+}
+
+dsl_df = as.data.frame(dsl_df)
+
+names(dsl_df) = names(dslinks[[1]]) 
+
+assign(paste0(table,"_df"), dsl_df)
+}
+
+sites_df = sites_df %>% dplyr::mutate(siteid = as.numeric(siteid))
+
+collectionunits_df = collectionunits_df %>% dplyr::mutate(siteid = as.numeric(siteid))
+dslinks_df = dslinks_df %>% dplyr::mutate(datasetid=as.character(datasetid))
+```
+
+# No database
+``` {r firstquery, message=FALSE,warning=FALSE,echo=FALSE}
+
+
+
+joiner = dslinks_df %>% left_join(sites_df, by = join_by(siteid)) %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) 
+
+dups = joiner %>% group_by(siteid) %>% summarize(toString(unique(datasetid))) %>% left_join(sites_df) %>% group_by(geog) %>% count() %>% filter(n>1) %>% left_join(joiner)
+
+missers = sites_df %>% left_join(collectionunits_df,by=join_by(siteid)) %>% left_join(datasets_df,by=join_by(collectionunitid))  %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) %>% dplyr::filter(is.na(collectionunitid) | is.na(datasetid)) %>% dplyr::select(c(siteid,sitename,collectionunitid,datasetid,databasename,databaseid,geog))
+
+
+m_sfc = st_as_sfc(hex2raw(missers$geog),EWKB=TRUE)
+missers_sf = st_as_sf(missers,geom=m_sfc) %>% dplyr::select(!geog)
+
+
+missers_sf = missers_sf %>% dplyr::mutate(whatmiss = case_when(
+  is.na(datasetid) & is.na(collectionunitid) ~ paste0(sitename, " missing: dataset + collectionunit"),
+  is.na(datasetid) & !is.na(collectionunitid) ~ paste0(sitename, " missing: dataset"),
+  !is.na(datasetid) & is.na(collectionunitid) ~ paste0(sitename, " missing: collectionunit"),
+  !is.na(datasetid) & !is.na(collectionunitid) ~ paste0("none missing from ",sitename)))
+                                                               
+
+ pointSites_m = missers_sf[st_geometry_type(missers_sf) == "POINT",] 
+    polySites_m = missers_sf[st_geometry_type(missers_sf) == "POLYGON",] 
+
+    leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites_m, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~whatmiss)  %>%
+  addCircleMarkers(data = pointSites_m, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.2, 
+                   stroke = FALSE, 
+                   popup = ~whatmiss)
+
+    
+analy_missers = sites_df %>% left_join(collectionunits_df,by=join_by(siteid)) %>% left_join(analysis_df, by=join_by(collectionunitid)) %>% left_join(datasets_df,by=join_by(collectionunitid))  %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) %>% dplyr::filter(is.na(analysisunitid)) %>% dplyr::select(c(siteid,sitename,collectionunitid,datasetid,databasename,databaseid,analysisunitid, geog)) 
+
+
+am_sfc = st_as_sfc(hex2raw(analy_missers$geog),EWKB=TRUE)
+analy_missers_sf = st_as_sf(analy_missers,geom=am_sfc) %>% dplyr::select(!geog)
+
+
+analy_missers_nodb = analy_missers_sf %>% dplyr::filter(is.na(databaseid))
+
+datatable(analy_missers_nodb,rownames=FALSE)
+
+
+                                                 
+
+ pointSites_am = analy_missers_nodb[st_geometry_type(analy_missers_nodb) == "POINT",] 
+    polySites_am = analy_missers_nodb[st_geometry_type(analy_missers_nodb) == "POLYGON",] 
+
+    leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites_am, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites_am, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.2, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+
+for ( i in seq(2,5)) {
+
+  db_specific = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct()
+    db_specific2 = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct() %>% group_by(geog) %>% summarize(toString(unique(siteid)),toString(unique(sitename)))
+    
+    notnullloc = db_specific2 %>% dplyr::filter(!is.na(geog))
+    sfc = st_as_sfc(hex2raw(notnullloc$geog),EWKB=TRUE)
+    db_sf = st_as_sf(notnullloc,geom=sfc) %>% dplyr::select(!geog)
+    names(db_sf) = c("siteids","sitenames","geom")
+        
+    nullloc = db_specific2 %>% dplyr::filter(is.na(geog))
+    
+
+    pointSites = db_sf[st_geometry_type(db_sf) == "POINT",] 
+    polySites = db_sf[st_geometry_type(db_sf) == "POLYGON",] 
+
+   map_dups =  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitenames)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitenames)
+    
+      if(length(polySites[[1]]) > 0 | length(pointSites[[1]]) > 0) {
+   assign(paste0("map_dups_",i),map_dups)}
+   
+    datatable(nullloc,rownames=FALSE)
+    
+     assign(paste0("dups_na_",i),nullloc)
+   
+    
+    db_spec_analymiss = analy_missers_sf %>% dplyr::filter(databaseid==i)
+    
+    datatable(db_spec_analymiss)
+    
+       assign(paste0("analymiss_",i),db_spec_analymiss)
+   
+    
+   pointSites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POINT",] 
+    polySites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POLYGON",] 
+
+    whereanaly = leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites_am, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites_am, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+    
+    if(length(polySites_am[[1]]) > 0 | length(pointSites_am[[1]]) > 0) {
+       assign(paste0("whereanaly_",i),whereanaly)}
+   
+    
+}
+```
+
+
+# African Pollen Database
+
+```{r rez1, echo=FALSE,message=FALSE,warning=FALSE}
+
+if (exists("map_dups_2")) {
+map_dups_2}
+
+if (length(dups_na_2[[1]]) > 0) {
+datatable(dups_na_2,rownames=FALSE)}
+
+
+if (length(analymiss_2[[1]] > 0)) {
+datatable(analymiss_2,rownames=FALSE)}
+
+if (exists("whereanaly_2")) {
+whereanaly_2}
+
+
+```
+
+# European Pollen Database
+
+```{r rez3, echo=FALSE,message=FALSE,warning=FALSE}
+
+
+if (exists("map_dups_3")) {
+map_dups_3}
+
+
+if (length(dups_na_3[[1]]) > 0) {
+datatable(dups_na_3,rownames=FALSE)}
+
+
+if (length(analymiss_3[[1]] > 0)) {
+datatable(analymiss_3,rownames=FALSE)}
+
+if (exists("whereanaly_3")) {
+whereanaly_3}
+
+
+```
+
+# Indo Pacific Pollen Database
+
+```{r rez4, echo=FALSE,message=FALSE,warning=FALSE}
+
+
+if (exists("map_dups_4")) {
+map_dups_4}
+
+if (length(dups_na_4[[1]]) > 0) {
+datatable(dups_na_4,rownames=FALSE)}
+
+
+if (length(analymiss_4[[1]] > 0)) {
+datatable(analymiss_4,rownames=FALSE)}
+
+if (exists("whereanaly_4")) {
+whereanaly_4}
+
+
+```
+
+# Latin American Pollen Database
+
+```{r rez5, echo=FALSE,message=FALSE,warning=FALSE}
+
+if (exists("map_dups_5")) {
+map_dups_5}
+
+
+if (length(dups_na_5[[1]]) > 0) {
+datatable(dups_na_5,rownames=FALSE)}
+
+if (length(analymiss_5[[1]] > 0)) {
+datatable(analymiss_5,rownames=FALSE)}
+
+if (exists("whereanaly_5")) {
+whereanaly_5}
+
+
+```
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>

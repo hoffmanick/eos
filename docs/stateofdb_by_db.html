@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nick Hoffman" />
+
+<meta name="date" content="2025-01-23" />
+
+<title>State of the Database by Constituent db</title>
+
+<script src="site_libs/header-attrs-2.26/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="site_libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-binding-2.2.1/leaflet.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.32/datatables.js"></script>
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">State of the Database by Constituent
+db</h1>
+<h4 class="author">Nick Hoffman</h4>
+<h4 class="date">2025-01-23</h4>
+
+</div>
+
+
+<style type="text/css">
+h2, h3, h4, h5, h6 {
+  counter-reset: section;
+}
+p {
+  font-size:18px;
+}
+
+ul {
+  font-size:18px;
+}
+
+li {
+  font-size:18px;
+}
+table {
+   padding: 0;border-collapse: collapse;
+   layout: fixed;
+   width: 90%; }
+table tr {
+   border-top: 1px solid #cccccc;
+   background-color: white;
+   margin: 0;
+   padding: 0; }
+table tr:nth-child(2n) {
+   background-color: #f8f8f8; }
+table tr th {
+   font-weight: bold;
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr td {
+   border: 1px solid #cccccc;
+   margin: 0;
+   padding: 6px 13px; }
+table tr th :first-child, table tr td :first-child {
+   margin-top: 0; }
+table tr th :last-child, table tr td :last-child {
+   margin-bottom: 0; }
+.html-widget {
+    margin: auto;
+}
+</style>
+<hr />
+<div id="no-database" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> No database</h1>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-17cf1aa3b464d104a9c4" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-17cf1aa3b464d104a9c4">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[-86.18729,-86.18289,-86.18289,-86.18729,-86.18729],"lat":[44.69179,44.69179,44.69424,44.69424,44.69179]}]],[[{"lng":[-92.77697999999999,-92.76372000000001,-92.76372000000001,-92.77697999999999,-92.77697999999999],"lat":[48.52198,48.52198,48.52926,48.52926,48.52198]}]],[[{"lng":[-79.43729,-79.43729,-79.43068,-79.43068,-79.43729],"lat":[49.07017,49.07536,49.07536,49.07017,49.07017]}]],[[{"lng":[-79.43729,-79.43729,-79.43068,-79.43068,-79.43729],"lat":[49.07017,49.07536,49.07536,49.07017,49.07017]}]],[[{"lng":[-85.88779,-85.88037,-85.88037,-85.88779,-85.88779],"lat":[44.91948,44.91948,44.92887,44.92887,44.91948]}]],[[{"lng":[-85.95542,-85.95102,-85.95102,-85.95542,-85.95542],"lat":[44.90257,44.90257,44.90514,44.90514,44.90257]}]],[[{"lng":[-93.55110999999999,-93.53514,-93.53514,-93.55110999999999,-93.55110999999999],"lat":[44.88911,44.88911,44.90315,44.90315,44.88911]}]],[[{"lng":[-93.55110999999999,-93.53514,-93.53514,-93.55110999999999,-93.55110999999999],"lat":[44.88911,44.88911,44.90315,44.90315,44.88911]}]],[[{"lng":[-93.55110999999999,-93.53514,-93.53514,-93.55110999999999,-93.55110999999999],"lat":[44.88911,44.88911,44.90315,44.90315,44.88911]}]],[[{"lng":[-93.55110999999999,-93.53514,-93.53514,-93.55110999999999,-93.55110999999999],"lat":[44.88911,44.88911,44.90315,44.90315,44.88911]}]],[[{"lng":[-92.93277,-92.91543,-92.91543,-92.93277,-92.93277],"lat":[48.52196,48.52196,48.52884,48.52884,48.52196]}]],[[{"lng":[-113.6847,-113.6847,-113.6678,-113.6678,-113.6847],"lat":[48.774,48.7876,48.7876,48.774,48.774]}]],[[{"lng":[-92.85278,-92.83437000000001,-92.83437000000001,-92.85278,-92.85278],"lat":[48.48132,48.48132,48.48565,48.48565,48.48132]}]],[[{"lng":[-86.06570000000001,-86.05686,-86.05686,-86.06570000000001,-86.06570000000001],"lat":[44.73766,44.73766,44.74308,44.74308,44.73766]}]],[[{"lng":[-88.71965,-88.67845,-88.67845,-88.71965,-88.71965],"lat":[48.03207,48.03207,48.05279,48.05279,48.03207]}]],[[{"lng":[-92.77018,-92.75087000000001,-92.75087000000001,-92.77018,-92.77018],"lat":[48.50667,48.50667,48.51485,48.51485,48.50667]}]],[[{"lng":[-74.05125,-74.04226,-74.04226,-74.05125,-74.05125],"lat":[43.51027,43.51027,43.51279,43.51279,43.51027]}]],[[{"lng":[-86.54013999999999,-86.53617,-86.53617,-86.54013999999999,-86.54013999999999],"lat":[46.47897,46.47897,46.48271,46.48271,46.47897]}]],[[{"lng":[-72.23856000000001,-72.23135000000001,-72.23135000000001,-72.23856000000001,-72.23856000000001],"lat":[43.82827,43.82827,43.83765,43.83765,43.82827]}]],[[{"lng":[-86.35879,-86.32334,-86.32334,-86.35879,-86.35879],"lat":[46.55798,46.55798,46.57811,46.57811,46.55798]}]],[[{"lng":[-111.92871,-111.89781,-111.89781,-111.92871,-111.92871],"lat":[75.1812,75.1812,75.18882000000001,75.18882000000001,75.1812]}]],[[{"lng":[-92.54537000000001,-92.52675000000001,-92.52675000000001,-92.54537000000001,-92.54537000000001],"lat":[48.4115,48.4115,48.4197,48.4197,48.4115]}]],[[{"lng":[-92.98484999999999,-92.97812,-92.97812,-92.98484999999999,-92.98484999999999],"lat":[44.90374,44.90374,44.90912,44.90912,44.90374]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-74.44297,-74.42735,-74.42735,-74.44297,-74.44297],"lat":[44.34932,44.34932,44.35616,44.35616,44.34932]}]],[[{"lng":[-74.87821,-74.86958,-74.86958,-74.87821,-74.87821],"lat":[41.76102,41.76102,41.76829,41.76829,41.76102]}]],[[{"lng":[-68.90519999999999,-68.87662,-68.87662,-68.90519999999999,-68.90519999999999],"lat":[46.95393,46.95393,46.96711,46.96711,46.95393]}]],[[{"lng":[-92.99166,-92.96784,-92.96784,-92.99166,-92.99166],"lat":[48.53433,48.53433,48.53896,48.53896,48.53433]}]],[[{"lng":[-109.23641,-109.12226,-109.12226,-109.23641,-109.23641],"lat":[37.25817,37.25817,37.33205,37.33205,37.25817]}]],[[{"lng":[-92.81601999999999,-92.80611,-92.80611,-92.81601999999999,-92.81601999999999],"lat":[48.46568,48.46568,48.46947,48.46947,48.46568]}]],[[{"lng":[-92.64779,-92.63500000000001,-92.63500000000001,-92.64779,-92.64779],"lat":[48.39423,48.39423,48.40218,48.40218,48.39423]}]],[[{"lng":[-86.06649,-86.06074,-86.06074,-86.06649,-86.06649],"lat":[44.83522,44.83522,44.84439,44.84439,44.83522]}]],[[{"lng":[-90.46426,-90.45726999999999,-90.45726999999999,-90.46426,-90.46426],"lat":[47.00069,47.00069,47.01064,47.01064,47.00069]}]],[[{"lng":[-90.88695,-90.88411000000001,-90.88411000000001,-90.88695,-90.88695],"lat":[46.94726,46.94726,46.9484,46.9484,46.94726]}]],[[{"lng":[-92.80168999999999,-92.78821000000001,-92.78821000000001,-92.80168999999999,-92.80168999999999],"lat":[48.51233,48.51233,48.521,48.521,48.51233]}]],[[{"lng":[-72.22244999999999,-72.21576,-72.21576,-72.22244999999999,-72.22244999999999],"lat":[41.92042,41.92042,41.92917,41.92917,41.92042]}]],[[{"lng":[-72.22244999999999,-72.21576,-72.21576,-72.22244999999999,-72.22244999999999],"lat":[41.92042,41.92042,41.92917,41.92917,41.92042]}]],[[{"lng":[-90.51338,-90.51075,-90.51075,-90.51338,-90.51338],"lat":[46.87616,46.87616,46.87804,46.87804,46.87616]}]],[[{"lng":[-92.81397,-92.80024,-92.80024,-92.81397,-92.81397],"lat":[44.74842,44.74842,44.77023,44.77023,44.74842]}]],[[{"lng":[-92.84976,-92.84204,-92.84204,-92.84976,-92.84976],"lat":[48.47576,48.47576,48.47844,48.47844,48.47576]}]],[[{"lng":[-86.45509,-86.44222000000001,-86.44222000000001,-86.45509,-86.45509],"lat":[46.52743,46.52743,46.54078,46.54078,46.52743]}]],[[{"lng":[-92.76703999999999,-92.73717000000001,-92.73717000000001,-92.76703999999999,-92.76703999999999],"lat":[44.91213,44.91213,44.96208,44.96208,44.91213]}]],[[{"lng":[-91.88836000000001,-91.88235,-91.88235,-91.88836000000001,-91.88836000000001],"lat":[45.94352,45.94352,45.9485,45.9485,45.94352]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-120.12589,-119.9968,-119.9968,-120.12589,-120.12589],"lat":[34.20612,34.20612,34.35024,34.35024,34.20612]}]],[[{"lng":[-109.08164,-109.07519,-109.07519,-109.08164,-109.08164],"lat":[37.38287,37.38287,37.38629,37.38629,37.38287]}]],[[{"lng":[-94.86761,-94.81869,-94.81869,-94.86761,-94.86761],"lat":[45.16876,45.16876,45.19744,45.19744,45.16876]}]],[[{"lng":[-70.93456,-70.93004999999999,-70.93004999999999,-70.93456,-70.93456],"lat":[43.1886,43.1886,43.19217,43.19217,43.1886]}]],[[{"lng":[-93.3557,-93.34398,-93.34398,-93.3557,-93.3557],"lat":[43.88817,43.88817,43.89519,43.89519,43.88817]}]],[[{"lng":[-93.3557,-93.34398,-93.34398,-93.3557,-93.3557],"lat":[43.88817,43.88817,43.89519,43.89519,43.88817]}]],[[{"lng":[-92.65173,-92.64577,-92.64577,-92.65173,-92.65173],"lat":[45.41215,45.41215,45.4249,45.4249,45.41215]}]],[[{"lng":[-112.4341,-112.42513,-112.42513,-112.4341,-112.4341],"lat":[47.30134,47.30134,47.31026,47.31026,47.30134]}]],[[{"lng":[-92.82625,-92.80251,-92.80251,-92.82625,-92.82625],"lat":[48.51509,48.51509,48.51978,48.51978,48.51509]}]],[[{"lng":[-74.1708,-74.16794,-74.16794,-74.1708,-74.1708],"lat":[43.28972,43.28972,43.29118,43.29118,43.28972]}]],[[{"lng":[-108.96964,-108.96939,-108.96939,-108.96964,-108.96964],"lat":[37.45433,37.45433,37.45451,37.45451,37.45433]}]],[[{"lng":[-92.95816000000001,-92.93675,-92.93675,-92.95816000000001,-92.95816000000001],"lat":[48.52967,48.52967,48.53621,48.53621,48.52967]}]],[[{"lng":[-85.04201999999999,-85.03607,-85.03607,-85.04201999999999,-85.04201999999999],"lat":[46.69984,46.69984,46.70353,46.70353,46.69984]}]],[[{"lng":[-92.88540999999999,-92.86919,-92.86919,-92.88540999999999,-92.88540999999999],"lat":[48.48584,48.48584,48.49164,48.49164,48.48584]}]],[[{"lng":[-85.90488000000001,-85.89651000000001,-85.89651000000001,-85.90488000000001,-85.90488000000001],"lat":[44.94279,44.94279,44.95436,44.95436,44.94279]}]],[[{"lng":[-93.01791,-92.99302,-92.99302,-93.01791,-93.01791],"lat":[48.535,48.535,48.54256,48.54256,48.535]}]],[[{"lng":[-86.02983999999999,-86.01954000000001,-86.01954000000001,-86.02983999999999,-86.02983999999999],"lat":[45.11942,45.11942,45.1371,45.1371,45.11942]}]],[[{"lng":[-69.25042999999999,-69.24554000000001,-69.24554000000001,-69.25042999999999,-69.25042999999999],"lat":[44.91271,44.91271,44.92365,44.92365,44.91271]}]],[[{"lng":[-86.13526,-86.12634,-86.12634,-86.13526,-86.13526],"lat":[44.70495,44.70495,44.71403,44.71403,44.70495]}]],[[{"lng":[-87.21624,-87.19976,-87.19976,-87.21624,-87.21624],"lat":[41.61289,41.61289,41.61918,41.61918,41.61289]}]],[[{"lng":[-88.87322,-88.73692,-88.73692,-88.87322,-88.87322],"lat":[47.97393,47.97393,48.02424,48.02424,47.97393]}]],[[{"lng":[-74.34998,-74.28097,-74.28097,-74.34998,-74.34998],"lat":[41.1435,41.1435,41.23367,41.23367,41.1435]}]],[[{"lng":[-92.70976,-92.70478,-92.70478,-92.70976,-92.70976],"lat":[48.51475,48.51475,48.52231,48.52231,48.51475]}]],[[{"lng":[-69.23163,-69.21429000000001,-69.21429000000001,-69.23163,-69.23163],"lat":[45.74581,45.74581,45.75037,45.75037,45.74581]}]],[[{"lng":[-92.99924,-92.93847,-92.93847,-92.99924,-92.99924],"lat":[44.74984,44.74984,44.77337,44.77337,44.74984]}]],[[{"lng":[-91.87763,-91.87139999999999,-91.87139999999999,-91.87763,-91.87763],"lat":[45.92134,45.92134,45.92519,45.92519,45.92134]}]],[[{"lng":[-88.54329,-88.53458000000001,-88.53458000000001,-88.54329,-88.54329],"lat":[48.14629,48.14629,48.15144,48.15144,48.14629]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-74.88014,-74.81762999999999,-74.81762999999999,-74.88014,-74.88014],"lat":[43.81683,43.81683,43.84209,43.84209,43.81683]}]],[[{"lng":[-90.54968,-90.54564999999999,-90.54564999999999,-90.54968,-90.54968],"lat":[46.92375,46.92375,46.93137,46.93137,46.92375]}]],[[{"lng":[-84.76358,-84.76358,-84.7625,-84.7625,-84.76358],"lat":[45.07316,45.0736111111111,45.0736111111111,45.07316,45.07316]}]],[[{"lng":[-69.63827999999999,-69.62969,-69.62969,-69.63827999999999,-69.63827999999999],"lat":[44.90334,44.90334,44.9113,44.9113,44.90334]}]],[[{"lng":[-92.53266000000001,-92.51043,-92.51043,-92.53266000000001,-92.53266000000001],"lat":[48.39105,48.39105,48.40245,48.40245,48.39105]}]],[[{"lng":[-92.53266000000001,-92.51043,-92.51043,-92.53266000000001,-92.53266000000001],"lat":[48.39105,48.39105,48.40245,48.40245,48.39105]}]],[[{"lng":[-88.68536,-88.63129000000001,-88.63129000000001,-88.68536,-88.68536],"lat":[48.08735,48.08735,48.10454,48.10454,48.08735]}]],[[{"lng":[-108.89158,-108.82258,-108.82258,-108.89158,-108.89158],"lat":[37.51835,37.51835,37.57905,37.57905,37.51835]}]],[[{"lng":[-92.81835,-92.79295,-92.79295,-92.81835,-92.81835],"lat":[48.49468,48.49468,48.50117,48.50117,48.49468]}]],[[{"lng":[-93.34882,-93.30976,-93.30976,-93.34882,-93.34882],"lat":[45.1427,45.1427,45.16479,45.16479,45.1427]}]],[[{"lng":[-68.95281,-68.95281,-68.94732,-68.94732,-68.95281],"lat":[70.55568,70.55925000000001,70.55925000000001,70.55568,70.55568]}]],[[{"lng":[-84.76358,-84.76358,-84.7625,-84.7625,-84.76358],"lat":[45.07316,45.0736111111111,45.0736111111111,45.07316,45.07316]}]],[[{"lng":[-93.2033,-93.19905,-93.19905,-93.2033,-93.2033],"lat":[44.91543,44.91543,44.92372,44.92372,44.91543]}]],[[{"lng":[-86.12472,-86.11734,-86.11734,-86.12472,-86.12472],"lat":[45.00384,45.00384,45.01595,45.01595,45.00384]}]],[[{"lng":[-88.80907999999999,-88.7859,-88.7859,-88.80907999999999,-88.80907999999999],"lat":[48.04639,48.04639,48.05339,48.05339,48.04639]}]],[[{"lng":[-89.18810999999999,-89.15291999999999,-89.15291999999999,-89.18810999999999,-89.18810999999999],"lat":[47.84788,47.84788,47.86147,47.86147,47.84788]}]],[[{"lng":[-71.98972000000001,-71.98779,-71.98779,-71.98972000000001,-71.98972000000001],"lat":[44.00051,44.00051,44.00514,44.00514,44.00051]}]],[[{"lng":[-122.53438,-122.53438,-122.52288,-122.52288,-122.53438],"lat":[52.09353,52.09968,52.09968,52.09353,52.09353]}]],[[{"lng":[-92.84478,-92.82852,-92.82852,-92.84478,-92.84478],"lat":[48.46781,48.46781,48.4739,48.4739,48.46781]}]],[[{"lng":[-92.50042000000001,-92.47691,-92.47691,-92.50042000000001,-92.50042000000001],"lat":[48.32337,48.32337,48.34825,48.34825,48.32337]}]],[[{"lng":[-93.32034,-93.3036,-93.3036,-93.32034,-93.32034],"lat":[44.93406,44.93406,44.94967,44.94967,44.93406]}]],[[{"lng":[-92.18194,-92.17614,-92.17614,-92.18194,-92.18194],"lat":[48.2017,48.2017,48.20714,48.20714,48.2017]}]],[[{"lng":[-92.78583,-92.77776,-92.77776,-92.78583,-92.78583],"lat":[48.52578,48.52578,48.52939,48.52939,48.52578]}]],[[{"lng":[-70.65342,-70.64492,-70.64492,-70.65342,-70.65342],"lat":[43.51264,43.51264,43.52783,43.52783,43.51264]}]],[[{"lng":[-92.66249000000001,-92.65485,-92.65485,-92.66249000000001,-92.66249000000001],"lat":[48.39102,48.39102,48.40091,48.40091,48.39102]}]],[[{"lng":[-89.01546,-88.95555,-88.95555,-89.01546,-89.01546],"lat":[47.96635,47.96635,47.98313,47.98313,47.96635]}]],[[{"lng":[4.65604,4.6636,4.6636,4.65604,4.65604],"lat":[52.4047,52.4047,52.4248,52.4248,52.4047]}]],[[{"lng":[-69.60533,-69.60245,-69.60245,-69.60533,-69.60533],"lat":[45.33813,45.33813,45.3392,45.3392,45.33813]}]],[[{"lng":[-88.76376,-88.74959,-88.74959,-88.76376,-88.76376],"lat":[48.07725,48.07725,48.08315,48.08315,48.07725]}]],[[{"lng":[-86.36739,-86.35928,-86.35928,-86.36739,-86.36739],"lat":[46.55737,46.55737,46.56266,46.56266,46.55737]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-79.24114,-79.24114,-79.23775000000001,-79.23775000000001,-79.24114],"lat":[49.50729,49.51097,49.51097,49.50729,49.50729]}]],[[{"lng":[-68.02336,-67.97272,-67.97272,-68.02336,-68.02336],"lat":[45.11654,45.11654,45.17091,45.17091,45.11654]}]],[[{"lng":[-89.18414,-89.17718000000001,-89.17718000000001,-89.18414,-89.18414],"lat":[42.77893,42.77893,42.78526,42.78526,42.77893]}]],[[{"lng":[-92.89686,-92.85961,-92.85961,-92.89686,-92.89686],"lat":[48.49376,48.49376,48.50798,48.50798,48.49376]}]],[[{"lng":[22.90125,22.90651,22.90651,22.90125,22.90125],"lat":[-34.01494,-34.01494,-34.01066,-34.01066,-34.01494]}]],[[{"lng":[22.90125,22.90651,22.90651,22.90125,22.90125],"lat":[-34.01494,-34.01494,-34.01066,-34.01066,-34.01494]}]],[[{"lng":[-78.62683,-78.60872000000001,-78.60872000000001,-78.62683,-78.62683],"lat":[45.24117,45.24117,45.25773,45.25773,45.24117]}]],[[{"lng":[-73.32080000000001,-73.31711,-73.31711,-73.32080000000001,-73.32080000000001],"lat":[41.23547,41.23547,41.2488,41.2488,41.23547]}]],[[{"lng":[-88.68967000000001,-88.68218,-88.68218,-88.68967000000001,-88.68967000000001],"lat":[48.0061,48.0061,48.00904,48.00904,48.0061]}]],[[{"lng":[-68.47691,-68.45871,-68.45871,-68.47691,-68.47691],"lat":[47.21152,47.21152,47.21488,47.21488,47.21152]}]],[[{"lng":[-86.05204000000001,-86.0275,-86.0275,-86.05204000000001,-86.05204000000001],"lat":[46.62001,46.62001,46.65278,46.65278,46.62001]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},["Round missing: dataset","Peary missing: dataset","Lac Altura [Altona] missing: dataset","Lac Altura [Altona] missing: dataset","Bass Lake missing: dataset","Tucker missing: dataset","Christmas Lake missing: dataset","Christmas Lake missing: dataset","Christmas Lake missing: dataset","Christmas Lake missing: dataset","Loiten Lake missing: dataset","Lake Josephine missing: dataset + collectionunit","Jorgens missing: dataset","Otter missing: dataset","Richie missing: dataset","Beast missing: dataset","Lixard Pond missing: dataset","Miners missing: dataset","Abanaki missing: dataset","Beaver_PIRO missing: dataset","Lake BC01 missing: dataset","O'Leary missing: dataset","Carver Lake missing: dataset","Gull Lake missing: dataset","Gull Lake missing: dataset","Gull Lake missing: dataset","Gull Lake missing: dataset","Gull Lake missing: dataset","Gull Lake missing: dataset","Dry Channel P. missing: dataset","Briscoe Lake missing: dataset","Gardner Pond missing: dataset","War Club missing: dataset","Climax missing: dataset","Agnes missing: dataset","Tooth Lake missing: dataset","North Bar missing: dataset","Outer Lagoon missing: dataset","Little Sand Bay Lagoon missing: dataset","Brown missing: dataset","Bissonette Pond missing: dataset","Bissonette Pond missing: dataset","Michigan Lagoon missing: dataset","Lake St. Croix Prescott missing: dataset","Quarterline missing: dataset","Chapel missing: dataset","Lake St. Croix Hudson missing: dataset","St. Croix River Trego #3 missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","ODP Hole 893A missing: dataset","Square Tower Ruin Group missing: dataset","Diamond Lake missing: dataset","Barbadoes Pond missing: dataset","Beaver Lake missing: dataset","Beaver Lake missing: dataset","St. Croix River, St. Croix Falls Dam missing: dataset","Bean Lake missing: dataset","Oslo missing: dataset","Alexandra Lake missing: dataset","Painted Hand Pueblo missing: dataset","Quill missing: dataset","Andrus Lake missing: dataset","Little Shoepack missing: dataset","Shell missing: dataset","Locator Lake missing: dataset","Manitou missing: dataset","Alder Brook Stream missing: dataset","Loon missing: dataset","Long missing: dataset","Siskiwit missing: dataset","Greenwood Lake missing: dataset","Ryan missing: dataset","Female Pond missing: dataset","Mississippi River Spring Lake 822 missing: dataset","St. Croix River Trego #1 missing: dataset","Ahmik missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Big Moose Lake missing: dataset","Stockton Lagoon missing: dataset","Green Lake missing: dataset + collectionunit","Barker Pond missing: dataset","Little Trout Lake missing: dataset","Little Trout Lake missing: dataset","Sargent missing: dataset","Sandstone 1 missing: dataset","Cruiser missing: dataset","Mississippi River Coon Rapids missing: dataset","Lake CF8 missing: dataset","Green Lake missing: dataset + collectionunit","Mississippi River RM850 missing: dataset","Florence missing: dataset","Harvey missing: dataset","Feldtman missing: dataset","Lake Constance missing: dataset","BC037 (Wilson et al. 1996) missing: dataset","Ek missing: dataset","Mukooda missing: dataset","Lake Calhoun missing: dataset","Agawato Lake missing: dataset","Fishmouth missing: dataset","Swan Pond missing: dataset","Net missing: dataset","Desor missing: dataset","Haarlem Kabelsleuf missing: dataset","Bear Pond missing: dataset","Beaver_ISRO missing: dataset","Little Beaver missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Inconnu 19 missing: dataset","Fourth Machias Lake missing: dataset","Gibbs Lake missing: dataset","Shoepack missing: dataset","Vankervelsvlei missing: dataset","Vankervelsvlei missing: dataset","Kelly Lake missing: dataset","Aspetuck Reservoir missing: dataset","George missing: dataset","Black missing: dataset","Grand Sable missing: dataset"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[42.443,32.59300712,47.94850085,46.35278,46.35278,44.6672222222222,47.5788475,43.76528,42.7959,46.11443869,46.11443869,46.11443869,40.04075657,41.58007689,42.7475,56.9333333333333,43.31528,47.022222,44.13778,52.79,53.006524,46.37421211,46.37421211,39.46727638,46.64962378,36.00712806,14.0333333333333,45.16915,55.806093,49.735,47.48799465,72.166814,35.071667,51.3231388888889,51.3231388888889,50.24406,50.24406,46.47746767,56.051111,45.909444,48.41877337,46.89197546,46.89197546,46.89197546,46.89197546,46.89197546,41.89706027,45.91703876,45.91703876,75.18348,44.8855,48.4591667,31.05988383,43.8526781,39.6534,43.5253,79.92,45.6434979,45.6434979,46.5555,-12.86,48.28610194,43.8519,43,41.9519,40.38121547,48.0573,44.849882],[-74.4552,-98.31569017,-91.39296143,-69.0575,-69.0575,6.14944444444444,-96.23531853999999,-73.18389000000001,-71.2585,-99.42452982,-99.42452982,-99.42452982,-81.01548859,-71.79802709000001,-71.55056,15.2666666666667,-74.19444,8.373333000000001,-74.29583,-86.17,6.45873,-98.99123974,-98.99123974,-114.854418,-99.42139052,-84.89743874,16.3166666666667,-92.7479167,-5.071082,-125.1933333,-123.2647195,-78.500145,32.719444,6.15780555555556,6.15780555555556,-91.45744000000001,-91.45744000000001,-103.2176549,-3.986666,8.953889,-117.6640499,-99.08101062999999,-99.08101062999999,-99.08101062999999,-99.08101062999999,-99.08101062999999,-73.4471959,-97.02426153,-97.02426153,-111.900273,-69.5748,-92.95358330000001,-81.41308684000001,-84.77214787,-74.6534,-74.0224,-82.93000000000001,-99.23111059,-99.23111059,-68.8708,131.13,-101.9047579,-74.4714,-78,-71.20650000000001,-84.32400254,-88.6292,-68.429254],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.2},null,null,["Blenheim Gilboa Rese. missing: dataset","JAMES LAKE missing: dataset","Becoosin Lake missing: dataset","Big Reed Pond missing: dataset","Big Reed Pond missing: dataset","Les Caves missing: dataset","NLA06608-0915 missing: dataset","Burr Pond missing: dataset","Canobie Lake missing: dataset","NLA06608-0339 missing: dataset","NLA06608-0339 missing: dataset","NLA06608-0339 missing: dataset","Belmont Lake missing: dataset","Beach Pond missing: dataset","Flints Pond missing: dataset","Storasjö missing: dataset","Bennett Lake missing: dataset","Vierwaldstattersee (Lake Lucerne) missing: dataset + collectionunit","Brueyer Pond missing: dataset","ROFTGH27 missing: dataset","Esmeer missing: dataset","NLA06608-0259 missing: dataset","NLA06608-0259 missing: dataset","Bassett Lake missing: dataset","NLA06608-0899 missing: dataset","Lake Catherine missing: dataset","Kamala missing: dataset","St. Croix Islands-2 missing: dataset + collectionunit","Loch Fadd missing: dataset + collectionunit","Anderson Fen missing: dataset","Cushman Lake missing: dataset","QB01 missing: dataset + collectionunit","Ein El Balad (lower), spring fed reservoir missing: dataset + collectionunit","Laumans Kern missing: dataset","Groeve Laumans missing: dataset","Atlantic Lake missing: dataset","Atlantic Lake missing: dataset","White Lake missing: dataset","Loch Coulter missing: dataset + collectionunit","Monte San Giorgio missing: dataset","Bayley missing: dataset","NLA06608-0195 missing: dataset","NLA06608-0195 missing: dataset","NLA06608-0195 missing: dataset","NLA06608-0195 missing: dataset","NLA06608-0195 missing: dataset","Beardsley Pond missing: dataset","NLA06608-0302 missing: dataset","NLA06608-0302 missing: dataset","BC02 missing: dataset","Bog Pond missing: dataset","Kabetogama missing: dataset + collectionunit","Oleander Lake missing: dataset","Clark Co. Lake missing: dataset","Batsto River Reservoir missing: dataset","Garnet Lake missing: dataset","CV04 missing: dataset","NLA06608-0439 missing: dataset","NLA06608-0439 missing: dataset","Bartlett Pond missing: dataset","Manton Dam missing: dataset + collectionunit","NLA06608-0442 missing: dataset","Blue Mountain Lake missing: dataset","Hiscock Site missing: dataset","Barrowsville Pond missing: dataset","Lake Lorraine missing: dataset","Wallace missing: dataset + collectionunit","Halfmile Pond missing: dataset"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-34.01494,79.92],"lng":[-125.1933333,131.13]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-2584352f9b9692e5379d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-2584352f9b9692e5379d">{"x":{"filter":"none","vertical":false,"data":[[30455,24824,31292,10418,10418,10418,28875,31423,27268,24786,24823,22957,28303,32833,30953,28272,30999,30940,27329,30939,31494,30980,23218,30942,24810,24810,24810,24810,32825,24816,24816,14012,32890,24817,32814],["Les Caves","NLA06608-0915","Lake Josephine","Gull Lake","Gull Lake","Gull Lake","Storasjö","Vierwaldstattersee (Lake Lucerne)","ROFTGH27","Square Tower Ruin Group","NLA06608-0899","Lake Catherine","Kamala","St. Croix Islands-2","Loch Fadd","Anderson Fen","QB01","Green Lake","Lake CF8","Green Lake","Ein El Balad (lower), spring fed reservoir","Atlantic Lake","White Lake","Loch Coulter","NLA06608-0195","NLA06608-0195","NLA06608-0195","NLA06608-0195","Kabetogama","NLA06608-0439","NLA06608-0439","Gibbs Lake","Manton Dam","NLA06608-0442","Wallace"],["41568","37608",null,"41806","41776","41799","39244",null,"35134","32441","37606","27534","38262",null,null,"38220",null,null,"35213",null,null,"42355","27804",null,"37585","37586","37591","37592",null,"37600","37601","15778",null,"37603",null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[{"type":"Point","coordinates":[6.14944444444444,44.6672222222222]},{"type":"Point","coordinates":[-96.23531853999999,47.5788475]},{"type":"Polygon","coordinates":[[[-113.6847,48.774],[-113.6847,48.7876],[-113.6678,48.7876],[-113.6678,48.774],[-113.6847,48.774]]]},{"type":"Polygon","coordinates":[[[-119.08811,37.77273],[-119.07915,37.77273],[-119.07915,37.77815],[-119.08811,37.77815],[-119.08811,37.77273]]]},{"type":"Polygon","coordinates":[[[-119.08811,37.77273],[-119.07915,37.77273],[-119.07915,37.77815],[-119.08811,37.77815],[-119.08811,37.77273]]]},{"type":"Polygon","coordinates":[[[-119.08811,37.77273],[-119.07915,37.77273],[-119.07915,37.77815],[-119.08811,37.77815],[-119.08811,37.77273]]]},{"type":"Point","coordinates":[15.2666666666667,56.9333333333333]},{"type":"Point","coordinates":[8.373333000000001,47.022222]},{"type":"Point","coordinates":[-86.17,52.79]},{"type":"Polygon","coordinates":[[[-109.08164,37.38287],[-109.07519,37.38287],[-109.07519,37.38629],[-109.08164,37.38629],[-109.08164,37.38287]]]},{"type":"Point","coordinates":[-99.42139052,46.64962378]},{"type":"Point","coordinates":[-84.89743874,36.00712806]},{"type":"Point","coordinates":[16.3166666666667,14.0333333333333]},{"type":"Point","coordinates":[-92.7479167,45.16915]},{"type":"Point","coordinates":[-5.071082,55.806093]},{"type":"Point","coordinates":[-125.1933333,49.735]},{"type":"Point","coordinates":[-78.500145,72.166814]},{"type":"Polygon","coordinates":[[[-84.76358,45.07316],[-84.76358,45.0736111111111],[-84.7625,45.0736111111111],[-84.7625,45.07316],[-84.76358,45.07316]]]},{"type":"Polygon","coordinates":[[[-68.95281,70.55568],[-68.95281,70.55925000000001],[-68.94732,70.55925000000001],[-68.94732,70.55568],[-68.95281,70.55568]]]},{"type":"Polygon","coordinates":[[[-84.76358,45.07316],[-84.76358,45.0736111111111],[-84.7625,45.0736111111111],[-84.7625,45.07316],[-84.76358,45.07316]]]},{"type":"Point","coordinates":[32.719444,35.071667]},{"type":"Point","coordinates":[-91.45744000000001,50.24406]},{"type":"Point","coordinates":[-103.2176549,46.47746767]},{"type":"Point","coordinates":[-3.986666,56.051111]},{"type":"Point","coordinates":[-99.08101062999999,46.89197546]},{"type":"Point","coordinates":[-99.08101062999999,46.89197546]},{"type":"Point","coordinates":[-99.08101062999999,46.89197546]},{"type":"Point","coordinates":[-99.08101062999999,46.89197546]},{"type":"Point","coordinates":[-92.95358330000001,48.4591667]},{"type":"Point","coordinates":[-99.23111059,45.6434979]},{"type":"Point","coordinates":[-99.23111059,45.6434979]},{"type":"Polygon","coordinates":[[[-89.18414,42.77893],[-89.17718000000001,42.77893],[-89.17718000000001,42.78526],[-89.18414,42.78526],[-89.18414,42.77893]]]},{"type":"Point","coordinates":[131.13,-12.86]},{"type":"Point","coordinates":[-101.9047579,48.28610194]},{"type":"Point","coordinates":[-88.6292,48.0573]}]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>siteid<\/th>\n      <th>sitename<\/th>\n      <th>collectionunitid<\/th>\n      <th>datasetid<\/th>\n      <th>databasename<\/th>\n      <th>databaseid<\/th>\n      <th>analysisunitid<\/th>\n      <th>geom<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":0},{"name":"siteid","targets":0},{"name":"sitename","targets":1},{"name":"collectionunitid","targets":2},{"name":"datasetid","targets":3},{"name":"databasename","targets":4},{"name":"databaseid","targets":5},{"name":"analysisunitid","targets":6},{"name":"geom","targets":7}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-55130f82122fe40c43e2" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-55130f82122fe40c43e2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[-113.6847,-113.6847,-113.6678,-113.6678,-113.6847],"lat":[48.774,48.7876,48.7876,48.774,48.774]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-119.08811,-119.07915,-119.07915,-119.08811,-119.08811],"lat":[37.77273,37.77273,37.77815,37.77815,37.77273]}]],[[{"lng":[-109.08164,-109.07519,-109.07519,-109.08164,-109.08164],"lat":[37.38287,37.38287,37.38629,37.38629,37.38287]}]],[[{"lng":[-84.76358,-84.76358,-84.7625,-84.7625,-84.76358],"lat":[45.07316,45.0736111111111,45.0736111111111,45.07316,45.07316]}]],[[{"lng":[-68.95281,-68.95281,-68.94732,-68.94732,-68.95281],"lat":[70.55568,70.55925000000001,70.55925000000001,70.55568,70.55568]}]],[[{"lng":[-84.76358,-84.76358,-84.7625,-84.7625,-84.76358],"lat":[45.07316,45.0736111111111,45.0736111111111,45.07316,45.07316]}]],[[{"lng":[-89.18414,-89.17718000000001,-89.17718000000001,-89.18414,-89.18414],"lat":[42.77893,42.77893,42.78526,42.78526,42.77893]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},["Lake Josephine","Gull Lake","Gull Lake","Gull Lake","Square Tower Ruin Group","Green Lake","Lake CF8","Green Lake","Gibbs Lake"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[44.6672222222222,47.5788475,56.9333333333333,47.022222,52.79,46.64962378,36.00712806,14.0333333333333,45.16915,55.806093,49.735,72.166814,35.071667,50.24406,46.47746767,56.051111,46.89197546,46.89197546,46.89197546,46.89197546,48.4591667,45.6434979,45.6434979,-12.86,48.28610194,48.0573],[6.14944444444444,-96.23531853999999,15.2666666666667,8.373333000000001,-86.17,-99.42139052,-84.89743874,16.3166666666667,-92.7479167,-5.071082,-125.1933333,-78.500145,32.719444,-91.45744000000001,-103.2176549,-3.986666,-99.08101062999999,-99.08101062999999,-99.08101062999999,-99.08101062999999,-92.95358330000001,-99.23111059,-99.23111059,131.13,-101.9047579,-88.6292],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.2},null,null,["Les Caves","NLA06608-0915","Storasjö","Vierwaldstattersee (Lake Lucerne)","ROFTGH27","NLA06608-0899","Lake Catherine","Kamala","St. Croix Islands-2","Loch Fadd","Anderson Fen","QB01","Ein El Balad (lower), spring fed reservoir","Atlantic Lake","White Lake","Loch Coulter","NLA06608-0195","NLA06608-0195","NLA06608-0195","NLA06608-0195","Kabetogama","NLA06608-0439","NLA06608-0439","Manton Dam","NLA06608-0442","Wallace"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-12.86,72.166814],"lng":[-125.1933333,131.13]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="african-pollen-database" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> African Pollen
+Database</h1>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-9e87314f4e667c2ddd61" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-9e87314f4e667c2ddd61">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},[],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[-30.15,7.81666666666667],[25.0833333333333,39.3333333333333],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.5},null,null,["Gutter, Blydefontein Stream Mouth 97","Dega Sala swamp"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-30.15,7.81666666666667],"lng":[25.0833333333333,39.3333333333333]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="european-pollen-database" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> European Pollen
+Database</h1>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-623c26360c7234f6f5f7" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-623c26360c7234f6f5f7">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[21.56513,21.63328,21.63328,21.56513,21.56513],"lat":[40.59702,40.59702,40.65878,40.65878,40.59702]}]],[[{"lng":[10.30419,10.31964,10.31964,10.30419,10.30419],"lat":[51.67243,51.67243,51.67749,51.67749,51.67243]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},["Khimaditis, Khimaditis Ib","Lüderholz"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[49.62626,47.706388,49.76057,51.25919,47.2138888888889,47.81885,46.6702777777778,70.9192,43.566389,47.8708333333333,49.68509,49.68227,49.77894,49.80366,49.76956,37.2333333333333,58.5261111111111,49.56648,49.65886,70.9667,44.8030555555556,49.75349,40.441944,47.838889,70.91330000000001,79.73999999999999,42.1569388888889,49.5862,49.61474],[15.83664,9.183055,16.0602,4.08422,-1.55722222222222,8.15269,5.79138888888889,-8.7333,3.916667,1.15083333333333,15.89515,15.98694,15.79089,15.81989,15.934,-2.7,22.4230555555556,15.97328,15.97139,-8.6806,2.89222222222222,15.99222,-3.503056,23.712222,-8.744400000000001,10.80421389,2.4574,15.9429,15.87842],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.5},null,null,["Vepřová-Žlábek","Überlinger See - Mainau","Porostliny","Clinge 2, Clinge 4","Tanneurs, Couëdic","Schluchsee","Lac de Chalain","Båtvika","Embouchac, Saint Sauveur","Pezou","Suché Kopce","Kocanda","Zubří","Nový Rybník","Ratajské rybníky","Sierra de Baza","Surusoo bog","Plíčky","Pihoviny","Hollendarhaugen","Les Enfrus, Montgros","Bahna","Camino de las Yeseras","Poiana Brazilor, Virful Brazilor","Borgsletta","Søre Salatberget","Pla de les Preses","Louky u Černého lesa","Račín"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[37.2333333333333,79.73999999999999],"lng":[-8.744400000000001,23.712222]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-27b7796529a7ed45897d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-27b7796529a7ed45897d">{"x":{"filter":"none","vertical":false,"data":[[22656],["Lake Sännen"],["27234"],["39356"],["European Pollen Database"],["3"],[null],[{"type":"Polygon","coordinates":[[[15.3569,56.31515],[15.38418,56.31515],[15.38418,56.3278],[15.3569,56.3278],[15.3569,56.31515]]]}]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>siteid<\/th>\n      <th>sitename<\/th>\n      <th>collectionunitid<\/th>\n      <th>datasetid<\/th>\n      <th>databasename<\/th>\n      <th>databaseid<\/th>\n      <th>analysisunitid<\/th>\n      <th>geom<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":0},{"name":"siteid","targets":0},{"name":"sitename","targets":1},{"name":"collectionunitid","targets":2},{"name":"datasetid","targets":3},{"name":"databasename","targets":4},{"name":"databaseid","targets":5},{"name":"analysisunitid","targets":6},{"name":"geom","targets":7}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-01000bda3af1d1f23532" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-01000bda3af1d1f23532">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[15.3569,15.38418,15.38418,15.3569,15.3569],"lat":[56.31515,56.31515,56.3278,56.3278,56.31515]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},"Lake Sännen",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[],[],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.5},null,null,[],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[56.31515,56.3278],"lng":[15.3569,15.38418]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="indo-pacific-pollen-database" class="section level1"
+number="4">
+<h1><span class="header-section-number">4</span> Indo Pacific Pollen
+Database</h1>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-4fd81dc48818393008b5" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-4fd81dc48818393008b5">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[146.077,146.077,146.20186,146.20186,146.077],"lat":[-16.847,-16.74,-16.74,-16.847,-16.847]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},"KG 951 VC 1, KG 951 VC 2",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[-30.296,-15.66,-10.0667,-41.03,-31.34033333,-31.3405],[139.4318333,144.3,142.15,172.86,138.538,138.5443333],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.5},null,null,["Haematite Hill, North Well Creek 2","Garden Creek Swamp, Yam Camp","Waruid 1, Waruid","Cobb Valley CV1, Cobb Valley CV3","Brachina Gorge 3, Brachina Gorge 4","Brachina Gorge 2, Brachina Gorge 7"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-41.03,-10.0667],"lng":[138.538,172.86]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="latin-american-pollen-database" class="section level1"
+number="5">
+<h1><span class="header-section-number">5</span> Latin American Pollen
+Database</h1>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-f99a1a1dcaa0da9db24a" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-f99a1a1dcaa0da9db24a">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[-77.14319999999999,-77.0869,-77.0869,-77.14319999999999,-77.14319999999999],"lat":[2.0024,2.0024,2.0201,2.0201,2.0024]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"red","weight":5,"opacity":0.5,"fill":true,"fillColor":"orange","fillOpacity":0.35,"smoothFactor":1,"noClip":false},"El Patía-1, El Patía-2",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[-13.1895,10.45326,8.797874,-23.316667,9.179608,10.434547,-13.17484,8.799148000000001,8.949999999999999,10.862403,-13.4,-3.0434501,10.816667,20.866667,8.681429,-16.366667,10.816705,-4.37461111111111,8.830844000000001,9.167723000000001,10.423,8.802533,9.182188999999999,-4.04586111111111,8.765549999999999,10.432406,16.11,8.78457,-2.3055799],[-71.58684,-84.02787499999999,-82.502546,-67.783333,-79.76042200000001,-84.011324,-71.62665200000001,-82.50803399999999,-82.83329999999999,-85.682788,-72.134,-78.0335999,-85.63333299999999,-90.13333299999999,-82.225041,-68.15000000000001,-85.65000000000001,-79.11152777777779,-82.471773,-79.75250699999999,-84.012963,-82.52023800000001,-79.764177,-79.1595833333333,-82.212712,-84.013509,-91.68000000000001,-82.49237100000001,-78.14209750000001],5,null,null,{"interactive":true,"className":"","stroke":false,"color":"blue","weight":5,"opacity":0.5,"fill":true,"fillColor":"blue","fillOpacity":0.5},null,null,["F1t-TI6C17cm, F3t-TI-6A4cm","Plot4.29_30X30, Plot4.30_50X50, Plot4.31_70X70, Plot4.32_70X30","VolcanBaru2240m.2, VolcanBaru2240m.3, VolcanBaru2240m.4","Tumbre 1, Tumbre 2","PipelineSite2.1, PipelineSite2.2, PipelineSite2.3","Plot1.1_50X50, Plot1.2_100X50, Plot1.3_150X40, Plot1.4_150X100, Plot1.5_100X100, Plot1.6_50X100, Plot1.7_50X150, Plot1.8_100X150","T7t-644.2D2-3cm, T8t-644.2B1-2cm","VolcanBaru2380m.4, VolcanBaru2380m.5","LasAlturas, Lasalturas.Bell","Bosque_Humido.1, Bosque_Humido.2, Bosque_humido.4dist, Bosque_humido.5, humido.3dist","HuaypoB, HuaypoC","Ayauchi121, Ayauchi121Moss","Cafetal.6, Cafetal.7, Cafetal.8","San Jose Chulchaca, Cenote San Jose Chulchaca","Nelson.1, Nelson.2, Nelson.3, Nelson.4, Nelson.5, Nelson.6, Nelson.8","Chacaltaya 1, Chacaltaya 2","St.Emilio.10, St.Emilio.9","Cerro Toledo","Finca.1, Finca.1L, Finca.2, Finca.2L, Finca.4","PipelineSite3.1, PipelineSite3.2","Plot2.10_370X30, Plot2.11_370X60, Plot2.12_340X60, Plot2.13_340X30, Plot2.14_290X40, Plot2.15_290X70, Plot2.16_250X70, Plot2.17, Plot2.18_190X10, Plot2.19_190X70","VolcanBaru2810.1, VolcanBaru2810m.2, VolcanBaru2810m.3","PipelineSite1.1, PipelineSite1.2, PipelineSite1.3, PipelineSite1.4, PipelineSite1.5","Cocha Caranga Forest, Laguna Cocha Caranga","HorseflyRidge.1, HorseflyRidge.2, HorseflyRidge.3, HorseflyRidge.4","Plot3.20_70X50, Plot3.21_60X100, Plot3.22_50X, Plot3.23_100X150, Plot3.24_100X80, Plot3.25_100X40, Plot3.26_X50, Plot3.27_150X100, Plot3.28_150X150","5_Lakes_B, Escondido","VolcanBaru1780mtrapD, VolcanBaru1780mtrapE, VolcanBaru1780mTrapF, VolcanBaru1780mtrapG","Macas127A, Macas127B, Macas127Moss"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-23.316667,20.866667],"lng":[-91.68000000000001,-67.783333]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-1c10fd509d79000209ec" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-1c10fd509d79000209ec">{"x":{"filter":"none","vertical":false,"data":[[null],["29821, 29822, 29823, 29824, 29825, 29826, 29827, 29828, 29829, 29830, 29831, 29832, 29833, 29834, 29835, 29836, 29837, 29838, 29839, 29840, 29841, 29842, 29843, 29844, 29845, 29846, 29847, 29848, 29849, 29850, 29851, 29852, 29853, 29854, 29855, 29856, 29857, 29858, 29859, 29860, 29861, 29862, 29863, 29864, 29865, 29866, 29867, 29868, 29869, 29870, 29871, 29872, 29873, 29874, 29875, 29876, 29877, 29878, 29879, 29880, 29881, 29882, 29883, 29889, 29890, 29891, 30078"],["BCI92-94_1_10, BCI92-94_1_15, BCI92-94_10_10, BCI92-94_10_15, BCI92-94_14_15, BCI92-94_15_10, BCI92-94_20_10, BCI92-94_20_15, BCI92-94_25_10, BCI92-94_25-15, BCI92-94_30_15, BCI92-94_35_10, BCI92-94_35_15, BCI92-94_40_10, BCI92-94_40_15, BCI92-94_45_10, BCI92-94_45_15, BCI92-94_5_10, BCI92-94_5_15, cuencaalta, CuencaAlta.1, CuencaAlta.2, CuencaAlta.3, CuencaAlta.4, CuencaAlta.5, cuencaswamp, Darien, Comprida0.01, Cuyabeno, Cuyabeno_101, Cuyabeno_105, Cuyabeno_108, Cuyabeno_111, Cuyabeno_114, Cuyabeno_117, Cuyabeno_12, Cuyabeno_121, Cuyabeno_125, Cuyabeno_16, Cuyabeno_20, Cuyabeno_24, Cuyabeno_28, Cuyabeno_32, Cuyabeno_36, Cuyabeno_4, Cuyabeno_40, Cuyabeno_44, Cuyabeno_48, Cuyabeno_52, Cuyabeno_56, Cuyabeno_59, Cuyabeno_63, Cuyabeno_66, Cuyabeno_70, Cuyabeno_74, Cuyabeno_77, Cuyabeno_8, Cuyabeno_81, Cuyabeno_85, Cuyabeno_89, Cuyabeno_93, Cuyabeno_97, Geral10cm, Coba"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>geog<\/th>\n      <th>toString(unique(siteid))<\/th>\n      <th>toString(unique(sitename))<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"name":"geog","targets":0},{"name":"toString(unique(siteid))","targets":1},{"name":"toString(unique(sitename))","targets":2}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="tocify-extend-page" data-unique="tocify-extend-page"
+style="height: 0;">
+
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
