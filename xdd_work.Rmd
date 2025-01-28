@@ -134,53 +134,55 @@ dois = dois %>% dplyr::filter(!doi %in% c("10.1002/(SICI)1099-1417(199709/10)12:
 diff = length(dois_a[[1]]) - length(dois[[1]])
 
 
-articles=list()
-for (i in seq(length(dois[[1]]))) {
+#articles=list()
+#for (i in seq(length(dois[[1]]))) {
 #print(i)
-if (!grepl(" ",dois$doi[[i]])) {
-  val = dois$doi[[i]]
-} else {
-  val <- sub(" .*", "", dois$doi[[i]])
-}
+#if (!grepl(" ",dois$doi[[i]])) {
+#  val = dois$doi[[i]]
+#} else {
+#  val <- sub(" .*", "", dois$doi[[i]])
+#}
     
-  article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=",val)))$success$data
+#  article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=",val)))$success$data
 
-  if (length(article) != 0) {
-    articles = append(articles,article)
-  }
+#  if (length(article) != 0) {
+#    articles = append(articles,article)
+#  }
   
-}
+#}
 
 #article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=10.15468/39omei")))$success$data
 
 
-nodoi = pub_df %>% dplyr::filter(is.na(doi)) %>% dplyr::filter(!grepl("https:",articletitle))
+#nodoi = pub_df %>% dplyr::filter(is.na(doi)) %>% dplyr::filter(!grepl("https:",articletitle))
 
-articles2=list()
-for (i in seq(length(nodoi[[1]]))) {
+#articles2=list()
+#for (i in seq(length(nodoi[[1]]))) {
 #print(i)
-title = nodoi$articletitle[[i]]
-article= content(GET(paste0("https://xdd.wisc.edu/api/articles?pubname=",URLencode(title))))$success$data
+#title = nodoi$articletitle[[i]]
+#article= content(GET(paste0("https://xdd.wisc.edu/api/articles?pubname=",URLencode(#title))))$success$data
 
-  if (length(article) != 0) {
-    articles2 = append(articles2,article)
-  }
+#  if (length(article) != 0) {
+#    articles2 = append(articles2,article)
+#  }
   
-}
+#}
 
-articles_all = append(articles,articles2)
-article_mat = matrix(nrow=length(articles_all),ncol=5)
-for ( i in seq(length(articles_all))) {
-  article_mat[[i,1]] = articles_all[[i]][['_gddid']]
-  article_mat[[i,2]] = articles_all[[i]]$title
-  article_mat[[i,3]] = articles_all[[i]]$volume
-  article_mat[[i,4]] = articles_all[[i]]$journal
-  if(!is.null(articles_all[[i]]$year)) {
-  article_mat[[i,5]] = articles_all[[i]]$year}
-}
+#articles_all = articles
+#article_mat = matrix(nrow=length(articles_all),ncol=5)
+#for ( i in seq(length(articles_all))) {
+#  article_mat[[i,1]] = articles_all[[i]][['_gddid']]
+#  article_mat[[i,2]] = articles_all[[i]]$title
+#  article_mat[[i,3]] = articles_all[[i]]$volume
+#  article_mat[[i,4]] = articles_all[[i]]$journal
+#  if(!is.null(articles_all[[i]]$year)) {
+#  article_mat[[i,5]] = articles_all[[i]]$year}
+#}
 
-article_df = as.data.frame(article_mat)
-names(article_df) = c("id","title","volume","journal","year")
+#article_df = as.data.frame(article_mat)
+#names(article_df) = c("id","title","volume","journal","year")
+
+article_df = read.csv("article_df.csv")
 
 dois_percent= round(length(dois[[1]])/length(pub_df[[1]])*100,1)
 
@@ -190,7 +192,7 @@ gddid_percent = round(length(article_df[[1]])/length(pub_df[[1]])*100,1)
 
 # Neotoma Publications Indexed by XDD
 
-Neotoma contains `r length(pub_df[[1]])` records. Of these `r length(pub_df[[1]])` records, only `r length(dois_a[[1]])` have DOIs. `r diff` of the DOIs are problematically formatted. Of the `r length(dois[[1]])` (`r dois_percent`) articles with unproblematic DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])`  (`r gddid_percent`) publications had an internal ID with XDD. It seems likely <em style="color:red;"> (should verify this later) </em> that only publications with a an internal XDD id are indexed by XDD. However, I conduct the following searches using DOI, not internal XDD ID, just in case...
+Neotoma contains `r length(pub_df[[1]])` records. Of these `r length(pub_df[[1]])` records, only `r length(dois_a[[1]])` have DOIs. `r diff` of the DOIs are problematically formatted. Of the `r length(dois[[1]])` (`r dois_percent` %) articles with unproblematic DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])`  (`r gddid_percent` % ) publications had an internal ID with XDD. It seems likely <em style="color:red;"> (should verify this later) </em> that only publications with a an internal XDD id are indexed by XDD. However, I conduct the following searches using DOI, not internal XDD ID, just in case...
 
 # CARE exemplary practices
 
@@ -222,71 +224,74 @@ datatable(terms_df,rownames=FALSE)
 
 
 
-for (i in seq(length(dois[[1]]))) {
+#for (i in seq(length(dois[[1]]))) {
 #  print(i)
-  for (j in seq(length(terms_list))) {
-    if (!grepl(" ",dois$doi[[i]])) {
-  doi = dois$doi[[i]]
-} else {
-  doi <- sub(" .*", "", dois$doi[[i]])
-}
-  doi = URLencode(doi)
-  term = URLencode(terms_list[[j]])
-  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
+#  for (j in seq(length(terms_list))) {
+#    if (!grepl(" ",dois$doi[[i]])) {
+#  doi = dois$doi[[i]]
+#} else {
+#  doi <- sub(" .*", "", dois$doi[[i]])
+#}
+#  doi = URLencode(doi)
+#  term = URLencode(terms_list[[j]])
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",#doi,"&inclusive&full_results&clean")))$success$data
   
-  if (length(call) != 0) {
-    fuzzes = append(fuzzes,call)
-    whichfuzz_neo = append(whichfuzz_neo,dois$publicationid[i])
-  }
-  }
-}
+#  if (length(call) != 0) {
+#    fuzzes = append(fuzzes,call)
+#    whichfuzz_neo = append(whichfuzz_neo,dois$publicationid[i])
+#  }
+#  }
+#}
 
-idx = 0
-for ( i in seq(length(fuzzes))) {
+#idx = 0
+#for ( i in seq(length(fuzzes))) {
 
-  for (j in seq(length(fuzzes[[i]]$highlight))) {
-    idx = idx + 1
+#  for (j in seq(length(fuzzes[[i]]$highlight))) {
+#    idx = idx + 1
 
-  }
-}
+#  }
+#}
 
 
 
-fuzz_mat = matrix(nrow = idx,ncol=11)
-idx = 0
-for ( i in seq(length(fuzzes))) {
+#fuzz_mat = matrix(nrow = idx,ncol=11)
+#idx = 0
+#for ( i in seq(length(fuzzes))) {
 
-  for (j in seq(length(fuzzes[[i]]$highlight))) {
-    idx = idx + 1
-        if(!is.null(fuzzes[[i]][['_gddid']])) {
-    fuzz_mat[idx,1] = fuzzes[[i]][['_gddid']]}
-        if(!is.null(fuzzes[[i]]$title)) {
-    fuzz_mat[idx,2] = fuzzes[[i]]$title}
-        if(!is.null(fuzzes[[i]]$pubname)) {
-    fuzz_mat[idx,3] = fuzzes[[i]]$pubname}
-        if(!is.null(fuzzes[[i]]$authors)) {
-    fuzz_mat[idx,4] = fuzzes[[i]]$authors}
-        if(!is.null(fuzzes[[i]]$hits)) {
-    fuzz_mat[idx,5] = fuzzes[[i]]$hits}
-        if(!is.null(fuzzes[[i]]$URL)) {
-    fuzz_mat[idx,6] = fuzzes[[i]]$URL}
-        if(!is.null(fuzzes[[i]]$publisher)) {
-    fuzz_mat[idx,7] = fuzzes[[i]]$publisher}
-        if(!is.null(fuzzes[[i]]$doi)) {
-    fuzz_mat[idx,8] = fuzzes[[i]]$doi}
-    if(!is.null(fuzzes[[i]]$coverDate)) {
-      fuzz_mat[idx,9] = fuzzes[[i]]$coverDate}
-        if(!is.null(fuzzes[[i]]$highlight[[j]])) {
-    fuzz_mat[idx,10] = fuzzes[[i]]$highlight[[j]]}
-          if(!is.null(whichfuzz_neo[[i]])) {
-    fuzz_mat[idx,11] = whichfuzz_neo[[i]]}
+#  for (j in seq(length(fuzzes[[i]]$highlight))) {
+#    idx = idx + 1
+#        if(!is.null(fuzzes[[i]][['_gddid']])) {
+#    fuzz_mat[idx,1] = fuzzes[[i]][['_gddid']]}
+#        if(!is.null(fuzzes[[i]]$title)) {
+#    fuzz_mat[idx,2] = fuzzes[[i]]$title}
+#        if(!is.null(fuzzes[[i]]$pubname)) {
+#    fuzz_mat[idx,3] = fuzzes[[i]]$pubname}
+#        if(!is.null(fuzzes[[i]]$authors)) {
+#    fuzz_mat[idx,4] = fuzzes[[i]]$authors}
+#        if(!is.null(fuzzes[[i]]$hits)) {
+#    fuzz_mat[idx,5] = fuzzes[[i]]$hits}
+#        if(!is.null(fuzzes[[i]]$URL)) {
+#    fuzz_mat[idx,6] = fuzzes[[i]]$URL}
+#        if(!is.null(fuzzes[[i]]$publisher)) {
+#    fuzz_mat[idx,7] = fuzzes[[i]]$publisher}
+#        if(!is.null(fuzzes[[i]]$doi)) {
+#    fuzz_mat[idx,8] = fuzzes[[i]]$doi}
+#    if(!is.null(fuzzes[[i]]$coverDate)) {
+#      fuzz_mat[idx,9] = fuzzes[[i]]$coverDate}
+#        if(!is.null(fuzzes[[i]]$highlight[[j]])) {
+#    fuzz_mat[idx,10] = fuzzes[[i]]$highlight[[j]]}
+#          if(!is.null(whichfuzz_neo[[i]])) {
+#    fuzz_mat[idx,11] = whichfuzz_neo[[i]]}
     
-  }
-}
+#  }
+#}
 
-fuzz_df = as.data.frame(fuzz_mat) %>% distinct()
+#fuzz_df = as.data.frame(fuzz_mat) %>% distinct()
+
+fuzz_df = read.csv('fuzz_df.csv')
 
 names(fuzz_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
+
 
 
 ```
@@ -324,75 +329,76 @@ datatable(terms_df_per,rownames=FALSE)
 
 
 
-for (i in seq(length(dois[[1]]))) {
+#for (i in seq(length(dois[[1]]))) {
 #  print(i)
-  for (j in seq(length(terms_list_per))) {
-    if (!grepl(" ",dois$doi[[i]])) {
-  doi = dois$doi[[i]]
-} else {
-  doi <- sub(" .*", "", dois$doi[[i]])
-}
-  doi = URLencode(doi)
-  term = URLencode(terms_list_per[[j]])
-  if (term=="permit%20#") {
-    term = "permit%20%23"
-  }
-  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean&no_word_stemming")))$success$data
+#  for (j in seq(length(terms_list_per))) {
+#    if (!grepl(" ",dois$doi[[i]])) {
+#  doi = dois$doi[[i]]
+#} else {
+#  doi <- sub(" .*", "", dois$doi[[i]])
+#}
+#  doi = URLencode(doi)
+#  term = URLencode(terms_list_per[[j]])
+#  if (term=="permit%20#") {
+#    term = "permit%20%23"
+#  }
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",#doi,"&inclusive&full_results&clean&no_word_stemming")))$success$data
   
-  if (length(call) != 0) {
-    permits = append(permits,call)
-    which_per = append(which_per,dois$publicationid[i])
-  }
-  }
-}
+#  if (length(call) != 0) {
+#    permits = append(permits,call)
+#    which_per = append(which_per,dois$publicationid[i])
+#  }
+#  }
+#}
 
-idx = 0
-for ( i in seq(length(permits))) {
+#idx = 0
+#for ( i in seq(length(permits))) {
 
-  for (j in seq(length(permits[[i]]$highlight))) {
-    idx = idx + 1
+#  for (j in seq(length(permits[[i]]$highlight))) {
+#    idx = idx + 1
 
-  }
-}
+#  }
+#}
 
 
 
-per_mat = matrix(nrow = idx,ncol=11)
-idx = 0
-for ( i in seq(length(permits))) {
+#per_mat = matrix(nrow = idx,ncol=11)
+#idx = 0
+#for ( i in seq(length(permits))) {
 
-  for (j in seq(length(permits[[i]]$highlight))) {
-    idx = idx + 1
-        if(!is.null(permits[[i]][['_gddid']])) {
-    per_mat[idx,1] = permits[[i]][['_gddid']]}
-        if(!is.null(permits[[i]]$title)) {
-    per_mat[idx,2] = permits[[i]]$title}
-        if(!is.null(permits[[i]]$pubname)) {
-    per_mat[idx,3] = permits[[i]]$pubname}
-        if(!is.null(permits[[i]]$authors)) {
-    per_mat[idx,4] = permits[[i]]$authors}
-        if(!is.null(permits[[i]]$hits)) {
-    per_mat[idx,5] = permits[[i]]$hits}
-        if(!is.null(permits[[i]]$URL)) {
-    per_mat[idx,6] = permits[[i]]$URL}
-        if(!is.null(permits[[i]]$publisher)) {
-    per_mat[idx,7] = permits[[i]]$publisher}
-        if(!is.null(permits[[i]]$doi)) {
-    per_mat[idx,8] = permits[[i]]$doi}
-    if(!is.null(permits[[i]]$coverDate)) {
-      per_mat[idx,9] = permits[[i]]$coverDate}
-        if(!is.null(permits[[i]]$highlight[[j]])) {
-    per_mat[idx,10] = permits[[i]]$highlight[[j]]}
-         if(!is.null(which_per[[i]])) {
-    per_mat[idx,11] = which_per[[i]]}
+ # for (j in seq(length(permits[[i]]$highlight))) {
+#    idx = idx + 1
+#        if(!is.null(permits[[i]][['_gddid']])) {
+#    per_mat[idx,1] = permits[[i]][['_gddid']]}
+#        if(!is.null(permits[[i]]$title)) {
+#    per_mat[idx,2] = permits[[i]]$title}
+#        if(!is.null(permits[[i]]$pubname)) {
+#    per_mat[idx,3] = permits[[i]]$pubname}
+#        if(!is.null(permits[[i]]$authors)) {
+#    per_mat[idx,4] = permits[[i]]$authors}
+#        if(!is.null(permits[[i]]$hits)) {
+#    per_mat[idx,5] = permits[[i]]$hits}
+#        if(!is.null(permits[[i]]$URL)) {
+#    per_mat[idx,6] = permits[[i]]$URL}
+#        if(!is.null(permits[[i]]$publisher)) {
+#    per_mat[idx,7] = permits[[i]]$publisher}
+#        if(!is.null(permits[[i]]$doi)) {
+#    per_mat[idx,8] = permits[[i]]$doi}
+#    if(!is.null(permits[[i]]$coverDate)) {
+#      per_mat[idx,9] = permits[[i]]$coverDate}
+#        if(!is.null(permits[[i]]$highlight[[j]])) {
+#    per_mat[idx,10] = permits[[i]]$highlight[[j]]}
+#         if(!is.null(which_per[[i]])) {
+#    per_mat[idx,11] = which_per[[i]]}
     
-  }
-}
+#  }
+#}
 
-per_df = as.data.frame(per_mat) %>% distinct()
+#per_df = as.data.frame(per_mat) %>% distinct()
 
-names(per_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
+#names(per_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi#","coverDate","highlight","publicationid")
 
+per_df = read.csv("per_df.csv")
 
 ```
 
@@ -626,41 +632,6 @@ names(rc_df) = c("geochronid","radiocarbonmethodid","percentc","percentn","delta
 materialtypes = geochron_df %>% dplyr::group_by(materialdated) %>% count()
 
 
-dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People","cairn","Cairn")
-
-## geochrons materialDated
-
-matches_geochron_materialDated <- grep(paste(dictionary,collapse="|"), 
-                        geochron_df[[11]])
-
-geochron_results= geochron_df[matches_geochron_materialDated,]
-
-
-## geochrons notes
-matches_geochron_notes <- grep(paste(dictionary,collapse="|"), 
-                        geochron_df[[12]])
-
-
-geochron_results= rbind(geochron_results, geochron_df[matches_geochron_notes,]) %>% distinct()
-
-
-## collunits  location
-
-matches_collunits_location <- grep(paste(dictionary,collapse="|"), 
-                        collunits_df$location)
-
-
-collunits_results= collunits_df[matches_collunits_location,]
-
-
-## collunits notes
-
-matches_collunits_notes <- grep(paste(dictionary,collapse="|"), 
-                        collunits_df$notes)
-
-collunits_results = rbind(collunits_results,collunits_df[matches_collunits_notes,]) %>% distinct()
-
-
 ambig_rad = geochron_df %>% filter(materialdated %in% c("Bone collagen","bone collagen","","bone","Bone") | is.na(materialdated))
 
 
@@ -676,50 +647,50 @@ articles_ambig=list()
 
 
 pubids = list()
-for (i in seq(length(ambig_rad_pubsd[[1]]))) {
+#for (i in seq(length(ambig_rad_pubsd[[1]]))) {
   #print(i)
-if (!grepl(" ",ambig_rad_pubsd$doi[[i]])) {
-  val = ambig_rad_pubs$doi[[i]]
-} else {
-  val <- sub(" .*", "", ambig_rad_pubsd$doi[[i]])
-}
-  if (ambig_rad_pubsd$doi[[i]] == "10.1016") {
-  val = "nevermind"
-}
+#if (!grepl(" ",ambig_rad_pubsd$doi[[i]])) {
+#  val = ambig_rad_pubs$doi[[i]]
+#} else {
+#  val <- sub(" .*", "", ambig_rad_pubsd$doi[[i]])
+#}
+#  if (ambig_rad_pubsd$doi[[i]] == "10.1016") {
+#  val = "nevermind"
+#}
     
-  article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=",val)))$success$data
+  #article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=",val)))$success$data
 
-  if (length(article) != 0) {
-    articles_ambig = append(articles_ambig,article)
-    pubids = append(pubids,rep(ambig_rad_pubsd$publicationid[[i]]),length(article))
-  }
+  #if (length(article) != 0) {
+  #  articles_ambig = append(articles_ambig,article)
+  #  pubids = append(pubids,rep(ambig_rad_pubsd$publicationid[[i]]),length(article))
+  #}
   
-    if (length(article) == 10) {
-      for ( i in seq(10)) {
+    #if (length(article) == 10) {
+  #    for ( i in seq(10)) {
        # print(val)
     #print(article[[i]][["_gddid"]])
-        }
-  }
+   #     }
+ # }
   
   
-}
+#}
 
 
-article_ambig_mat = matrix(nrow=length(articles_ambig),ncol=6)
-for ( i in seq(length(articles_ambig))) {
-  article_ambig_mat[[i,1]] = articles_ambig[[i]][['_gddid']]
-  article_ambig_mat[[i,2]] = articles_ambig[[i]]$title
-  article_ambig_mat[[i,3]] = articles_ambig[[i]]$volume
-  article_ambig_mat[[i,4]] = articles_ambig[[i]]$journal
-  if(!is.null(articles_ambig[[i]]$year)) {
-  article_ambig_mat[[i,5]] = articles_ambig[[i]]$year}
-  article_ambig_mat[[i,6]] = pubids[[i]]
-}
+#article_ambig_mat = matrix(nrow=length(articles_ambig),ncol=6)
+#for ( i in seq(length(articles_ambig))) {
+#  article_ambig_mat[[i,1]] = articles_ambig[[i]][['_gddid']]
+#  article_ambig_mat[[i,2]] = articles_ambig[[i]]$title
+#  article_ambig_mat[[i,3]] = articles_ambig[[i]]$volume
+#  article_ambig_mat[[i,4]] = articles_ambig[[i]]$journal
+#  if(!is.null(articles_ambig[[i]]$year)) {
+#  article_ambig_mat[[i,5]] = articles_ambig[[i]]$year}
+#  article_ambig_mat[[i,6]] = pubids[[i]]
+#}
 
-article_ambig_df = as.data.frame(article_ambig_mat)
-names(article_ambig_df) = c("id","title","volume","journal","year", "publicationid")
+#article_ambig_df = as.data.frame(article_ambig_mat)
+#names(article_ambig_df) = c("id","title","volume","journal","year", "publicationid")
 
-
+article_ambig_df = read.csv("article_ambig_df.csv")
 
 
 ```
@@ -750,74 +721,76 @@ datatable(terms_list_rc_df, rownames=FALSE)
 
 
 
-for (i in seq(length(ambig_rad_pubsd[[1]]))) {
+#for (i in seq(length(ambig_rad_pubsd[[1]]))) {
 #  print(i)
-  for (j in seq(length(terms_list_rc))) {
-    if (!grepl(" ",ambig_rad_pubsd$doi[[i]])) {
-      doi = ambig_rad_pubsd$doi[[i]]
-      } else {
-      doi <- sub(" .*", "", ambig_rad_pubsd$doi[[i]])
-  }
-  doi = URLencode(doi)
-  term = URLencode(terms_list_rc[[j]])
-  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
+#  for (j in seq(length(terms_list_rc))) {
+#    if (!grepl(" ",ambig_rad_pubsd$doi[[i]])) {
+#      doi = ambig_rad_pubsd$doi[[i]]
+#      } else {
+#      doi <- sub(" .*", "", ambig_rad_pubsd$doi[[i]])
+#  }
+#  doi = URLencode(doi)
+#  term = URLencode(terms_list_rc[[j]])
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",#doi,"&inclusive&full_results&clean")))$success$data
   
-  if (length(call) != 0) {
+ # if (length(call) != 0) {
     #print(paste0(length(call), "at i = ", i))
-    human_rcs = append(human_rcs,call)
-    which_human_pub = append(which_human_pub,ambig_rad_pubsd$publicationid[[i]])
+#    human_rcs = append(human_rcs,call)
+#    which_human_pub = append(which_human_pub,ambig_rad_pubsd$publicationid[[i]])
     
-  }
-  }
-}
+ # }
+#  }
+#}
 
-idx = 0
-for ( i in seq(length(human_rcs))) {
+#idx = 0
+#for ( i in seq(length(human_rcs))) {
 
-  for (j in seq(length(human_rcs[[i]]$highlight))) {
-    idx = idx + 1
+ # for (j in seq(length(human_rcs[[i]]$highlight))) {
+#    idx = idx + 1
 
-  }
-}
+ # }
+#}
 
 
 
-human_rc_mat = matrix(nrow = idx,ncol=11)
-idx = 0
-for ( i in seq(length(human_rcs))) {
+#human_rc_mat = matrix(nrow = idx,ncol=11)
+#idx = 0
+#for ( i in seq(length(human_rcs))) {
 
-  for (j in seq(length(human_rcs[[i]]$highlight))) {
-    idx = idx + 1
-        if(!is.null(human_rcs[[i]][['_gddid']])) {
-    human_rc_mat[idx,1] = human_rcs[[i]][['_gddid']]}
-        if(!is.null(human_rcs[[i]]$title)) {
-    human_rc_mat[idx,2] = human_rcs[[i]]$title}
-        if(!is.null(human_rcs[[i]]$pubname)) {
-    human_rc_mat[idx,3] = human_rcs[[i]]$pubname}
-        if(!is.null(human_rcs[[i]]$authors)) {
-    human_rc_mat[idx,4] = human_rcs[[i]]$authors}
-        if(!is.null(human_rcs[[i]]$hits)) {
-    human_rc_mat[idx,5] = human_rcs[[i]]$hits}
-        if(!is.null(human_rcs[[i]]$URL)) {
-    human_rc_mat[idx,6] = human_rcs[[i]]$URL}
-        if(!is.null(human_rcs[[i]]$publisher)) {
-    human_rc_mat[idx,7] = human_rcs[[i]]$publisher}
-        if(!is.null(human_rcs[[i]]$doi)) {
-    human_rc_mat[idx,8] = human_rcs[[i]]$doi}
-    if(!is.null(human_rcs[[i]]$coverDate)) {
-      human_rc_mat[idx,9] = human_rcs[[i]]$coverDate}
-        if(!is.null(human_rcs[[i]]$highlight[[j]])) {
-    human_rc_mat[idx,11] = human_rcs[[i]]$highlight[[j]]}
-            if(!is.null(which_human_pub[[i]])) {
-    human_rc_mat[idx,11] = which_human_pub[[i]]}
+ # for (j in seq(length(human_rcs[[i]]$highlight))) {
+#    idx = idx + 1
+#        if(!is.null(human_rcs[[i]][['_gddid']])) {
+#    human_rc_mat[idx,1] = human_rcs[[i]][['_gddid']]}
+#        if(!is.null(human_rcs[[i]]$title)) {
+#    human_rc_mat[idx,2] = human_rcs[[i]]$title}
+#        if(!is.null(human_rcs[[i]]$pubname)) {
+#    human_rc_mat[idx,3] = human_rcs[[i]]$pubname}
+#        if(!is.null(human_rcs[[i]]$authors)) {
+##    human_rc_mat[idx,4] = human_rcs[[i]]$authors}
+#        if(!is.null(human_rcs[[i]]$hits)) {
+#    human_rc_mat[idx,5] = human_rcs[[i]]$hits}
+#        if(!is.null(human_rcs[[i]]$URL)) {
+#    human_rc_mat[idx,6] = human_rcs[[i]]$URL}
+#        if(!is.null(human_rcs[[i]]$publisher)) {
+##    human_rc_mat[idx,7] = human_rcs[[i]]$publisher}
+#        if(!is.null(human_rcs[[i]]$doi)) {
+#    human_rc_mat[idx,8] = human_rcs[[i]]$doi}
+#    if(!is.null(human_rcs[[i]]$coverDate)) {
+#      human_rc_mat[idx,9] = human_rcs[[i]]$coverDate}
+#        if(!is.null(human_rcs[[i]]$highlight[[j]])) {
+#    human_rc_mat[idx,10] = human_rcs[[i]]$highlight[[j]]}
+#            if(!is.null(which_human_pub[[i]])) {
+#    human_rc_mat[idx,11] = which_human_pub[[i]]}
     
-  }
-}
+ # }#
+#}
 
-human_rc_df = as.data.frame(human_rc_mat)
+#human_rc_df = as.data.frame(human_rc_mat)
+
+
+human_rc_df = read.csv("human_rc_df.csv")
 
 names(human_rc_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight", "publicationid")
-
 
 ```
 
