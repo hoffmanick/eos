@@ -1,5 +1,5 @@
 ---
-title: "xdd"
+title: "XDD audit extenison"
 author: "Nick Hoffman"
 date: "`r Sys.Date()`"
 output:
@@ -62,7 +62,12 @@ table tr th :last-child, table tr td :last-child {
 
 ---
 
-# Intro
+# Introduction
+
+As part of Neotoma's participation in the Ethical Open Science for Past Global Change Data RCN, we are [auditing our records](https://hoffmanick.github.io/eos/neoHomo.html) for sensitive data, especially data which are sensitive with respect to the CARE principles.  
+
+The main audit document is based on programmatic searches of Neotoma metadata. These structured metadata are curated by a community of experts, so they're a highly accurate source for making determinations about Neotoma's holdings. However, they are necessarily limited in scope. This page documents our attempt to extend our audit through programmatic searches of the full texts of publications associated with datasets in Neotoma according to Neotoma's metadata. This corpus is more extensive, but it is harder to draw conclusions from our hits because it is unstructured.
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -85,14 +90,7 @@ library(rmapshaper)
 
 
 sf_use_s2(FALSE)
-```
 
-## XDD Pubs from Neotoma
-
-I downloaded all the publication records in the Neotoma database:
-
-
-```{r cars, message=FALSE, warning=FALSE,echo=FALSE}
 
 
 pubs = content(GET(paste0('https://api.neotomadb.org/v2.0/data/dbtables/publications?count=false&limit=99999&offset=0')))$data
@@ -119,17 +117,22 @@ pub_df = pub_mat %>% as.data.frame() %>% distinct()
 
 names(pub_df) =c("publicationid","pubtypeid","year","citation","articletitle","journal","volume","issue","pages","citationnumber","doi","booktitle","numvolumes","edition","volumetitle","seriestitle","seriesvolume","publisher","url","city","state","country","originallanguage","notes","datecreated","datemodified","bibtex","crossrefDOI")
 
-datatable(pub_df, rownames=FALSE)
 
 pub_with_doi = pub_df %>% dplyr::filter(!is.na(doi))
 
 pub_with_crossrefdoi = pub_df %>% dplyr::filter(!is.na(crossrefDOI))
 
-dois = pub_with_doi %>% rbind(pub_with_crossrefdoi) %>% distinct()
+dois_a = pub_with_doi %>% rbind(pub_with_crossrefdoi) %>% distinct()
 
 
 
-dois = dois %>% dplyr::filter(!doi  %in% c("10.1073\002pnas.0530193100","10.1073\002pnas.0408315102"))
+dois = dois_a %>% dplyr::filter(!doi  %in% c("10.1073\002pnas.0530193100","10.1073\002pnas.0408315102"))
+
+
+dois = dois %>% dplyr::filter(!doi %in% c("10.1002/(SICI)1099-1417(199709/10)12:5<347::AID-JQS319>3.0.CO;2-#","10.1130/0091-7613(1987) 15<837:CRDOTP> 2.0.CO;2","10.1016","10.1111"))
+
+diff = length(dois_a[[1]]) - length(dois[[1]])
+
 
 articles=list()
 for (i in seq(length(dois[[1]]))) {
@@ -179,19 +182,38 @@ for ( i in seq(length(articles_all))) {
 article_df = as.data.frame(article_mat)
 names(article_df) = c("id","title","volume","journal","year")
 
+dois_percent= round(length(dois[[1]])/length(pub_df[[1]])*100,1)
+
+gddid_percent = round(length(article_df[[1]])/length(pub_df[[1]])*100,1)
+
 ```
 
-Of these `r length(pub_df[[1]])` records, only `r length(dois[[1]])` have DOIs. Of the `r length(dois[[1]])` articles with DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])` publications had an internal ID with XDD.
+# Neotoma Publications Indexed by XDD
 
+Neotoma contains `r length(pub_df[[1]])` records. Of these `r length(pub_df[[1]])` records, only `r length(dois_a[[1]])` have DOIs. `r diff` of the DOIs are problematically formatted. Of the `r length(dois[[1]])` (`r dois_percent`) articles with unproblematic DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])`  (`r gddid_percent`) publications had an internal ID with XDD. It seems likely <em style="color:red;"> (should verify this later) </em> that only publications with a an internal XDD id are indexed by XDD. However, I conduct the following searches using DOI, not internal XDD ID, just in case...
+
+# CARE exemplary practices
+
+One of the things we're looking for is evidence of researcher behavior that demonstrates compliance with the spirit of the CARE principles. Below I outline searches for 
+
+
+<ol>
+<li>fuzzed sites</li>
+<li>permitting, and </li>
+<li>collaboration with Indigenous nations.</li>
+</ol>
 
 ## Fuzzed Sites
 
-I searched through the text of Neotoma publications for any that contained one of the following phrases, suggestive of a potential fuzzing process:
 
-```{r fuzzdict, echo=FALSE, message=FALSE,warning=FALSE}
+I searched through the text of Neotoma publications with unproblematic DOI for any that contained one of the following phrases, suggestive of a potential fuzzing process:
+
+```{r cars, message=FALSE, warning=FALSE,echo=FALSE}
+
 
 fuzzes = list()
-terms_list = c("sensitive site","geomask","low-resolution map","fuzzed site", "obscured location", "purposeful imprecision")
+whichfuzz_neo = list()
+terms_list = c("sensitive site","geomask","low-resolution map","fuzzed site", "obscured location", "purposeful imprecision","obfuscate", "county-level")
 terms_df = as.data.frame(terms_list)
 
 names(terms_df) = c("dictionary")
@@ -210,10 +232,11 @@ for (i in seq(length(dois[[1]]))) {
 }
   doi = URLencode(doi)
   term = URLencode(terms_list[[j]])
-  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results")))$success$data
+  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
   
   if (length(call) != 0) {
     fuzzes = append(fuzzes,call)
+    whichfuzz_neo = append(whichfuzz_neo,dois$publicationid[i])
   }
   }
 }
@@ -229,7 +252,7 @@ for ( i in seq(length(fuzzes))) {
 
 
 
-fuzz_mat = matrix(nrow = idx,ncol=10)
+fuzz_mat = matrix(nrow = idx,ncol=11)
 idx = 0
 for ( i in seq(length(fuzzes))) {
 
@@ -255,153 +278,265 @@ for ( i in seq(length(fuzzes))) {
       fuzz_mat[idx,9] = fuzzes[[i]]$coverDate}
         if(!is.null(fuzzes[[i]]$highlight[[j]])) {
     fuzz_mat[idx,10] = fuzzes[[i]]$highlight[[j]]}
+          if(!is.null(whichfuzz_neo[[i]])) {
+    fuzz_mat[idx,11] = whichfuzz_neo[[i]]}
     
   }
 }
 
 fuzz_df = as.data.frame(fuzz_mat) %>% distinct()
 
-names(fuzz_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight")
+names(fuzz_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
+
 
 ```
 
-I searched using two slightly different API calls:
 
-```"https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results"```
+This search returned the following `r length(fuzz_df[[1]])` results:
 
-and 
 
-```"https://xdd.wisc.edu/api/snippets?term=",term,"&docid=",docid,"&inclusive&full_results"```
-
-where doi references the DOI of the articles. (`r round(length(dois[[1]])/length(pub_df[[1]])*100,1)`% of Neotoma articles are associated with a DOI.) and docid references the internal XDD document id. (only `r round(length(article_df[[1]])/length(pub_df[[1]])*100,1)`% of Neotoma articles are associated with such an ID.) I assumed that the number of returns should be the same, because I expect that any Neotoma publications without an internal XDD document ID are not indexed by XDD. However, when I used internal XDD ID, I only got 16 results, while when I used the DOI, I got the below `r length(fuzz_df[[1]])` results.
-
-```{r pressure, message=FALSE, warning=FALSE,echo=FALSE}
-
+```{r fuzzdict, echo=FALSE, message=FALSE,warning=FALSE}
 
 datatable(fuzz_df,rownames=FALSE)
 
 ```
 
-Now one questions is whether it's feasible for me to go through and see if any of these papers really did fuzz their sites.
-
-## Radiocarbon from Human Samples
 
 
-```{r fromhomothing, message=FALSE,warning=FALSE,echo=FALSE}
-fuzzed_sites = as.data.frame(matrix(ncol=7,nrow=0))
+## Permit, Consultation, Collaboration
 
-names(fuzzed_sites) = c("lon","lat","siteid","sitename","datasettype","database","datasetid")
-for (i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)) {
-  db = content(GET(paste0("https://api.neotomadb.org/v2.0/apps/constdb/datasets?dbid=",i)))$data
-  if (length(db) >0) {
-    #print(paste("DB ID:",i))
-    db_mat = matrix(nrow=length(db),ncol=7)
-    for (m in seq(length(db))) {
-      if(!is.null(db[[m]]$coords[[1]])) {
-        db_mat[[m,1]] = db[[m]]$coords[[1]]
-        db_mat[[m,2]] = db[[m]]$coords[[2]]
-        db_mat[[m,3]] = db[[m]]$siteid
-        db_mat[[m,4]] = db[[m]]$sitename
-        db_mat[[m,5]] = db[[m]]$datasettype[[1]]
-        db_mat[[m,6]] = i
-        db_mat[[m,7]] = db[[m]]$datasetid
-      }
-    }
-    db_df = as.data.frame(db_mat)
-    names(db_df) = c("lon","lat","siteid","sitename","datasettype","database","datasetid")
-    db_df = db_df %>% drop_na() %>% mutate(lon=as.numeric(lon),lat=as.numeric(lat))
-    fuzzed = db_df %>% dplyr::filter((lon %% 0.25 == 0) & (lat %% 0.25 ==0))
-    if (length(fuzzed[[1]]) != 0 ) {
-      fuzzed_sites = rbind(fuzzed_sites,fuzzed)
-    }
-    fuzzed2 = db_df %>% drop_na(lon) %>% drop_na(lat) %>% dplyr::mutate(lon_decimals = nchar(str_extract(lon, "\\.(\\d+)")) - 1) %>%
-      dplyr::mutate(lat_decimals = nchar(str_extract(lat, "\\.(\\d+)")) - 1) %>%
-      dplyr::mutate(lat_decimals = case_when(is.na(lat_decimals) ~ 0, TRUE ~ lat_decimals)) %>%
-      dplyr::mutate(lon_decimals = case_when(is.na(lon_decimals) ~ 0, TRUE ~ lon_decimals)) %>%
-      dplyr::filter(lon_decimals <= 1 | lat_decimals <= 1) %>%
-      dplyr::select(lon,lat,siteid,sitename,datasettype,database,datasetid)
-        if (length(fuzzed[[2]]) != 0 ) {
-      fuzzed_sites = rbind(fuzzed_sites,fuzzed2) %>% distinct()
-    }
-    db_df = distinct(db_df) %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
- 
-    }
+### Permit
+
+I also searched for any mention of the following terms suggestive of a permitting process of any kind:
+
+```{r pressure, message=FALSE, warning=FALSE,echo=FALSE}
+
+permits = list()
+which_per = list()
+terms_list_per = c("permit number","permit #")
+terms_df_per = as.data.frame(terms_list_per)
+
+names(terms_df_per) = c("dictionary")
+
+datatable(terms_df_per,rownames=FALSE)
+
+
+
+
+
+for (i in seq(length(dois[[1]]))) {
+#  print(i)
+  for (j in seq(length(terms_list_per))) {
+    if (!grepl(" ",dois$doi[[i]])) {
+  doi = dois$doi[[i]]
+} else {
+  doi <- sub(" .*", "", dois$doi[[i]])
+}
+  doi = URLencode(doi)
+  term = URLencode(terms_list_per[[j]])
+  if (term=="permit%20#") {
+    term = "permit%20%23"
+  }
+  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean&no_word_stemming")))$success$data
+  
+  if (length(call) != 0) {
+    permits = append(permits,call)
+    which_per = append(which_per,dois$publicationid[i])
+  }
+  }
+}
+
+idx = 0
+for ( i in seq(length(permits))) {
+
+  for (j in seq(length(permits[[i]]$highlight))) {
+    idx = idx + 1
+
+  }
 }
 
 
 
+per_mat = matrix(nrow = idx,ncol=11)
+idx = 0
+for ( i in seq(length(permits))) {
 
-db_names = c("African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", 
-"Latin American Pollen Database", "North American Pollen Database", 
-"Pollen Database of Siberia and the Russian Far East", "FAUNMAP", "Neotoma", 
-"North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", 
-"NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", 
-"Alaskan Archaeofaunas","French Institute of Pondicherry Palynology and Paleoecology Database" ,"Japanese Pollen Database", "Neotoma Midden Database", 
-"Chinese Pollen Database","Holocene Perspective on Peatland Biogeochemistry" ,"Neotoma Testate Amoebae Database", 
-"Deep-Time Palynology Database", "Neotoma Biomarker Database", 
-"Alpine Palynological Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", 
-"Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", 
-"Faunal Isotope Database", "Neotoma Charcoal Data","Pollen Monitoring Programme", "PaleoVertebrates of Latin America", 
-"St. Croix Watershed Research Station of the Science Museum of Minnesota", 
-"Tropical South American Diatom Database", "Marine Dinoflagellates Database", "Nonmarine Ostracod Distribution in Europe Database","East Asian Nonmarine Ostracod Database") %>% as.data.frame()
-
-
-db_names = db_names %>% cbind(as.data.frame(c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42)))
-
-
-names(db_names) = c("db_names","database")
-db_names = db_names %>% dplyr::mutate(database = as.character(database))
-
-fuzzed_sites = fuzzed_sites %>% distinct() %>% st_as_sf(coords=c("lon","lat"),crs="NAD83")
-
-
-fuzzed_sites = fuzzed_sites %>% dplyr::filter(datasettype != "geochronologic")
-
-num_fuzzed= length(fuzzed_sites[[1]])
-
-
-#repospec prep
-repospecs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=repositoryspecimens&count=false&limit=99999&offset=0"))$data
-
-repospec_mat = matrix(nrow=length(repospecs),ncol=5)
-
-for (i in seq(length(repospecs))) {
-  for(j in seq(5) ) {
-    if (!is.null(repospecs[[i]][[j]])) {
-  repospec_mat[i,j] = repospecs[[i]][[j]]
-    }}}
-
-
-repospec_df = as.data.frame(repospec_mat)
-
-
-names(repospec_df) = c("datasetid","repositoryid","notes","recdatecreated","recdatemodified")
-
-#specimens prep
-specs = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=specimens&count=false&limit=99999&offset=0"))$data
-
-spec_mat = matrix(nrow=length(specs),ncol=17)
-
-for (i in seq(length(specs))) {
-  for(j in seq(17) ) {
-    if (!is.null(specs[[i]][[j]])) {
-  spec_mat[i,j] = specs[[i]][[j]]
-    }}
+  for (j in seq(length(permits[[i]]$highlight))) {
+    idx = idx + 1
+        if(!is.null(permits[[i]][['_gddid']])) {
+    per_mat[idx,1] = permits[[i]][['_gddid']]}
+        if(!is.null(permits[[i]]$title)) {
+    per_mat[idx,2] = permits[[i]]$title}
+        if(!is.null(permits[[i]]$pubname)) {
+    per_mat[idx,3] = permits[[i]]$pubname}
+        if(!is.null(permits[[i]]$authors)) {
+    per_mat[idx,4] = permits[[i]]$authors}
+        if(!is.null(permits[[i]]$hits)) {
+    per_mat[idx,5] = permits[[i]]$hits}
+        if(!is.null(permits[[i]]$URL)) {
+    per_mat[idx,6] = permits[[i]]$URL}
+        if(!is.null(permits[[i]]$publisher)) {
+    per_mat[idx,7] = permits[[i]]$publisher}
+        if(!is.null(permits[[i]]$doi)) {
+    per_mat[idx,8] = permits[[i]]$doi}
+    if(!is.null(permits[[i]]$coverDate)) {
+      per_mat[idx,9] = permits[[i]]$coverDate}
+        if(!is.null(permits[[i]]$highlight[[j]])) {
+    per_mat[idx,10] = permits[[i]]$highlight[[j]]}
+         if(!is.null(which_per[[i]])) {
+    per_mat[idx,11] = which_per[[i]]}
+    
   }
+}
+
+per_df = as.data.frame(per_mat) %>% distinct()
+
+names(per_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
 
 
-spec_df = as.data.frame(spec_mat)
+```
+
+It returned the following `r length(per_df[[1]])` results. However, one issue here is that I'm having trouble searching for the symbol "#". When I use the URL encode function, the transformation to "%23" doesn't happen for some reason. So I manually transform the url to reflect that encoding, but the API doesn't understand what I'm asking for. Or I don't understand how to ask the API for what I want.
+
+``` {r permits, message=FALSE,echo=FALSE,warning=FALSE}
+
+datatable(per_df, rownames=FALSE)
 
 
-names(spec_df) = c("specimenid","dataid","elementtypeid","symmetryid","portionid","maturityid","sexid","domesticstatusid","preservative","nisp","repositoryid","specimennr","fieldnr","arctosnr","notes","recdatecreated","recdatemodified")
+
+tribes = content(GET('https://cdxapi.epa.gov/oms-tribes-rest-services/api/v1/tribes?tribeNameQualifier=contains&tribalBandFilter=ExcludeTribalBands'))
+
+tribe_mat = matrix(nrow=length(tribes),ncol=2)
+for (i in seq(length(tribes))) {
+  tribe_mat[[i,1]]=i
+  tribe_mat[[i,2]] = tribes[[i]]$currentName
+  
+}
+
+tribe_df = as.data.frame(tribe_mat)
+```
+
+### Federally Recognized Tribe Official Names
+
+Naming a federally recognized tribe would be suggestive of a collaboration between researchers and the tribe named. I searched all Neotoma publications with unproblematic DOIs for any mention of the following official names of federally recognized Indigenous nations. This took a long time (`r length(tribe_df[[1]])` * `r length(dois[[1]])` calls), so I stored the results and will just call those up here. 
+
+```{r termfield, message=FALSE,echo=FALSE,warning=FALSE}
+
+names(tribe_df) = c("index","tribeName")
+
+#tribes_x = list()
+#which_pub = list()
+#which_trib= list()
+terms_list_trib = tribe_df$tribeName
+terms_df_trib = as.data.frame(terms_list_trib)
 
 
-database_list = c("Cooperative Holocene Mapping Project", "African Pollen Database", "European Pollen Database", "Indo-Pacific Pollen Database", "Latin American Pollen Database", "North American Pollen Database", "Pollen Database of Siberia and the Russian Far East", "Canadian Pollen Database", "FAUNMAP", "Neotoma", "North American Plant Macrofossil Database", "Academy of Natural Sciences of Drexel University", "NDSU Insect Database", "North American Non-Marine Ostracode Database Project (NANODe)", "MioMap", "Alaskan Archaeofaunas", "French Institute of Pondicherry Palynology and Paleoecology Database", "Japanese Pollen Database", "Neotoma Midden Database", "Chinese Pollen Database", "Holocene Perspective on Peatland Biogeochemistry", "ANTIGUA", "Neotoma Testate Amoebae Database", "Deep-Time Palynology Database", "Neotoma Biomarker Database", "Alpine Pollen Database", "Canadian Museum of Nature-Delorme Ostracoda-Surface Samples", "Diatom Paleolimnology Data Cooperative (DPDC)", "Neotoma Ostracode Database", "Faunal Isotope Database", "Neotoma Charcoal Data", "Pollen Monitoring Programme", "PaleoVertebrates of Latin America", "St. Croix Watershed Research Station of the Science Museum of Minnesota","Marine Dinoflagellates Database","Tropical South American Diatom Database", "Packrat Middens", "Sedimentary aDNA Database")
+names(terms_df_trib) = c("dictionary")
+
+datatable(terms_df_trib,rownames=FALSE)
+
+
+#for (i in seq(2200,3132)) {
+#  print(i)
+#  for (j in seq(length(terms_list_trib))) {
+#    if (!grepl(" ",dois$doi[[i]])) {
+#  doi = dois$doi[[i]]
+#} else {
+#  doi <- sub(" .*", "", dois$doi[[i]])
+#}
+#  doi = URLencode(doi)
+#  term = URLencode(terms_list_trib[[j]])
+
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
+  
+#  if (length(call) != 0) {
+#    tribes_x = append(tribes_x,call)
+#    print(paste0("call length: ",length(call), " for ", i," ",j))
+#    which_pub = append(which_pub,dois$publicationid[i])
+#    which_trib = append(which_trib,tribe_df$tribeName[[j]])
+#  }
+#    if (i %in% c(100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400,3500)& j == 1) {
+#    print(paste0("at i = ",i, " at ", Sys.time()))
+#  }
+#  }
+#}
+
+## 246,247,248,185, 123
+## writing to file tribes_x, which_pub at i=900
+##
+##
+
+#idx = 0
+#for ( i in seq(length(tribes_x))) {
+
+#  for (j in seq(length(tribes_x[[i]]$highlight))) {
+#    idx = idx + 1
+
+#  }
+#}
+
+
+
+#trib_mat = matrix(nrow = idx,ncol=11)
+#idx2 = 0
+#for ( i in seq(length(tribes_x))) {
+
+
+ # for (j in seq(length(tribes_x[[i]]$highlight))) {
+ #   idx2 = idx2 + 1
+#        if(!is.null(tribes_x[[i]][['_gddid']])) {
+#    trib_mat[idx2,1] = tribes_x[[i]][['_gddid']]}
+#        if(!is.null(tribes_x[[i]]$title)) {
+#    trib_mat[idx2,2] = tribes_x[[i]]$title}
+#        if(!is.null(tribes_x[[i]]$pubname)) {
+#    trib_mat[idx2,3] = tribes_x[[i]]$pubname}
+#        if(!is.null(tribes_x[[i]]$authors)) {
+#    trib_mat[idx2,4] = tribes_x[[i]]$authors}
+#        if(!is.null(tribes_x[[i]]$hits)) {
+#    trib_mat[idx2,5] = tribes_x[[i]]$hits}
+##        if(!is.null(tribes_x[[i]]$URL)) {
+#    trib_mat[idx2,6] = tribes_x[[i]]$URL}
+#        if(!is.null(tribes_x[[i]]$publisher)) {
+#    trib_mat[idx2,7] = tribes_x[[i]]$publisher}
+#        if(!is.null(tribes_x[[i]]$doi)) {
+#    trib_mat[idx2,8] = tribes_x[[i]]$doi}
+#    if(!is.null(tribes_x[[i]]$coverDate)) {
+#      trib_mat[idx2,9] = tribes_x[[i]]$coverDate}
+#        if(!is.null(tribes_x[[i]]$highlight[[j]])) {
+##    trib_mat[idx2,10] = tribes_x[[i]]$highlight[[j]]}
+#         if(!is.null(which_pub[[i]])) {
+#    trib_mat[idx2,11] = which_pub[[i]]}
+    
+#  }
+#}
+
+#trib_df = as.data.frame(trib_mat) %>% distinct()
+
+#names(trib_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
+
+#write.csv(trib_df,"trib_df2200_3132.csv",row.names=FALSE)
+
+trib_df1 = read.csv("trib_df1_900.csv")
+trib_df2 = read.csv("trib_df900_1400.csv")
+trib_df3 = read.csv("trib_df1400_2200.csv")
+trib_df4 = read.csv("trib_df2200_3132.csv")
+
+trib_df = rbind(trib_df1,trib_df2) %>% rbind(trib_df3) %>% rbind(trib_df4) %>% distinct()
+
+datatable(trib_df, rownames=FALSE)
+
 
 ```
 
 
-```{r geochron,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+I had a similar problem as I had above with special symbols. The ampersand in Sac & Fox wasn't reading correctly, for instance.
+
+
+# Radiocarbon from Human Samples
+
+
+``` {r premio, echo=FALSE,warning=FALSE,message=FALSE}
+
 
 #geochrons prep
 geochrons = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=geochronology&count=false&limit=99999&offset=0"))$data
@@ -437,6 +572,54 @@ collunits_df = as.data.frame(collunits_mat)
 
 
 names(collunits_df) = c("collectionunitid","handle","siteid","colltypeid","depenvtid","collunitname","colldate","colldevice","gpslatitude","gpslongitude","gpsaltitude","gpserror","waterdepth","substrateid","slopeaspect","slopeangle","location","notes","recdatecreated","recdatemodified")
+
+
+
+chronpubs = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/geochronpublications?count=false&limit=99999&offset=0'))$data
+
+
+chronpub_mat = matrix(nrow=length(chronpubs),ncol=4)
+
+for (i in seq(length(chronpubs))) {
+  for(j in seq(4) ) {
+    if (!is.null(chronpubs[[i]][[j]])) {
+  chronpub_mat[i,j] = chronpubs[[i]][[j]]
+    }}}
+
+
+chronpub_df = as.data.frame(chronpub_mat)
+
+
+names(chronpub_df) = c("geochronid","publicationid","recdatecreated","recdatemodified")
+
+
+radiocarbon = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/radiocarbon?count=false&limit=99999&offset=0'))$data
+
+
+rc_mat = matrix(nrow=length(radiocarbon),ncol=10)
+
+for (i in seq(length(radiocarbon))) {
+  if (!is.null(radiocarbon[[i]]$geochronid[[1]])) {
+    rc_mat[i,1] = radiocarbon[[i]]$geochronid[[1]]
+  }
+    if (!is.null(radiocarbon[[i]]$radiocarbonmethodid[[1]])) {
+    rc_mat[i,2] = radiocarbon[[i]]$radiocarbonmethodid[[1]]
+  }
+  for(j in seq(6) ) {
+    if (!is.null(radiocarbon[[i]][[(j+2)]])) {
+  rc_mat[i,(j+2)] = radiocarbon[[i]][[(j+2)]]
+    }}
+   for(j in seq(2) ) {
+    if (!is.null(radiocarbon[[i]][[(j+8)]])) {
+  rc_mat[i,(j+8)] = radiocarbon[[i]][[(j+8)]]
+    }}}
+
+
+rc_df = as.data.frame(rc_mat)
+
+
+names(rc_df) = c("geochronid","radiocarbonmethodid","percentc","percentn","delta13c","delta15n","percentcollagen","reservoir","masscmg","cnratio")
+
 
 
 #
@@ -478,183 +661,17 @@ matches_collunits_notes <- grep(paste(dictionary,collapse="|"),
 collunits_results = rbind(collunits_results,collunits_df[matches_collunits_notes,]) %>% distinct()
 
 
-
-
-```
-
-
-```{r geochron-results,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
-
-samples = list()
-for (i in seq(20)) {
-  val=i*30000 - 30000
-  samples = append(samples,content(GET(paste0('https://api.neotomadb.org/v2.0/data/dbtables/samples?count=false&limit=30000&offset=',val)))$data)
-}
-
-
-
-sample_mat = matrix(nrow=length(samples),ncol=2)
-
-for (i in seq(length(samples))) {
-    if (!is.null(samples[[i]]$sampleid)) {
-  sample_mat[i,1] = samples[[i]]$sampleid
-    }
-      if (!is.null(samples[[i]]$datasetid)) {
-  sample_mat[i,2] = samples[[i]]$datasetid
-    }}
-
-
-sample_df = as.data.frame(sample_mat)
-
-
-names(sample_df) = c("sampleid","datasetid")
-
-
-sample_filtered = sample_df %>% dplyr::filter(sampleid %in% geochron_results$sampleid) 
-
-sample_topaste = sample_filtered %>% dplyr::select(datasetid) %>% distinct()
-
-ds_info1 = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(sample_topaste[1:25,],collapse=","))))$data
-
-
-ds_info2 = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(sample_topaste[26:length(sample_topaste[,1]),],collapse=","))))$data
-
-ds_info = append(ds_info1,ds_info2)
-
-
-ds_mat = matrix(nrow=length(ds_info),ncol=3)
-
-
-for (i in seq(length(ds_info))) {
-    if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasetid)) {
-  ds_mat[i,1] = ds_info[[i]]$site$datasets[[1]]$datasetid
-    }
-      if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasettype)) {
-  ds_mat[i,2] = ds_info[[i]]$site$datasets[[1]]$datasettype
-      }
-      if (!is.null(ds_info[[i]]$site$datasets[[1]]$database)) {
-  ds_mat[i,3] = ds_info[[i]]$site$datasets[[1]]$database
-    }
-}
-ds_df = as.data.frame(ds_mat)
-
-
-names(ds_df) = c("datasetid","datasettype","database")
-ds_df = ds_df %>% dplyr::mutate(datasetid = as.numeric(datasetid))
-join_df = sample_filtered %>% dplyr::left_join(ds_df)
-
-
-
-chronpubs = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/geochronpublications?count=false&limit=99999&offset=0'))$data
-
-
-chronpub_mat = matrix(nrow=length(chronpubs),ncol=4)
-
-for (i in seq(length(chronpubs))) {
-  for(j in seq(4) ) {
-    if (!is.null(chronpubs[[i]][[j]])) {
-  chronpub_mat[i,j] = chronpubs[[i]][[j]]
-    }}}
-
-
-chronpub_df = as.data.frame(chronpub_mat)
-
-
-names(chronpub_df) = c("geochronid","publicationid","recdatecreated","recdatemodified")
-
-
-geochron_results = geochron_results %>% dplyr::mutate(sensitivity =  case_when(
-                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE))
-| grepl(21255,geochronid,fixed= TRUE)| grepl(29333,geochronid,fixed= TRUE)| grepl(29334,geochronid,fixed= TRUE)| grepl(29335,geochronid,fixed= TRUE)
- ~ 1,          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2, grepl("human burial", materialdated, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2,TRUE ~ 3))
-
-
-geochron_investigate = geochron_results %>% dplyr::filter(sensitivity==3 & (grepl("bone",materialdated,fixed=TRUE) | grepl("Bone",materialdated,fixed=TRUE)))
-
-pub_IDs = chronpub_df %>% dplyr::filter(geochronid %in% geochron_investigate$geochronid)
-
-pub_investigate = content(GET(paste0("https://api.neotomadb.org/v2.0/data/publications/",paste0(pub_IDs$publicationid,collapse=","))))$data
-
-
-pub_mat = matrix(nrow=length(pub_investigate),ncol=2)
-
-for (i in seq(length(pub_investigate))) {
-    if (!is.null(pub_investigate[[i]]$publication$publicationid)) {
-  pub_mat[i,1] = pub_investigate[[i]]$publication$publicationid
-    }
-     if (!is.null(pub_investigate[[i]]$publication$citation)) {
-  pub_mat[i,2] = pub_investigate[[i]]$publication$citation
-    }}
-
-
-radiocarbon = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/radiocarbon?count=false&limit=99999&offset=0'))$data
-
-
-rc_mat = matrix(nrow=length(radiocarbon),ncol=10)
-
-for (i in seq(length(radiocarbon))) {
-  if (!is.null(radiocarbon[[i]]$geochronid[[1]])) {
-    rc_mat[i,1] = radiocarbon[[i]]$geochronid[[1]]
-  }
-    if (!is.null(radiocarbon[[i]]$radiocarbonmethodid[[1]])) {
-    rc_mat[i,2] = radiocarbon[[i]]$radiocarbonmethodid[[1]]
-  }
-  for(j in seq(6) ) {
-    if (!is.null(radiocarbon[[i]][[(j+2)]])) {
-  rc_mat[i,(j+2)] = radiocarbon[[i]][[(j+2)]]
-    }}
-   for(j in seq(2) ) {
-    if (!is.null(radiocarbon[[i]][[(j+8)]])) {
-  rc_mat[i,(j+8)] = radiocarbon[[i]][[(j+8)]]
-    }}}
-
-
-rc_df = as.data.frame(rc_mat)
-
-
-names(rc_df) = c("geochronid","radiocarbonmethodid","percentc","percentn","delta13c","delta15n","percentcollagen","reservoir","masscmg","cnratio")
-
-
-check = rc_df %>% dplyr::filter(geochronid %in% c(29333,29334,29335))
-
-
-join_df = join_df %>% dplyr::mutate(sampleid = as.character(sampleid))
-geochron_counter = geochron_results %>% left_join(join_df) %>% group_by(database,sensitivity) %>% count() %>% drop_na() %>% arrange(desc(n))
-
-
 ambig_rad = geochron_df %>% filter(materialdated %in% c("Bone collagen","bone collagen","","bone","Bone") | is.na(materialdated))
 
-
-datatable(ambig_rad,rownames=FALSE)
-
-```
-
-Neotoma has `r length(geochron_df[[1]])` geochronological records, of which at least `r length(ambig_rad[[1]])` have an ambiguous material dated (material dated of bone collagen, bone, or blank).
-
-```{r radcarb, message=FALSE, warning=FALSE,echo=FALSE}
-chronpubs = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/geochronpublications?count=false&limit=99999&offset=0'))$data
-
-
-chronpub_mat = matrix(nrow=length(chronpubs),ncol=4)
-
-for (i in seq(length(chronpubs))) {
-  for(j in seq(4) ) {
-    if (!is.null(chronpubs[[i]][[j]])) {
-  chronpub_mat[i,j] = chronpubs[[i]][[j]]
-    }}}
-
-
-chronpub_df = as.data.frame(chronpub_mat)
-
-
-names(chronpub_df) = c("geochronid","publicationid","recdatecreated","recdatemodified")
 
 ambig_rad_pubs = chronpub_df %>% dplyr::filter(geochronid %in% ambig_rad$geochronid) %>% distinct()
 
 ambig_rad_pubs = pub_df %>% dplyr::filter(publicationid %in% ambig_rad_pubs$publicationid)
 
 
-ambig_rad_pubsd = ambig_rad_pubs %>% dplyr::filter(!is.na(doi))
+ambig_rad_pubsd = ambig_rad_pubs %>% dplyr::filter(!is.na(doi)) %>% dplyr::filter(!doi %in% c("10.1016"))
+
+
 articles_ambig=list()
 
 
@@ -707,20 +724,30 @@ names(article_ambig_df) = c("id","title","volume","journal","year", "publication
 
 ```
 
-I used the Neotoma geochronpublications table to find the publications associated with these ambiguous chron records. I found `r length(ambig_rad_pubs[[1]])` publications associated with these ambiguous records. Then I filtered for just those with DOIs (n = `r length(ambig_rad_pubsd[[1]])`), and I looked for how many were associated with an internal document ID from XDD (n = `r length(article_ambig_df[[1]])`).
+As part of our interest in our repository's relationship to CARE, we want to know about the disposition of the remains of human ancestors, for both radiocarbon dates and samples. There are `r length(geochron_df[[1]])` records in Neotoma's geochronology table, of which there are `r length(ambig_rad[[1]])` records ambiguous with respect to taxon (meaning the <i>materialdated</i> field is bone collagen, bone, blank, or NA). We would like to search for those ambiguous taxa which are most likely to be dated from human material.
 
-Finally I searched through all the articles in Neotoma with an internal document ID or with a DOI for the following terms:
+We searched for all the publications in Neotoma associated with these ambiguous records and found `r length(ambig_rad_pubs[[1]])` records. Of these records, only `r length(ambig_rad_pubsd[[1]])` have an unproblematic DOI, and `r length(article_ambig_df[[1]])` have an internal XDD ID.
 
-```{r moreambigrad, message=FALSE,echo=FALSE,warning=FALSE}
+I searched through all the Neotoma publications associated with an ambiguous taxon and with a DOI for the following terms:
+
+``` {r per fed, message=FALSE,echo=FALSE,warning=FALSE}
 
 
 human_rcs = list()
 terms_list_rc = c("human specimen", "human bone")
+which_human_pub = list()
 
 terms_list_rc_df = as.data.frame(terms_list_rc)
 names(terms_list_rc_df) = c("dictionary")
 
 datatable(terms_list_rc_df, rownames=FALSE)
+
+```
+
+
+
+```{r moreambigrad, message=FALSE,echo=FALSE,warning=FALSE}
+
 
 
 for (i in seq(length(ambig_rad_pubsd[[1]]))) {
@@ -733,10 +760,13 @@ for (i in seq(length(ambig_rad_pubsd[[1]]))) {
   }
   doi = URLencode(doi)
   term = URLencode(terms_list_rc[[j]])
-  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results")))$success$data
+  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
   
   if (length(call) != 0) {
+    #print(paste0(length(call), "at i = ", i))
     human_rcs = append(human_rcs,call)
+    which_human_pub = append(which_human_pub,ambig_rad_pubsd$publicationid[[i]])
+    
   }
   }
 }
@@ -752,7 +782,7 @@ for ( i in seq(length(human_rcs))) {
 
 
 
-human_rc_mat = matrix(nrow = idx,ncol=10)
+human_rc_mat = matrix(nrow = idx,ncol=11)
 idx = 0
 for ( i in seq(length(human_rcs))) {
 
@@ -777,20 +807,22 @@ for ( i in seq(length(human_rcs))) {
     if(!is.null(human_rcs[[i]]$coverDate)) {
       human_rc_mat[idx,9] = human_rcs[[i]]$coverDate}
         if(!is.null(human_rcs[[i]]$highlight[[j]])) {
-    human_rc_mat[idx,10] = human_rcs[[i]]$highlight[[j]]}
+    human_rc_mat[idx,11] = human_rcs[[i]]$highlight[[j]]}
+            if(!is.null(which_human_pub[[i]])) {
+    human_rc_mat[idx,11] = which_human_pub[[i]]}
     
   }
 }
 
 human_rc_df = as.data.frame(human_rc_mat)
 
-names(human_rc_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight")
+names(human_rc_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight", "publicationid")
 
 
 ```
 
 
-This time, the docid search returned three results while the DOI search returned `r length(human_rc_df[[1]])` results:
+This time, the DOI search returned `r length(human_rc_df[[1]])` results:
 
 ```{r evenmoreambigrad, message=FALSE, echo = FALSE, warning =FALSE}
 
