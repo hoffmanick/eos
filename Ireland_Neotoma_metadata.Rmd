@@ -195,44 +195,56 @@ sites_ir_sf_unique = sites_ir_sf %>% distinct(siteid,.keep_all=TRUE)
                    popup = ~sitename)
 ```
 
-There are `r length(sites_ir_sf_unique[[1]])` sites in Ireland in Neotoma, associated with `r length(sites_ir_sf[[1]])` datasets.
+  
+There are `r length(sites_ir_sf_unique[[1]])` sites in Ireland in Neotoma, associated with `r length(sites_ir_sf[[1]])` datasets. Below I count them by dataset type.
+
+``` {r datasettypetable}
+
+sites_ir_df %>% group_by(datasettype) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+```
 
 # Old, Young Age
-Next I use a different API to grab the oldest and youngest year associated with each dataset. These are probably in calibrated radiocarbon years...
+Next I use a different API to grab the oldest and youngest year associated with each dataset. In Neotoma, a single site can be associated with multiple datasets, which have types like pollen, charcoal, cladocera...
 
 ```{r oldyoung}
-idx=0
-for (h in seq(length(datasetids[[1]]))) {
-  returns = content(GET(paste0("https://api.neotomadb.org/v1.5/data/datasets/",datasetids$datasetid[[h]])))$data
-for (i in seq(length(returns))) {
-idx = idx +1
-}}
 
-
-oldyoung_mat = matrix(nrow=idx,ncol=3)
+site_string = paste0(distinct(sites_ir_sf_unique,siteid)$siteid, collapse=",")
+returns = content(GET(paste0("https://api.neotomadb.org/v2.0/data/sites/",site_string,"/datasets?limit=2000")))$data
 
 idx=0
-for (h in seq(length(datasetids[[1]]))) {
-  returns = content(GET(paste0("https://api.neotomadb.org/v1.5/data/datasets/",datasetids$datasetid[[h]])))$data
 for (i in seq(length(returns))) {
-  idx = idx + 1
-  if (!is.null(returns[[i]]$ageoldest)) {
-  oldyoung_mat[[idx,1]] = returns[[i]]$ageoldest}
-  if (!is.null(returns[[i]]$ageyoungest)) {
-   oldyoung_mat[[idx,2]] = returns[[i]]$ageyoungest}
-  if (!is.null(returns[[i]]$datasetid)) {
-   oldyoung_mat[[idx,3]]  = returns[[i]]$datasetid}
-}}
+  for (j in seq(length(returns[[i]]$site$datasets))) {
+    idx = idx +1
+  }
+}
+
+
+
+oldyoung_mat = matrix(nrow=idx,ncol=4)
+
+for (i in seq(length(returns))) {
+  for (j in seq(length(returns[[i]]$site$datasets))) {
+    if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$units)) {
+      oldyoung_mat[[idx,1]] = returns[[i]]$site$datasets[[j]]$agerange[[1]]$units}
+    if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold)) {
+      oldyoung_mat[[idx,2]] = returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold}
+    if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageyoung)) {
+      oldyoung_mat[[idx,3]]  = returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold}
+    if (!is.null(returns[[i]]$site$datasets[[j]]$datasetid)) {
+      oldyoung_mat[[idx,4]]  = returns[[i]]$site$datasets[[j]]$datasetid}
+    
+  }
+}
 
 oldyoung_df = as.data.frame(oldyoung_mat) 
-names(oldyoung_df) = c("old","young","datasetid")
+names(oldyoung_df) = c("units","old","young","datasetid")
 
 oldyoung_df = oldyoung_df %>% dplyr::mutate(datasetid = as.character(datasetid))
 ```
 
 # Pubs
 
-I download the database tables I'll need below. Datasetpublications links datasetids and publicationids, while publications has metadata for any given publication.
+I download the publication tables. Datasetpublications links datasetids and publicationids, while publications has metadata for any given publication. In Neotoma, there is a many-to-many relationship between datasets and publications: many datasets can be associated with a particular publication, and vice versa.
 
 ```{r downloadneotables}
 
@@ -284,7 +296,7 @@ assign(paste0(table,"_df"), df)
 
 # Put it all together
 
-I join all my different metadata together. Before I do that, I grab the x/y version of the coordinates instead of the sf version, which doesn't render well in tables.
+I join all my different metadata together. Before I do that, I grab the x/y version of the coordinates instead of the sf version, which doesn't render well in tables. Because of the one-to-many and many-to-many relationships among Neotoma tables, there are a lot of records in the below data table. But only about 100 Neotoma sites in Ireland, associated with about 300 datasets, and 64 publications. (And of those 300ish datasets, 62 are geochronologic type, which is a little artifactual, but I'm including it below for completeness.)
 
 ```{r joins}
 
@@ -295,7 +307,7 @@ all_coords_df = rbind(coords_polycenter,coords_pointcenter)
 
 joiner = sites_ir_df %>% left_join(datasetpublications_df, by=join_by(datasetid)) %>% left_join(publications_df, by=join_by(publicationid)) %>% left_join(oldyoung_df, by=join_by(datasetid)) %>% left_join(all_coords_df)
 
-ask = joiner %>% select(c(publicationid, citation, sitename, X,Y, altitude, datasettype,old,young))
+ask = joiner %>% select(c(publicationid, citation, sitename, X,Y, altitude, datasettype,old,young, units))
 
 datatable(ask,rownames=FALSE)
 ```
