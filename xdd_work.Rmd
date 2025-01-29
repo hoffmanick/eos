@@ -1,5 +1,5 @@
 ---
-title: "XDD audit extenison"
+title: "XDD audit extension"
 author: "Nick Hoffman"
 date: "`r Sys.Date()`"
 output:
@@ -126,10 +126,8 @@ dois_a = pub_with_doi %>% rbind(pub_with_crossrefdoi) %>% distinct()
 
 
 
-dois = dois_a %>% dplyr::filter(!doi  %in% c("10.1073\002pnas.0530193100","10.1073\002pnas.0408315102"))
+dois = dois_a %>% dplyr::filter(!doi  %in% c("10.1073\002pnas.0530193100","10.1073\002pnas.0408315102","10.1002/(SICI)1099-1417(199709/10)12:5<347::AID-JQS319>3.0.CO;2-#","10.1130/0091-7613(1987) 15<837:CRDOTP> 2.0.CO;2","10.1016","10.1111","6020"))
 
-
-dois = dois %>% dplyr::filter(!doi %in% c("10.1002/(SICI)1099-1417(199709/10)12:5<347::AID-JQS319>3.0.CO;2-#","10.1130/0091-7613(1987) 15<837:CRDOTP> 2.0.CO;2","10.1016","10.1111"))
 
 diff = length(dois_a[[1]]) - length(dois[[1]])
 
@@ -318,7 +316,7 @@ I also searched for any mention of the following terms suggestive of a permittin
 
 permits = list()
 which_per = list()
-terms_list_per = c("permit number","permit #")
+terms_list_per = c("permit number","permit" ,"thank", "authorit", "collaboration", "consultation", "approval", "IRB", "IACUC")
 terms_df_per = as.data.frame(terms_list_per)
 
 names(terms_df_per) = c("dictionary")
@@ -330,7 +328,7 @@ datatable(terms_df_per,rownames=FALSE)
 
 
 #for (i in seq(length(dois[[1]]))) {
-#  print(i)
+  #print(i)
 #  for (j in seq(length(terms_list_per))) {
 #    if (!grepl(" ",dois$doi[[i]])) {
 #  doi = dois$doi[[i]]
@@ -339,14 +337,24 @@ datatable(terms_df_per,rownames=FALSE)
 #}
 #  doi = URLencode(doi)
 #  term = URLencode(terms_list_per[[j]])
-#  if (term=="permit%20#") {
+#  if (term=="permit%20") {
 #    term = "permit%20%23"
 #  }
-#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",#doi,"&inclusive&full_results&clean&no_word_stemming")))$success$data
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean&no_word_stemming")))$success$data
   
-#  if (length(call) != 0) {
+ # if (length(call) == 2) {
+#    if (call[[1]]$doi == call[[2]]$doi) {
+#        permits = append(permits,call[1])
+#        which_per = append(which_per,dois$publicationid[i])
+#      }
+#    }
+#  if (length(call) ==1) {
 #    permits = append(permits,call)
 #    which_per = append(which_per,dois$publicationid[i])
+#    if (length(call) > 1) {
+#      print(paste0("length of call is ", length(call), " at i= ", i, " j = ", j))
+ #   }
+
 #  }
 #  }
 #}
@@ -355,7 +363,7 @@ datatable(terms_df_per,rownames=FALSE)
 #for ( i in seq(length(permits))) {
 
 #  for (j in seq(length(permits[[i]]$highlight))) {
-#    idx = idx + 1
+ #   idx = idx + 1
 
 #  }
 #}
@@ -366,7 +374,7 @@ datatable(terms_df_per,rownames=FALSE)
 #idx = 0
 #for ( i in seq(length(permits))) {
 
- # for (j in seq(length(permits[[i]]$highlight))) {
+#  for (j in seq(length(permits[[i]]$highlight))) {
 #    idx = idx + 1
 #        if(!is.null(permits[[i]][['_gddid']])) {
 #    per_mat[idx,1] = permits[[i]][['_gddid']]}
@@ -377,17 +385,17 @@ datatable(terms_df_per,rownames=FALSE)
 #        if(!is.null(permits[[i]]$authors)) {
 #    per_mat[idx,4] = permits[[i]]$authors}
 #        if(!is.null(permits[[i]]$hits)) {
-#    per_mat[idx,5] = permits[[i]]$hits}
-#        if(!is.null(permits[[i]]$URL)) {
+ #   per_mat[idx,5] = permits[[i]]$hits}
+###        if(!is.null(permits[[i]]$URL)) {
 #    per_mat[idx,6] = permits[[i]]$URL}
 #        if(!is.null(permits[[i]]$publisher)) {
 #    per_mat[idx,7] = permits[[i]]$publisher}
 #        if(!is.null(permits[[i]]$doi)) {
-#    per_mat[idx,8] = permits[[i]]$doi}
-#    if(!is.null(permits[[i]]$coverDate)) {
-#      per_mat[idx,9] = permits[[i]]$coverDate}
-#        if(!is.null(permits[[i]]$highlight[[j]])) {
-#    per_mat[idx,10] = permits[[i]]$highlight[[j]]}
+#    #per_mat[idx,8] = permits[[i]]$doi}
+   # if(!is.null(permits[[i]]$coverDate)) {
+  #    per_mat[idx,9] = permits[[i]]$coverDate}
+ #       if(!is.null(permits[[i]]$highlight[[j]])) {
+ #   per_mat[idx,10] = permits[[i]]$highlight[[j]]}
 #         if(!is.null(which_per[[i]])) {
 #    per_mat[idx,11] = which_per[[i]]}
     
@@ -396,7 +404,8 @@ datatable(terms_df_per,rownames=FALSE)
 
 #per_df = as.data.frame(per_mat) %>% distinct()
 
-#names(per_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi#","coverDate","highlight","publicationid")
+#names(per_df) = c("gddid","title","pubname","authors","hits","URL","publisher","doi","coverDate","highlight","publicationid")
+
 
 per_df = read.csv("per_df.csv")
 
@@ -802,6 +811,5 @@ This time, the DOI search returned `r length(human_rc_df[[1]])` results:
 datatable(human_rc_df,rownames=FALSE)
 
 ```
-I guess I should go through the pubs and see if anything really turns up.
 
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
