@@ -222,14 +222,16 @@ for (i in seq(length(returns))) {
 
 oldyoung_mat = matrix(nrow=idx,ncol=4)
 
+idx = 0
 for (i in seq(length(returns))) {
   for (j in seq(length(returns[[i]]$site$datasets))) {
+    idx = idx + 1
     if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$units)) {
       oldyoung_mat[[idx,1]] = returns[[i]]$site$datasets[[j]]$agerange[[1]]$units}
     if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold)) {
       oldyoung_mat[[idx,2]] = returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold}
     if (!is.null(returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageyoung)) {
-      oldyoung_mat[[idx,3]]  = returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageold}
+      oldyoung_mat[[idx,3]]  = returns[[i]]$site$datasets[[j]]$agerange[[1]]$ageyoung}
     if (!is.null(returns[[i]]$site$datasets[[j]]$datasetid)) {
       oldyoung_mat[[idx,4]]  = returns[[i]]$site$datasets[[j]]$datasetid}
     
