@@ -213,7 +213,7 @@ I searched through the text of Neotoma publications with unproblematic DOI for a
 
 fuzzes = list()
 whichfuzz_neo = list()
-terms_list = c("sensitive site","geomask","low-resolution map","fuzzed site", "obscured location", "purposeful imprecision","obfuscate", "county-level")
+terms_list = c("sensitive site","geomask","low-resolution map","fuzzed site", "obscured location", "purposeful imprecision","obfuscate", "county-level", "county level","county-scale" ,"county scale", "restricted access", "ethic", "legal", "site protection", "redacted", "sensitive date", "Archaeological Resource Protection Act", "National Historic Preservation Act", "withh", "privacy", "damage", "religious site", "cultural data")
 terms_df = as.data.frame(terms_list)
 
 names(terms_df) = c("dictionary")
@@ -232,11 +232,21 @@ datatable(terms_df,rownames=FALSE)
 #}
 #  doi = URLencode(doi)
 #  term = URLencode(terms_list[[j]])
-#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",#doi,"&inclusive&full_results&clean")))$success$data
+#  call = content(GET(paste0("https://xdd.wisc.edu/api/snippets?term=",term,"&doi=",doi,"&inclusive&full_results&clean")))$success$data
   
-#  if (length(call) != 0) {
+#  if (length(call) == 1) {
 #    fuzzes = append(fuzzes,call)
 #    whichfuzz_neo = append(whichfuzz_neo,dois$publicationid[i])
+#  }
+  
+#  if (length(call) == 2) {
+#    if (call[[1]]$doi == call[[2]]$doi) {
+#        fuzzes = append(fuzzes,call[1])
+#        whichfuzz_neo = append(whichfuzz_neo,dois$publicationid[i])
+#      }
+#    }
+#  if (length(call) > 1) {
+#    print(paste0("at i= ", i, " j = ", j, " call length is ", length(call)))
 #  }
 #  }
 #}
@@ -255,8 +265,7 @@ datatable(terms_df,rownames=FALSE)
 #fuzz_mat = matrix(nrow = idx,ncol=11)
 #idx = 0
 #for ( i in seq(length(fuzzes))) {
-
-#  for (j in seq(length(fuzzes[[i]]$highlight))) {
+#    for (j in seq(length(fuzzes[[i]]$highlight))) {
 #    idx = idx + 1
 #        if(!is.null(fuzzes[[i]][['_gddid']])) {
 #    fuzz_mat[idx,1] = fuzzes[[i]][['_gddid']]}
@@ -280,7 +289,7 @@ datatable(terms_df,rownames=FALSE)
 #    fuzz_mat[idx,10] = fuzzes[[i]]$highlight[[j]]}
 #          if(!is.null(whichfuzz_neo[[i]])) {
 #    fuzz_mat[idx,11] = whichfuzz_neo[[i]]}
-    
+#    
 #  }
 #}
 
