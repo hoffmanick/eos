@@ -92,6 +92,33 @@ library(rmapshaper)
 sf_use_s2(FALSE)
 
 
+tables = c("datasetpublications", "datasetdatabases","constituentdatabases", "datasets", "datasettypes")
+
+
+for (i in seq(length(tables))) {
+
+  table = tables[[i]]
+dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+
+
+dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+
+for (j in seq(1,length(dslinks))) {
+  for (k in seq(length(dslinks[[1]]))) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+
+dsl_df = as.data.frame(dsl_df)
+
+names(dsl_df) = names(dslinks[[1]]) 
+
+assign(paste0(table,"_df"), dsl_df)
+}
+
+
 
 pubs = content(GET(paste0('https://api.neotomadb.org/v2.0/data/dbtables/publications?count=false&limit=99999&offset=0')))$data
 
@@ -186,11 +213,75 @@ dois_percent= round(length(dois[[1]])/length(pub_df[[1]])*100,1)
 
 gddid_percent = round(length(article_df[[1]])/length(pub_df[[1]])*100,1)
 
+
+faunmap_pubs = pub_df %>% left_join(datasetpublications_df) %>% left_join(datasetdatabases_df, by=join_by(datasetid)) %>% left_join(constituentdatabases_df, by=join_by(databaseid)) %>% dplyr::filter(databaseid=="10") %>% distinct(publicationid,year, citation,articletitle,journal,booktitle,doi,notes)
+
+vert_pubs = pub_df %>% left_join(datasetpublications_df) %>% left_join(datasets_df, by=join_by(datasetid)) %>% left_join(datasettypes_df, by=join_by(datasettypeid)) %>% dplyr::filter(datasettype=="vertebrate fauna") %>% distinct(publicationid,year, citation,articletitle,journal,booktitle,doi,notes.x)
+
+vert_not_faun = vert_pubs %>% dplyr::filter(!publicationid %in% faunmap_pubs$publicationid)
+
+faun_not_vert = faunmap_pubs %>% dplyr::filter(!publicationid %in% vert_pubs$publicationid)
+
+vert_faun = faunmap_pubs %>% dplyr::filter(publicationid %in% vert_pubs$publicationid)
+
+faun_doi = faunmap_pubs %>% dplyr::filter(!is.na(doi))
+
+vert_doi = vert_pubs %>% dplyr::filter(!is.na(doi))
+
+#vert_articles=list()
+#for (i in seq(length(vert_doi[[1]]))) {
+#print(i)
+#if (!grepl(" ",vert_doi$doi[[i]])) {
+ # val = vert_doi$doi[[i]]
+#} else {
+#  val <- sub(" .*", "", vert_doi$doi[[i]])
+#}
+    
+ # article= content(GET(paste0("https://xdd.wisc.edu/api/articles?doi=",val)))$success$data
+
+#  if (length(article) != 0) {
+ #   vert_articles = append(vert_articles,article)
+#  }
+  
+#}
+
+
+#article_mat = matrix(nrow=length(vert_articles),ncol=5)
+#for ( i in seq(length(vert_articles))) {
+#  article_mat[[i,1]] = vert_articles[[i]][['_gddid']]
+#  article_mat[[i,2]] = vert_articles[[i]]$title
+#  article_mat[[i,3]] = vert_articles[[i]]$volume
+#  article_mat[[i,4]] = vert_articles[[i]]$journal
+#  if(!is.null(vert_articles[[i]]$year)) {
+#  article_mat[[i,5]] = vert_articles[[i]]$year}
+#}
+
+#vert_article_df = as.data.frame(article_mat)
+#names(vert_article_df) = c("id","title","volume","journal","year")
+
+faun_article_df = read.csv("faun_article_df.csv")
+
+vert_article_df = read.csv("vert_article_df.csv")
+
+
+faun_doi_percent= round(length(faun_doi[[1]])/length(faunmap_pubs[[1]])*100,1)
+vert_doi_percent= round(length(vert_doi[[1]])/length(vert_pubs[[1]])*100,1)
+
+faun_to_overall = round(((faun_doi_percent+vert_doi_percent)/2)/dois_percent,1)
+
+
+faun_gddid_percent = round(length(faun_article_df[[1]])/length(faunmap_pubs[[1]])*100,1)
+
+vert_gddid_percent = round(length(vert_article_df[[1]])/length(vert_pubs[[1]])*100,1)
+
 ```
 
 # Neotoma Publications Indexed by XDD
 
-Neotoma contains `r length(pub_df[[1]])` records. Of these `r length(pub_df[[1]])` records, only `r length(dois_a[[1]])` have DOIs. `r diff` of the DOIs are problematically formatted. Of the `r length(dois[[1]])` (`r dois_percent` %) articles with unproblematic DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])`  (`r gddid_percent` % ) publications had an internal ID with XDD. It seems likely <em style="color:red;"> (should verify this later) </em> that only publications with a an internal XDD id are indexed by XDD. However, I conduct the following searches using DOI, not internal XDD ID, just in case...
+Neotoma contains `r length(pub_df[[1]])` records. Of these `r length(pub_df[[1]])` records, only `r length(dois_a[[1]])` have DOIs. `r diff` of the DOIs are problematically formatted. Of the `r length(dois[[1]])` (`r dois_percent` %) articles with unproblematic DOIs, I searched for how many had internal document ids (XDD ids), by looping all the DOIs through the API call: ```https://xdd.wisc.edu/api/articles?doi=```. Only `r length(article_df[[1]])`  (`r gddid_percent` % ) publications had an internal ID with XDD. For all searches conducted so far, only publications with an internal XDD id seem to have been indexed by XDD. However, I conduct the following searches using DOI, not internal XDD ID, just in case...
+
+Of the `r length(faunmap_pubs[[1]])` distinct publications associated with the FAUNMAP database, and of the the `r length(vert_pubs[[1]])` distinct publications associated with datasets of type vertebrate fauna (overlap of `r length(vert_faun[[1]])`), only `r length(faun_doi[[1]])` and `r length(vert_doi[[1]])` have DOIs associated with them, respectively. That's `r faun_doi_percent` % and `r vert_doi_percent` % respectively, or about `r faun_to_overall` of the overall percentage of Neotoma publications with a known DOI. Only `r length(faun_article_df[[1]])` FAUNMAP publications (`r faun_gddid_percent` %) and `r length(vert_article_df[[1]])` vertebrate publications (`r vert_gddid_percent` %) are indexed by XDD. This low percentage matters because the datasets most likely to contain sensitive data are those from the FAUNMAP database and those that concern vertebrate fauna.
+
 
 # CARE exemplary practices
 
