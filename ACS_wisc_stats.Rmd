@@ -63,7 +63,7 @@ table tr th :last-child, table tr td :last-child {
 ---
 
 
-```{r this}
+```{r this,echo=FALSE,message=FALSE,warning=FALSE}
 
 library(httr)
 library(DT)
@@ -105,7 +105,7 @@ var_df = as.data.frame(var_mat)
 
 names(var_df) = c("name","label","concept")
 
-try = left_join(wisc_df,var_df, by=join_by("names" == "name")) %>% dplyr::filter(names != "GEO_ID")
+try = left_join(wisc_df,var_df, by=join_by("names" == "name")) %>% dplyr::filter(names != "GEO_ID") %>% dplyr::filter(!is.na(label)) 
 
 datatable(try, rownames=FALSE)
 ```
