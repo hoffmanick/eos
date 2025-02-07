@@ -61,7 +61,7 @@ table tr th :last-child, table tr td :last-child {
 </style>
 
 ---
-
+# SD wide
 ```{r setup, warning=FALSE,message=FALSE,echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(httr)
@@ -188,6 +188,106 @@ sites_sd_sf_unique = sites_sd_sf %>% distinct(siteid,.keep_all=TRUE)
 
   
 datatable(st_drop_geometry(sites_sd_sf_unique),rownames=FALSE)
+
+rezes = read_sf("tl_2019_us_aiannh.shp")
+
+coordinates_sf = st_transform(coordinates_sf,crs=st_crs(rezes))
+
+sd_rezes = rezes %>% dplyr::select(NAME) %>% st_filter(coordinates_sf)
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = sd_rezes, 
+              color = "black", 
+              weight = 5, 
+              fillColor = "white", 
+              fillOpacity = 0.35, 
+              popup = ~NAME) %>%
+  addPolygons(data = polySites, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.2, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+  
+
+sites_sd_sf_unique = st_transform(sites_sd_sf_unique,crs=st_crs(rezes))
+
+tribal_sites = sites_sd_sf_unique %>% st_filter(sd_rezes)
+```
+# Tribal Sites
+```{r chunl2, message=FALSE,echo=FALSE,warning=FALSE}
+
+datatable(st_drop_geometry(tribal_sites),rownames=FALSE)
+```
+
+# RBS sites
+```{r rbs, message=FALSE,warning=FALSE,echo=FALSE}
+
+trinomials = sites_sd_sf_unique$sitename[grep("39",sites_sd_sf_unique$sitename)]
+
+
+smiths = sites_sd_sf_unique %>% dplyr::filter(sitename %in% trinomials) %>% dplyr::filter(sitename!= "NLA06608-0439")
+
+
+ pointSites_s = smiths[st_geometry_type(smiths) == "POINT",] 
+    polySites_s = smiths[st_geometry_type(smiths) == "POLYGON",] 
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = sd_rezes, 
+              color = "black", 
+              weight = 5, 
+              fillColor = "white", 
+              fillOpacity = 0.35, 
+              popup = ~NAME) %>%
+  addPolygons(data = polySites, 
+              color = "blue", 
+              weight = 5, 
+              fillColor = "blue", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.2, 
+                   stroke = FALSE, 
+                   popup = ~sitename) %>%
+  addPolygons(data = polySites_s, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "red", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites_s, 
+                   radius = 5, 
+                   color = "red", 
+                   fillColor = "red", 
+                   fillOpacity = 0.2, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+  
+  
+smiths_tribal = smiths %>% st_filter(sd_rezes) 
+
+datatable(st_drop_geometry(smiths),rownames=FALSE)
+
+```
+
+# RBS Sites on federally recognized reservations lands in SD
+```{r lasty, message=FALSE,warning=FALSE,echo=FALSE}
+smiths_tribal %>% st_drop_geometry() %>% datatable(rownames=FALSE)
+
 ```
 
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
