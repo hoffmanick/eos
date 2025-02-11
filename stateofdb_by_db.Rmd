@@ -4,6 +4,7 @@ author: "Nick Hoffman"
 date: "`r Sys.Date()`"
 output:
   html_document:
+    css: db_by_db.css
     df_print: paged
     highlight: pygment
     keep_md: no
@@ -15,64 +16,30 @@ output:
 editor_options:
     chunk_output_type: inline
 ---
-
 <style type="text/css">
-h2, h3, h4, h5, h6 {
-  counter-reset: section;
-}
-p {
-  font-size:18px;
+details {
+  display: block;
 }
 
-ul {
-  font-size:18px;
-}
-
-li {
-  font-size:18px;
-}
-table {
-   padding: 0;border-collapse: collapse;
-   layout: fixed;
-   width: 90%; }
-table tr {
-   border-top: 1px solid #cccccc;
-   background-color: white;
-   margin: 0;
-   padding: 0; }
-table tr:nth-child(2n) {
-   background-color: #f8f8f8; }
-table tr th {
-   font-weight: bold;
-   border: 1px solid #cccccc;
-   margin: 0;
-   padding: 6px 13px; }
-table tr td {
-   border: 1px solid #cccccc;
-   margin: 0;
-   padding: 6px 13px; }
-table tr th :first-child, table tr td :first-child {
-   margin-top: 0; }
-table tr th :last-child, table tr td :last-child {
-   margin-bottom: 0; }
-.html-widget {
-    margin: auto;
+div {
+  display: block;
 }
 </style>
 
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
+```{r setup, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE}
 library(leaflet)
 library(wkb)
 library(dplyr)
 library(sf)
 library(httr)
 library(DT)
+library(htmltools)
+library(tidyverse)
 ```
 
+```{r, include=FALSE}
+datatable(iris)
+```
 
 ```{r downloadanaly, message=FALSE,warning=FALSE,echo=FALSE}
 
@@ -145,7 +112,7 @@ dslinks_df = dslinks_df %>% dplyr::mutate(datasetid=as.character(datasetid))
 
 joiner = dslinks_df %>% left_join(sites_df, by = join_by(siteid)) %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) 
 
-dups = joiner %>% group_by(siteid) %>% summarize(toString(unique(datasetid))) %>% left_join(sites_df) %>% group_by(geog) %>% count() %>% filter(n>1) %>% left_join(joiner)
+dups = joiner %>% group_by(siteid) %>% summarize(toString(unique(datasetid))) %>% left_join(sites_df) %>% group_by(geog) %>% count() %>% dplyr::filter(n>1) %>% left_join(joiner)
 
 missers = sites_df %>% left_join(collectionunits_df,by=join_by(siteid)) %>% left_join(datasets_df,by=join_by(collectionunitid))  %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) %>% dplyr::filter(is.na(collectionunitid) | is.na(datasetid)) %>% dplyr::select(c(siteid,sitename,collectionunitid,datasetid,databasename,databaseid,geog))
 
@@ -219,10 +186,33 @@ print("A map of sites missing datasets AND analysis units:")
                    stroke = FALSE, 
                    popup = ~sitename)
 
+    
+db_map = read.csv('dbids_names.csv') %>% dplyr::select(Database,dbid) %>% drop_na()
+db_list = list()
 for ( i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42,43)) {
-
+     if (exists('nullloc')) {
+  rm(nullloc)}
+      if (exists('db_name')) {
+  rm(db_name)}
+      if (exists('db_specific')) {
+  rm(db_specific)}
+      if (exists('map_dups')) {
+  rm(map_dups)}
+      if (exists('db_spec_analymiss')) {
+  rm(db_spec_analymiss)}
+      if (exists('whereanaly')) {
+  rm(whereanaly)}
+  db_mapper = db_map %>% dplyr::filter(dbid == i)
+  db_name = db_mapper$Database[[1]]
   db_specific = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct()
     db_specific2 = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct() %>% group_by(geog) %>% summarize(toString(unique(siteid)),toString(unique(sitename)))
+    
+        db_specific3 = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct() %>% group_by(geog) %>% summarize(toString(unique(siteid)),toString(unique(sitename))) %>% ungroup() %>% dplyr::filter(!is.na(geog))
+          
+if (length(db_specific3[[1]]) > 0) {
+  coords3 = st_coordinates(st_centroid(st_as_sfc(hex2raw(db_specific3$geog),EWKB=TRUE)))
+  db_specific3 = cbind(db_specific3,coords3) %>% ungroup() %>% dplyr::select(!geog)
+  names(db_specific3) = c("siteids", "sitenames", "longitude","latitude")}
     
     notnullloc = db_specific2 %>% dplyr::filter(!is.na(geog))
     rm(db_sf)
@@ -232,7 +222,8 @@ for ( i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,3
     db_sf = st_as_sf(notnullloc,geom=sfc) %>% dplyr::select(!geog)
     names(db_sf) = c("siteids","sitenames","geom")
     }
-    nullloc = db_specific2 %>% dplyr::filter(is.na(geog))
+    nullloc = db_specific %>% dplyr::filter(is.na(geog)) %>% dplyr::select(!geog)
+    names(nullloc) = c("siteid", "datasetids","sitename")
     
 if (exists("db_sf")) {
     pointSites = db_sf[st_geometry_type(db_sf) == "POINT",] 
@@ -255,20 +246,22 @@ if (exists("db_sf")) {
                    popup = ~sitenames)
     
       if(length(polySites[[1]]) > 0 | length(pointSites[[1]]) > 0) {
-   assign(paste0("map_dups_",i),map_dups)}}
+   assign(paste0("map_dups_",i),map_dups)}} else {
+     map_dups = NULL
+   }
    
     datatable(nullloc,rownames=FALSE)
     
      assign(paste0("dups_na_",i),nullloc)
-   
-    
+
     db_spec_analymiss = analy_missers_sf %>% dplyr::filter(databaseid==i)
     
     datatable(db_spec_analymiss)
     
        assign(paste0("analymiss_",i),db_spec_analymiss)
    
-    
+       
+
    pointSites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POINT",] 
     polySites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POLYGON",] 
 
@@ -290,1285 +283,60 @@ if (exists("db_sf")) {
     
     if(length(polySites_am[[1]]) > 0 | length(pointSites_am[[1]]) > 0) {
        assign(paste0("whereanaly_",i),whereanaly)}
-   
     
+    db_spec_analymiss = db_spec_analymiss %>% dplyr::select(!c(databasename,databaseid)) %>% st_drop_geometry()
+       specific_list = list(dbid=i,db_name=db_name,nulls = nullloc, dups = db_specific3, dup_map=map_dups,missing_analysis = db_spec_analymiss,map_missing_analysis = whereanaly)
+
+db_list = append(db_list,list(specific_list))
 }
 ```
 
-
-# African Pollen Database
-
-```{r rez1, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_2")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-map_dups_2
+```{r name, results="asis", echo=FALSE}
+for (i in seq(length(db_list))) {
+  cat("<details> <summary>")
+  cat("\n")
+  cat("<h1>", (i+1), db_list[[i]]$db_name, "</h1>\n")
+  cat("</summary>")
+  
+  
+cat("<h2> Duplicate Geographies </h2> \n") 
+if (!is.null(db_list[[i]]$dup_map)) {
+   cat("\n")
+  cat("<i>Note that in the duplicate geographies table, all locations are reported as points, though they may actually be stored as polygons in the database.</i>")
+  cat("\n")
+print(tagList(db_list[[i]]$dup_map))
+  cat("\n")
+print(tagList(datatable(db_list[[i]]$dups)))
 } else {
   cat(paste("No sites with duplicate geographies"))
+    cat("\n")
 }
 
-if (length(dups_na_2[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-datatable(dups_na_2,rownames=FALSE)
+   cat("<h2>Null Geographies </h2> \n")
+if (length(db_list[[i]]$nulls[[1]] > 0)) {
+   cat("\n")
+
+print(tagList(datatable(db_list[[i]]$nulls, rownames=FALSE)))
+  cat("\n")
 } else {
     cat(paste("No sites with null geographies"))
+    cat("\n")
   }
-
-if (exists("whereanaly_2")) {
+   cat("<h2>Missing Analysis Units </h2>")
+if (length(db_list[[i]]$missing_analysis[[1]]) > 0) {
 cat(paste("A map of sites missing analysis units:"))
-  whereanaly_2
+    cat("\n")
+ print(tagList(db_list[[i]]$map_missing_analysis))
+ print(tagList(datatable(db_list[[i]]$missing_analysis, rownames=FALSE)))
+   cat("\n")
+ 
 } else {
     cat(paste("No sites missing analysis units"))
+    cat("\n")
   }
 
-
-if (length(analymiss_2[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-datatable(analymiss_2,rownames=FALSE)
-} else {
-      cat(paste("No missing analysis units"))
-  }
-
-
-
-```
-
-
-
-# European Pollen Database
-
-```{r rez_3, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_3")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-map_dups_3
-} else {
-  cat(paste("No sites with duplicate geographies"))
+cat("</details>")
 }
-
-if (length(dups_na_3[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-datatable(dups_na_3,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_3")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_3
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_3[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-datatable(analymiss_3,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-
-```
-
-
-
-# Indo-Pacific Pollen Database
-
-```{r rez_4, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_4")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_4
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_4[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_4,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_4")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_4
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_4[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_4,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Latin American Pollen Database
-
-```{r rez_5, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_5")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_5
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_5[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_5,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_5")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_5
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_5[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_5,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-
-# North American Pollen Database
-
-```{r rez_6, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_6")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_6
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_6[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_6,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_6")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_6
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_6[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_6,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-
-# Pollen Database of Siberia and the Russian Far East
-
-
-```{r rez_7, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_7")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_7
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_7[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_7,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_7")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_7
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_7[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_7,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# FAUNMAP 
-
-```{r rez_10, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_10")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_10
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_10[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_10,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_10")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_10
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_10[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_10,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma (undifferentiated)
-
-```{r rez_11, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_11")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_11
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_11[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_11,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_11")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_11
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_11[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_11,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# North American Plant Macrofossil Database
-
-```{r rez_12, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_12")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_12
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_12[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_12,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_12")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_12
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_12[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_12,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Academy of Natural Sciences of Drexel University
-
-```{r rez_13, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_13")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_13
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_13[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_13,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_13")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_13
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_13[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_13,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# NDSU Insect Database
-
-```{r rez_14, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_14")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_14
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_14[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_14,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_14")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_14
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_14[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_14,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# North American Non-Marine Ostracode Database Project (NANODe)
-
-```{r rez_15, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_15")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_15
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_15[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_15,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_15")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_15
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_15[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_15,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Alaskan Archaeofaunas
-
-```{r rez_17, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_17")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_17
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_17[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_17,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_17")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_17
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_17[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_17,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# French Institute of Pondicherry Palynology and Paleoecology Database
-
-```{r rez_18, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_18")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_18
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_18[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_18,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_18")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_18
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_18[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_18,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Japanese Pollen Database
-
-```{r rez_19, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_19")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_19
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_19[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_19,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_19")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_19
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_19[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_19,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma Midden Database
-
-```{r rez_20, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_20")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_20
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_20[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_20,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_20")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_20
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_20[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_20,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Chinese Pollen Database
-
-
-```{r rez_22, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_22")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_22
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_22[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_22,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_22")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_22
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_22[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_22,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Holocene Perspective on Peatland Biogeochemistry
-
-```{r rez_23, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_23")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_23
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_23[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_23,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_23")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_23
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_23[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_23,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma Testate Amoebae Database
-
-```{r rez_25, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_25")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_25
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_25[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_25,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_25")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_25
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_25[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_25,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-
-
-# Deep-Time Palynology Database
-
-```{r rez_26, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_26")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_26
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_26[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_26,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_26")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_26
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_26[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_26,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma Biomarker Database
-
-```{r rez_27, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_27")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_27
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_27[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_27,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_27")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_27
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_27[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_27,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Alpine Palynological Database
-
-```{r rez_28, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_28")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_28
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_28[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_28,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_28")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_28
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_28[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_28,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Canadian Museum of Nature-Delorme Ostracoda- Surface Samples
-
-```{r rez_29, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_29")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_29
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_29[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_29,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_29")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_29
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_29[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_29,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Diatom Paleolimnology Data Cooperative (DPDC)
-
-```{r rez_30, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_30")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_30
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_30[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_30,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_30")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_30
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_30[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_30,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma Ostracode Database
-
-```{r rez_31, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_31")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_31
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_31[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_31,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_31")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_31
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_31[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_31,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Faunal Isotope Database
-
-```{r rez_32, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_32")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_32
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_32[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_32,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_32")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_32
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_32[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_32,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Neotoma Charcoal Data
-
-```{r rez_33, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_33")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_33
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_33[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_33,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_33")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_33
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_33[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_33,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Pollen Monitoring Programme
-
-
-```{r rez_35, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_35")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_35
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_35[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_35,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_35")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_35
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_35[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_35,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# PaleoVertebrates of Latin America
-
-
-```{r rez_36, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_36")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_36
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_36[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_36,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_36")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_36
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_36[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_36,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# St. Croix Watershed Research Station of the Science Museum of Minnesota
-
-```{r rez_37, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_37")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_37
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_37[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_37,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_37")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_37
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_37[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_37,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Tropical South American Diatom Database
-
-
-```{r rez_38, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_38")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_38
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_38[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_38,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_38")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_38
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_38[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_38,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Marine Dinoflagellates Database
-
-```{r rez_39, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_39")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_39
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_39[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_39,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_39")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_39
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_39[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_39,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Nonmarine Ostracod Distribution in Europe Database
-
-```{r rez_41, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_41")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_41
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_41[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_41,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_41")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_41
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_41[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_41,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# East Asian Nonmarine Ostracod Database
-
-```{r rez_42, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_42")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_42
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_42[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_42,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_42")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_42
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_42[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_42,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
-```
-
-# Strategic Environmental Archaeology Database
-
-```{r rez_43, echo=FALSE,message=FALSE,warning=FALSE}
-
-if (exists("map_dups_43")) {
-  cat(paste("A map of sites with duplicate geographies:"))
-  map_dups_43
-} else {
-  cat(paste("No sites with duplicate geographies"))
-}
-
-if (length(dups_na_43[[1]]) > 0) {
-   cat(paste("A table of sites with null geographies"))
-   datatable(dups_na_43,rownames=FALSE)
-} else {
-    cat(paste("No sites with null geographies"))
-  }
-
-if (exists("whereanaly_43")) {
-cat(paste("A map of sites missing analysis units:"))
-  whereanaly_43
-} else {
-    cat(paste("No sites missing analysis units"))
-  }
-
-
-if (length(analymiss_43[[1]] > 0)) {
-   cat(paste("A table of missing analysis units:"))
-   datatable(analymiss_43,rownames=FALSE)
-} else {
-       cat(paste("No missing analysis units"))
-  }
-
-
 ```
 
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
