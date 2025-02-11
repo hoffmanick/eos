@@ -105,7 +105,8 @@ collectionunits_df = collectionunits_df %>% dplyr::mutate(siteid = as.numeric(si
 dslinks_df = dslinks_df %>% dplyr::mutate(datasetid=as.character(datasetid))
 ```
 
-# No database
+<details> <summary>
+<h1>1 No database </h1> </summary>
 ``` {r firstquery, message=FALSE,warning=FALSE,echo=FALSE}
 
 
@@ -290,7 +291,7 @@ if (exists("db_sf")) {
 db_list = append(db_list,list(specific_list))
 }
 ```
-
+</details>
 ```{r name, results="asis", echo=FALSE}
 for (i in seq(length(db_list))) {
   cat("<details> <summary>")
