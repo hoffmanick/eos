@@ -282,6 +282,57 @@ smiths_tribal = smiths %>% st_filter(sd_rezes)
 
 datatable(st_drop_geometry(smiths),rownames=FALSE)
 
+#E,warning=FALSE,message=FALSE}
+
+
+tables = c("publications", "datasetpublications")
+
+
+
+for (i in seq(length(tables))) {
+
+  table = tables[[i]]
+dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+
+
+
+if (table == "publications") {
+  dsl_df = matrix(nrow=length(dslinks),ncol=(length(dslinks[[1]]) - 2))
+  for (j in seq(1,length(dslinks))) {
+  for (k in seq((length(dslinks[[1]])) - 2)) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+else {
+  dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+for (j in seq(1,length(dslinks))) {
+  for (k in seq(length(dslinks[[1]]))) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+
+dsl_df = as.data.frame(dsl_df)
+
+if (table =="publications") {
+names(dsl_df) = names(dslinks[[1]])[1:(length(dslinks[[1]])-2)]  }
+
+else {
+  names(dsl_df) = names(dslinks[[1]])  
+}
+
+assign(paste0(table,"_df"), dsl_df)
+}
+
+smithpubs = datasetpublications_df %>% dplyr::filter(datasetid %in% smiths$datasetid) %>% left_join(publications_df, by=join_by(publicationid))
+
+datatable(smithpubs,rownames=FALSE)
+
 ```
 
 # RBS Sites on federally recognized reservations lands in SD
@@ -289,5 +340,6 @@ datatable(st_drop_geometry(smiths),rownames=FALSE)
 smiths_tribal %>% st_drop_geometry() %>% datatable(rownames=FALSE)
 
 ```
+
 
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
