@@ -88,8 +88,10 @@ state_names = c("Alabama", "Alaska", "American Samoa", "Arizona", "Arkansas", "C
 tris = c(1,49,NA,2,3,4,5,6,7,NA,NA,8,9,NA,50,10,11,12,13,14,15,16,17,NA,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,NA,33,34,35,NA,36,NA,37,38,39,40,41,42,43,NA,44,45,46,47,48)
 
 
-state_tri_mapper=data.frame(names=state_names,trinom_num=tris)
+state_tri_mapper=data.frame(names=state_names,trinom_num=tris) %>% dplyr::mutate(trinom_num = as.character(trinom_num))
 
+state_tri_mapper = state_tri_mapper %>% dplyr::mutate(trinom_num = case_when(names=="Arizona" ~ "AZ", names=="California" ~ "CA",
+         TRUE ~ trinom_num))
 
 
 siteid=c("junk")
@@ -167,7 +169,12 @@ potentials = rbind(potentials,potentialsites)
 }}}
 
 
-potentials = potentials %>% dplyr::filter(sitename != "junk") %>% dplyr::filter(!str_detect(sitename,"Jensen 1998"))  %>% dplyr::filter(!str_detect(sitename,"Riegel 1965")) %>% dplyr::filter(!str_detect(sitename,"Haile 8A")) %>% dplyr::filter(!str_detect(sitename,"Santa Fe River 8A")) %>% distinct()
+potentials = potentials %>% dplyr::filter(sitename != "junk") %>% dplyr::filter(!str_detect(sitename,"Jensen 1998"))  %>% dplyr::filter(!str_detect(sitename,"Riegel 1965")) %>% dplyr::filter(!str_detect(sitename,"Haile 8A")) %>% dplyr::filter(!str_detect(sitename,"Santa Fe River 8A")) %>% distinct() %>% dplyr::filter(!sitename %in% c("Site 66 (Delcourt et al. 1983)","Site 110 (G.M. Peterson 1978)","Site 10 (Mack, Bryant, and Pell 1978)","LRRB31","Site 106 (Swain unpublished)","Anthony Cave [MALB 29]","Baldy Peak Cave [MALB 29]","Solar Energy Generating Station II [1.76.42]","Luz Solar Trough [1.76.34]", "Site 13 (Delcourt et al. 1983)","Site 14 (Delcourt et al. 1983)","Site 66 (Delcourt et al. 1983)","CHUSKA29","CHUS29","Upper Alturas [UO Loc 2424; CAS Loc 36805]","Site 35 (Heusser 1978)","BECL360","Stand 45 (Mack and Bryant 1974]","Law's [MSv100]","Seven Springs [CE101x3]","Rock House [MS201]","Mobile Bay, MB0810-GC20","Spring Canyon [A-41]","Pratt Cave [TMM-41172]","Little Sunday Canyon Local Fauna [V5414]","Avery Ranch [s:5:8]","Big Juniper House [1595]","Badger House [1453]","Mesa Verde Site 875","La Poudre LP5 Site","SNMN5","SNMN15","ANIM5","ANIM35","COMO5","LPLT5","GATC26","Mile 49 Lac la Ronge Highway","Stations 49-55 (Lichti-Federovich and Ritchie 1968)","TK-49","49 [HFL49]","Valkenswaard N49","Mosquito Lake Site, [PSM-00049]","BOREA24, Mile 49","LR49","ALTAK49","ABD249","Island 35 [10-Q-7]","Hancock Ditch (ditch #39)","Tunica Bayou Site 22","NLA06608-1232","JHMN24 (McAndrews and Wright 1969)","NLA06608-0439","Twin Peaks, AZ","Tucson Mountains, Pima Co., AZ")) %>%
+  dplyr::filter(!str_detect(sitename,"Mount Evans Surface")) %>%
+  dplyr::filter(!str_detect(sitename,"LDDsite")) %>%
+  dplyr::filter(!str_detect(sitename,"Begin boardwalk")) %>% dplyr::filter(!str_detect(sitename,"unpublished")) %>%
+  dplyr::filter(!str_detect(sitename,"Colonel's Island Site")) %>%
+  dplyr::filter(!str_detect(sitename,"Delcourt")) %>% dplyr::filter((state !="California") | state == "California" & str_detect(sitename,"CA"))
 
 datatable(potentials,rownames=FALSE)
 
