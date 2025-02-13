@@ -97,7 +97,8 @@ state_tri_mapper = state_tri_mapper %>% dplyr::mutate(trinom_num = case_when(nam
 siteid=c("junk")
 sitename=c("junk")
 state=c("junk")
-potentials = data.frame(siteid=siteid,sitename=sitename,state=state)
+geography=("junk")
+potentials = data.frame(siteid=siteid,sitename=sitename,state=state,geography=geography)
 for (num in seq(length(states[[1]]))) {
 
 coordinates_sf = states[num,] %>% st_convex_hull()
@@ -162,21 +163,48 @@ names(sites_state_df) = c("siteid","sitename","sitedescription","geography","alt
 numb = state_tri_mapper %>% dplyr::filter(names == states$NAME[[num]]) %>% dplyr::select(trinom_num)
 
 if (!is.na(numb[[1]])) {
-potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename,as.character(numb[[1]]))) %>% dplyr::select(siteid,sitename) %>% dplyr::mutate(state = states$NAME[[num]])
+potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename,as.character(numb[[1]]))) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
 potentials = rbind(potentials,potentialsites)
   } else {
-  print(paste0("Null mapper value for ", states$NAME[[num]]))
+  #print(paste0("Null mapper value for ", states$NAME[[num]]))
 }}}
 
 
-potentials = potentials %>% dplyr::filter(sitename != "junk") %>% dplyr::filter(!str_detect(sitename,"Jensen 1998"))  %>% dplyr::filter(!str_detect(sitename,"Riegel 1965")) %>% dplyr::filter(!str_detect(sitename,"Haile 8A")) %>% dplyr::filter(!str_detect(sitename,"Santa Fe River 8A")) %>% distinct() %>% dplyr::filter(!sitename %in% c("Site 66 (Delcourt et al. 1983)","Site 110 (G.M. Peterson 1978)","Site 10 (Mack, Bryant, and Pell 1978)","LRRB31","Site 106 (Swain unpublished)","Anthony Cave [MALB 29]","Baldy Peak Cave [MALB 29]","Solar Energy Generating Station II [1.76.42]","Luz Solar Trough [1.76.34]", "Site 13 (Delcourt et al. 1983)","Site 14 (Delcourt et al. 1983)","Site 66 (Delcourt et al. 1983)","CHUSKA29","CHUS29","Upper Alturas [UO Loc 2424; CAS Loc 36805]","Site 35 (Heusser 1978)","BECL360","Stand 45 (Mack and Bryant 1974]","Law's [MSv100]","Seven Springs [CE101x3]","Rock House [MS201]","Mobile Bay, MB0810-GC20","Spring Canyon [A-41]","Pratt Cave [TMM-41172]","Little Sunday Canyon Local Fauna [V5414]","Avery Ranch [s:5:8]","Big Juniper House [1595]","Badger House [1453]","Mesa Verde Site 875","La Poudre LP5 Site","SNMN5","SNMN15","ANIM5","ANIM35","COMO5","LPLT5","GATC26","Mile 49 Lac la Ronge Highway","Stations 49-55 (Lichti-Federovich and Ritchie 1968)","TK-49","49 [HFL49]","Valkenswaard N49","Mosquito Lake Site, [PSM-00049]","BOREA24, Mile 49","LR49","ALTAK49","ABD249","Island 35 [10-Q-7]","Hancock Ditch (ditch #39)","Tunica Bayou Site 22","NLA06608-1232","JHMN24 (McAndrews and Wright 1969)","NLA06608-0439","Twin Peaks, AZ","Tucson Mountains, Pima Co., AZ")) %>%
+potentials = potentials %>% dplyr::filter(sitename != "junk") %>% dplyr::filter(!str_detect(sitename,"Jensen 1998"))  %>% dplyr::filter(!str_detect(sitename,"Riegel 1965")) %>% dplyr::filter(!str_detect(sitename,"Haile 8A")) %>% dplyr::filter(!str_detect(sitename,"Santa Fe River 8A")) %>% distinct() %>% dplyr::filter(!sitename %in% c("Site 66 (Delcourt et al. 1983)","Site 110 (G.M. Peterson 1978)","Site 10 (Mack, Bryant, and Pell 1978)","LRRB31","Site 106 (Swain unpublished)","Anthony Cave [MALB 29]","Baldy Peak Cave [MALB 29]","Solar Energy Generating Station II [1.76.42]","Luz Solar Trough [1.76.34]", "Site 13 (Delcourt et al. 1983)","Site 14 (Delcourt et al. 1983)","Site 66 (Delcourt et al. 1983)","CHUSKA29","CHUS29","Upper Alturas [UO Loc 2424; CAS Loc 36805]","Site 35 (Heusser 1978)","BECL360","Stand 45 (Mack and Bryant 1974]","Law's [MSv100]","Seven Springs [CE101x3]","Rock House [MS201]","Mobile Bay, MB0810-GC20","Spring Canyon [A-41]","Pratt Cave [TMM-41172]","Little Sunday Canyon Local Fauna [V5414]","Avery Ranch [s:5:8]","Big Juniper House [1595]","Badger House [1453]","Mesa Verde Site 875","La Poudre LP5 Site","SNMN5","SNMN15","ANIM5","ANIM35","COMO5","LPLT5","GATC26","Mile 49 Lac la Ronge Highway","Stations 49-55 (Lichti-Federovich and Ritchie 1968)","TK-49","49 [HFL49]","Valkenswaard N49","Mosquito Lake Site, [PSM-00049]","BOREA24, Mile 49","LR49","ALTAK49","ABD249","Island 35 [10-Q-7]","Hancock Ditch (ditch #39)","Tunica Bayou Site 22","NLA06608-1232","JHMN24 (McAndrews and Wright 1969)","NLA06608-0439","Twin Peaks, AZ","Tucson Mountains, Pima Co., AZ","Vijdt Polder (B49D0349)","Borteldonk (B49F0399)","Halsteren (B49B0566)","Ossendrecht 49D20-1")) %>%
   dplyr::filter(!str_detect(sitename,"Mount Evans Surface")) %>%
   dplyr::filter(!str_detect(sitename,"LDDsite")) %>%
   dplyr::filter(!str_detect(sitename,"Begin boardwalk")) %>% dplyr::filter(!str_detect(sitename,"unpublished")) %>%
   dplyr::filter(!str_detect(sitename,"Colonel's Island Site")) %>%
   dplyr::filter(!str_detect(sitename,"Delcourt")) %>% dplyr::filter((state !="California") | state == "California" & str_detect(sitename,"CA"))
 
-datatable(potentials,rownames=FALSE)
+datatable(potentials[c('siteid','sitename','state')],rownames=FALSE)
+
+
+
+unique_pot = geojson_sf(potentials$geography) %>% cbind(potentials) %>% distinct(siteid,.keep_all=TRUE)
+
+ pointSites = unique_pot[st_geometry_type(unique_pot) == "POINT",] 
+    polySites = unique_pot[st_geometry_type(unique_pot) == "POLYGON",] 
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+
+  
+
 
 ```
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
