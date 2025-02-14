@@ -97,8 +97,9 @@ state_tri_mapper = state_tri_mapper %>% dplyr::mutate(trinom_num = case_when(nam
 siteid=c("junk")
 sitename=c("junk")
 state=c("junk")
+collectionunitid=c("junk")
 geography=("junk")
-potentials = data.frame(siteid=siteid,sitename=sitename,state=state,geography=geography)
+potentials = data.frame(siteid=siteid,sitename=sitename,state=state,geography=geography, collectionunitid=collectionunitid)
 for (num in seq(length(states[[1]]))) {
 
 coordinates_sf = states[num,] %>% st_convex_hull()
@@ -163,26 +164,26 @@ names(sites_state_df) = c("siteid","sitename","sitedescription","geography","alt
 numb = state_tri_mapper %>% dplyr::filter(names == states$NAME[[num]]) %>% dplyr::select(trinom_num)
 
 if (states$NAME[[num]] == "Vermont") {
-  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "VT")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "VT")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (states$NAME[[num]] == "Rhode Island") {
-  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "RI")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "RI")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (states$NAME[[num]] == "Connectictut") {
-  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "CT")| str_detect(sitename, "6")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "CT")| str_detect(sitename, "6")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (states$NAME[[num]] == "Arizona") {
-  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{1,2}:[0-9]{1,2}")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{1,2}:[0-9]{1,2}")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (states$NAME[[num]] == "Alaska") {
-  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{3}-[0-9]+")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{3}-[0-9]+")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (states$NAME[[num]] == "New York") {
   potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "\\d{5}")|
-str_detect(sitename,"30")) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+str_detect(sitename,"30")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
   potentials = rbind(potentials,potentialsites)
 } else if (!is.na(numb[[1]])) {
-potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename,as.character(numb[[1]]))) %>% dplyr::select(siteid,sitename,geography) %>% dplyr::mutate(state = states$NAME[[num]])
+potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename,as.character(numb[[1]]))) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
 potentials = rbind(potentials,potentialsites)
   } else {
   #print(paste0("Null mapper value for ", states$NAME[[num]]))
@@ -230,6 +231,103 @@ datatable(st_drop_geometry(unique_pot)[c('siteid','sitename','state')],rownames=
 
   
 
+tables = c("datasets","publications", "datasetpublications","collectionunits")
+
+
+
+for (i in seq(length(tables))) {
+
+  table = tables[[i]]
+dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+
+
+
+if (table == "publications") {
+  dsl_df = matrix(nrow=length(dslinks),ncol=(length(dslinks[[1]]) - 2))
+  for (j in seq(1,length(dslinks))) {
+  for (k in seq((length(dslinks[[1]])) - 2)) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+else {
+  dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+for (j in seq(1,length(dslinks))) {
+  for (k in seq(length(dslinks[[1]]))) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+
+dsl_df = as.data.frame(dsl_df)
+
+if (table =="publications") {
+names(dsl_df) = names(dslinks[[1]])[1:(length(dslinks[[1]])-2)]  }
+
+else {
+  names(dsl_df) = names(dslinks[[1]])  
+}
+
+assign(paste0(table,"_df"), dsl_df)
+}
+
+
+
+
+```
+# Publication Metadata
+
+## Sites associated with papers from before 1967
+
+The River Basin Surveys Program ended in 1967. The below sites are all associated in Neotoma with at least one publication from 1967 or earlier, so these ones are most likely to have been connected to the program.
+
+``` {r publics, message=FALSE,warning=FALSE,echo=FALSE}
+
+
+pubs = potentials %>% left_join(datasets_df, by=join_by(collectionunitid)) %>% left_join(datasetpublications_df, by=join_by(datasetid)) %>% left_join(publications_df, by=join_by(publicationid)) 
+
+
+pre1967 = pubs %>% dplyr::filter(!is.na(citation)) %>% dplyr::filter(as.numeric(year)<=1967) %>% group_by(siteid) %>% summarize(siteid,sitename,state.x,toString(unique(year)),toString(unique(citation)),geography) %>% distinct()
+
+names(pre1967) = c("siteid","sitename","state","publication years","citations","geography")
+
+
+
+pubyears = pubs %>% distinct(citation,.keep_all = TRUE) %>% select(year)
+
+pre1967 %>% select(!geography) %>% datatable(rownames=FALSE)
+
+
+pre1967_sf = geojson_sf(pre1967$geography) %>% cbind(pre1967) 
+
+
+
+
+pointSites_1967 = pre1967_sf[st_geometry_type(pre1967_sf) == "POINT",] 
+polySites_1967 = pre1967_sf[st_geometry_type(pre1967_sf) == "POLYGON",] 
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites_1967, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites_1967, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+
+  
 
 ```
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
