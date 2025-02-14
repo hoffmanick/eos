@@ -283,7 +283,7 @@ assign(paste0(table,"_df"), dsl_df)
 
 ## Sites associated with papers from before 1967
 
-The River Basin Surveys Program ended in 1967. The below sites are all associated in Neotoma with at least one publication from 1967 or earlier, so these ones are most likely to have been connected to the program.
+The River Basin Surveys Program began in 1946 and ended in 1967. The below sites are all associated in Neotoma with at least one publication from 1967 or earlier, so these ones are most likely to have been connected to the program. Some of these (n=23) actually are published before the RBS even begins. But I include them here anyway.
 
 ``` {r publics, message=FALSE,warning=FALSE,echo=FALSE}
 
@@ -291,7 +291,10 @@ The River Basin Surveys Program ended in 1967. The below sites are all associate
 pubs = potentials %>% left_join(datasets_df, by=join_by(collectionunitid)) %>% left_join(datasetpublications_df, by=join_by(datasetid)) %>% left_join(publications_df, by=join_by(publicationid)) 
 
 
-pre1967 = pubs %>% dplyr::filter(!is.na(citation)) %>% dplyr::filter(as.numeric(year)<=1967) %>% group_by(siteid) %>% summarize(siteid,sitename,state.x,toString(unique(year)),toString(unique(citation)),geography) %>% distinct()
+pre1967 = pubs %>% dplyr::filter(!is.na(citation)) %>% dplyr::filter(as.numeric(year)<=1967) %>% group_by(siteid) %>% summarize(siteid,sitename,state.x,toString(unique(year)),toString(unique(citation), sep="\n\n"),geography) %>% distinct()
+
+pre1967_sf = geojson_sf(pre1967$geography) %>% cbind(pre1967) 
+
 
 names(pre1967) = c("siteid","sitename","state","publication years","citations","geography")
 
@@ -300,10 +303,6 @@ names(pre1967) = c("siteid","sitename","state","publication years","citations","
 pubyears = pubs %>% distinct(citation,.keep_all = TRUE) %>% select(year)
 
 pre1967 %>% select(!geography) %>% datatable(rownames=FALSE)
-
-
-pre1967_sf = geojson_sf(pre1967$geography) %>% cbind(pre1967) 
-
 
 
 
