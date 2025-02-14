@@ -296,13 +296,14 @@ pre1967 = pubs %>% dplyr::filter(!is.na(citation)) %>% dplyr::filter(as.numeric(
 pre1967_sf = geojson_sf(pre1967$geography) %>% cbind(pre1967) %>% st_transform(crs=st_crs(us_bounds)) %>% st_filter(us_bounds)
 
 
-names(pre1967) = c("siteid","sitename","state","publication years","citations","geography")
-
-
 
 pubyears = pubs %>% distinct(citation,.keep_all = TRUE) %>% select(year)
 
-pre1967_sf %>% st_drop_geometry() %>% datatable(rownames=FALSE)
+names(pre1967_sf) = c("siteid","sitename","state","publication years","citations","geography","geometry")
+
+
+
+pre1967_sf %>% st_drop_geometry() %>% select(!geography) %>% datatable(rownames=FALSE)
 
 
 
