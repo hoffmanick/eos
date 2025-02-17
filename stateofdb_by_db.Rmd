@@ -32,8 +32,12 @@ max-width: 85%
 }
 
 .nav.nav-pills {
-    flex: 15%;
-    width: 100%;
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr 1fr;
+   justify-content: center;
+   justify-items: center;
+   align-items:center;
+   align-content:center;
 }
 .nav.nav-pills li{
     width: 100%;
