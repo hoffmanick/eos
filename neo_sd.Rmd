@@ -70,9 +70,12 @@ library(DT)
 library(geojsonsf)
 library(osmdata)
 library(rosm)
+library(rmapshaper)
 library(tmap)
 library(sf)
 library(leaflet)
+library(lubridate)
+library(neotoma2)
 
 #lats = c(46, 46, 42.42, 42.42)
 #lons = c(-104.3, -96, -96, -104.3) 
@@ -285,7 +288,7 @@ datatable(st_drop_geometry(smiths),rownames=FALSE)
 #E,warning=FALSE,message=FALSE}
 
 
-tables = c("publications", "datasetpublications")
+tables = c("publications", "datasetpublications","sites","dataprocessors","collectionunits","datasets","contacts")
 
 
 
@@ -340,6 +343,55 @@ datatable(smithpubs,rownames=FALSE)
 smiths_tribal %>% st_drop_geometry() %>% datatable(rownames=FALSE)
 
 ```
+# Sites added Later
 
+Two sites were added in 2018. One of these (Blaine) is not an RBS site. The other (Medicine Creek) is an RBS site. Medicine Creek was added by Jordan Schutz in July of that year. It's not recorded who added Blaine in April.
+
+```{r sitemata, echo=FALSE,message=FALSE,warning=FALSE}
+
+
+latesites1 = sites_df %>% dplyr::filter(siteid %in% smiths$siteid) %>% mutate(date = as.Date(recdatecreated)) %>% dplyr::filter(year(date) >2013)
+
+latesites2 = smiths %>% dplyr::filter(siteid %in% latesites1$siteid) %>% left_join(collectionunits_df,by=join_by(collectionunitid))  %>% left_join(datasets_df,by=join_by(datasetid))
+
+dataprocessors_df %>% dplyr::filter(datasetid %in% latesites2$datasetid) %>% dplyr::left_join(contacts_df,by=join_by(contactid))
+
+datatable(latesites1,rownames=FALSE)
+
+```
+
+# Number species
+
+## Number of specimens for Semken Falk
+
+All but two Semken Falk sites have greater than 11 species
+
+``` {r checker, echo=FALSE,message=FALSE,warning=FALSE}
+
+rbsmap = read.csv("rbs_semken_sd.csv") %>% dplyr::select(1,2,4,5) %>% dplyr::mutate(siteid=as.character(siteid))
+
+smith_datasets =smiths %>% left_join(collectionunits_df,by=join_by(collectionunitid))  %>% left_join(datasets_df,by=join_by(datasetid))
+
+neodata = get_datasets(c(as.numeric(smith_datasets$datasetid)),all_data=TRUE)
+
+samps = neodata %>% get_downloads(all_data=TRUE) %>% samples()
+
+distinct_species = samps %>% group_by(siteid) %>% distinct(variablename) %>% ungroup() %>% count(siteid) %>% left_join(rbsmap)
+
+sem = distinct_species %>% dplyr::filter(Semken..Falk.== "yes") %>% arrange(desc(n))
+
+datatable(sem,rownames=FALSE)
+```
+
+## Non Semken Falk
+
+Only 6 of the non Semken Falk sites have greater than 11 species!
+
+```{r nonsem, echo=FALSE,message=FALSE,warning=FALSE}
+nosem = distinct_species %>% dplyr::filter(Semken..Falk.== "no") %>% arrange(desc(n))
+
+datatable(nosem,rownames=FALSE)
+
+```
 
 <div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
