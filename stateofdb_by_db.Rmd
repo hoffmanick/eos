@@ -33,8 +33,8 @@ max-width: 85%
 }
 
 .nav.nav-pills {
-   display: grid;
-   grid-template-columns: 1fr 1fr 1fr 1fr;
+   display: flex;
+   flex-wrap:wrap;
    justify-content: center;
    justify-items: center;
    align-items:center;
@@ -45,6 +45,10 @@ max-width: 85%
 .tab-content{
     flex: 85%;
     width: 100%
+}
+
+.nav.nav-pills .nav-item {
+    flex: none; /* Prevents flexbox from resizing the nav items */
 }
 
 ```
