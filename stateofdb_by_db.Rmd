@@ -28,7 +28,7 @@ max-width: 85%
 }
 .tabset{
     display: grid;
-    grid-template-directions: 1fr 100fr 100fr;
+    grid-template-columns: 1fr 100fr 100fr;
 
 }
 
