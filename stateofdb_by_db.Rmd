@@ -27,7 +27,8 @@ div {
 max-width: 85%
 }
 .tabset{
-    display: flex;
+    display: grid;
+    grid-template-directions: 1fr 100fr 100fr;
 
 }
 
@@ -37,7 +38,6 @@ max-width: 85%
    justify-content: center;
    justify-items: center;
    align-items:center;
-   align-content:center;
 }
 .nav.nav-pills li{
     width: 100%;
