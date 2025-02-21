@@ -11,49 +11,32 @@ output:
     theme: journal
 editor_options:
     chunk_output_type: inline
+    
+  ### IPPD duplicate sites map is weird
+  ## add text above the tabset etc saying what the page is for and how to read the "menu"
+  
+  # if li role no class, make it gray
+  # give padding to all li roles, to make it clear that they're clickable buttons
+  # add padding everywhere, include to maps to avoid gray issues -> left padding to panel with map
+  # take a lot of code out and source it
+  # sites that contain duplicate datasets -> two datasets in same collectionunit of same datasettype
+  select st.sitename, cu.collectionunitid, dst.datasettype, count(*), array_agg(ds.datasetid) as datasetids
+from ndb.collectionunits as cu
+inner join ndb.datasets as ds on ds.collectionunitid = cu.collectionunitid
+inner join ndb.sites as st on st.siteid = cu.siteid
+inner join ndb.datasettypes as dst on dst.datasettypeid = ds.datasettypeid 
+group by
+ds.datasettypeid,
+cu.collectionunitid,
+st.siteid,
+st.sitename,
+dst.datasettype
+having count(*) > 1
+order by dst.datasettype ASC
+
+## taxa landing table
+
 ---
-<style type="text/css">
-details {
-  display: block;
-}
-
-div {
-  display: block;
-}
-</style>
-
-```{css, echo=FALSE}
-.container-fluid.main-container{
-max-width: 85%
-}
-.tabset{
-    display: grid;
-    grid-template-columns: 1fr 70fr 100fr;
-
-}
-
-.nav.nav-pills {
-   display: flex;
-   flex-wrap:wrap;
-   justify-content: center;
-   justify-items: center;
-   align-items:center;
-   align-content:flex-start;
-}
-.nav.nav-pills li{
-    width: 100%;
-}
-.tab-content{
-    flex: 85%;
-    width: 100%
-}
-
-.nav.nav-pills .nav-item {
-    flex: none; /* Prevents flexbox from resizing the nav items */
-}
-
-```
-
 
 ```{r setup, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE}
 library(leaflet)
@@ -70,7 +53,7 @@ library(tidyverse)
 datatable(iris)
 ```
 
-```{r downloadanaly, message=FALSE,warning=FALSE,echo=FALSE}
+```{r download_analysisunits, message=FALSE,warning=FALSE,echo=FALSE}
 
 analysisunits1 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999"))$data
 
@@ -274,6 +257,9 @@ if (exists("db_sf")) {
 db_list = append(db_list,list(specific_list))
 }
 ```
+# Data anomalies by constituent database
+
+This page provides information on anomalies in Neotoma, on a constituent database by database basis. You can click on the tab for any of the databases below (or 'no database' at the bottom) to receive information about duplicate site geographies, null site geographies, and sites without any connection to analysis units.
 
 # {.tabset .tabset-pills .tabcontent}
 ```{r name, results="asis", echo=FALSE}

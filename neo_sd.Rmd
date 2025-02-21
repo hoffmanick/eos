@@ -381,6 +381,8 @@ distinct_species = samps %>% group_by(siteid) %>% distinct(variablename) %>% ung
 sem = distinct_species %>% dplyr::filter(Semken..Falk.== "yes") %>% arrange(desc(n))
 
 datatable(sem,rownames=FALSE)
+
+procs = smith_datasets %>% left_join(dataprocessors_df,by=join_by(datasetid)) %>% left_join(contacts_df,by=join_by(contactid)) %>% dplyr::select(siteid.x,sitename,datasetid,contactname)
 ```
 
 ## Non Semken Falk

@@ -48,4 +48,33 @@ table tr th :last-child, table tr td :last-child {
 .html-widget {
     margin: auto;
 }
+
+.container-fluid.main-container{
+max-width: 85%
+}
+.tabset{
+    display: grid;
+    grid-template-columns: 1fr 30fr 100fr;
+
+}
+
+.nav.nav-pills {
+   display: flex;
+   flex-wrap:wrap;
+   justify-content: center;
+   justify-items: center;
+   align-items:center;
+   align-content:flex-start;
+}
+.nav.nav-pills li{
+    width: 100%;
+}
+.tab-content{
+    flex: 85%;
+    width: 100%
+}
+
+.nav.nav-pills .nav-item {
+    flex: none; /* Prevents flexbox from resizing the nav items */
+}
 </style>

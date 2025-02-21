@@ -1,0 +1,753 @@
+---
+title: "FAUNMAP audit"
+author: "Nick Hoffman"
+date: '`r Sys.Date()`'
+output: 
+  html_document:
+    df_print: paged
+    css: db_by_db.css
+    toc: true
+    number_sections: true
+    toc_depth: 1
+    toc_float: true
+    theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(dplyr)
+library(DT)
+library(geojsonsf)
+library(osmdata)
+library(rosm)
+library(rmapshaper)
+library(tmap)
+library(sf)
+library(leaflet)
+library(stringr)
+library(wkb)
+library(tidyverse)
+library(neotoma2)
+```
+
+```{r neotables, echo=FALSE,message=FALSE,warning=FALSE}
+
+
+
+tables = c("datasets","publications", "datasetpublications","collectionunits","datasetdatabases","constituentdatabases","sites","depenvttypes")
+
+
+
+for (i in seq(length(tables))) {
+
+  table = tables[[i]]
+dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+
+
+
+if (table == "publications") {
+  dsl_df = matrix(nrow=length(dslinks),ncol=(length(dslinks[[1]]) - 2))
+  for (j in seq(1,length(dslinks))) {
+  for (k in seq((length(dslinks[[1]])) - 2)) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+else {
+  dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+for (j in seq(1,length(dslinks))) {
+  for (k in seq(length(dslinks[[1]]))) {
+    if (!is.null(dslinks[[j]][[k]])) {
+      dsl_df[j,k] = dslinks[[j]][[k]]
+    }
+  }
+}
+}
+
+dsl_df = as.data.frame(dsl_df)
+
+if (table =="publications") {
+names(dsl_df) = names(dslinks[[1]])[1:(length(dslinks[[1]])-2)]  }
+
+else {
+  names(dsl_df) = names(dslinks[[1]])  
+}
+
+assign(paste0(table,"_df"), dsl_df)
+}
+
+
+```
+
+
+# Site Questions
+
+```{r smiths, echo=FALSE, message=FALSE,warning=FALSE}
+
+states = read_sf("tl_2024_us_state.shp")
+states = ms_simplify(states)
+
+# https://www.digtech-llc.com/blog/2012/3/27/94-shovelbums-guide-part-15-the-smithsonian-trinomial-system.html
+
+state_names = c("Alabama", "Alaska", "American Samoa", "Arizona", "Arkansas", "California", "Colorado","Connecticut","Delaware", "District of Columbia", "Federated States of Micronesia", "Florida", "Georgia","Guam","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Marshall Islands", "Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Northern Mariana Islands","Ohio","Oklahoma","Oregon","Palau","Pennsylvania","Puerto Rico","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virgin Islands","Virginia","Washington","West Virginia","Wisconsin","Wyoming")
+
+tris = c(1,49,NA,2,3,4,5,6,7,NA,NA,8,9,NA,50,10,11,12,13,14,15,16,17,NA,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,NA,33,34,35,NA,36,NA,37,38,39,40,41,42,43,NA,44,45,46,47,48)
+
+
+state_tri_mapper=data.frame(names=state_names,trinom_num=tris) %>% dplyr::mutate(trinom_num = as.character(trinom_num))
+
+state_tri_mapper = state_tri_mapper %>% dplyr::mutate(trinom_num = case_when(names=="Arizona" ~ "AZ", names=="California" ~ "CA", names=="New Mexico" ~ "LA",names=="Maine" ~ "ME",
+         TRUE ~ trinom_num))
+
+
+siteid=c("junk")
+sitename=c("junk")
+state=c("junk")
+collectionunitid=c("junk")
+geography=("junk")
+potentials = data.frame(siteid=siteid,sitename=sitename,state=state,geography=geography, collectionunitid=collectionunitid)
+for (num in seq(length(states[[1]]))) {
+
+coordinates_sf = states[num,] %>% st_convex_hull()
+
+
+coord_json = sf_geojson(coordinates_sf) %>% URLencode()
+
+
+sites = content(GET(paste0("https://api.neotomadb.org/v2.0/data/sites?loc=",coord_json,"&limit=9999&offset=0")))$data
+
+if (length(sites) > 0) {
+
+idx = 0
+for (i in seq(length(sites))) {
+  for (j in seq(length(sites[[i]]$collectionunits))) {
+    for (k in seq(length(sites[[i]]$collectionunits[[j]]$datasets))) {
+    idx = idx + 1
+    }
+    }
+}
+
+
+sites_mat = matrix(nrow=idx,ncol=11)
+
+idx2 = 0
+for (i in seq(length(sites))) {
+  for (j in seq(length(sites[[i]]$collectionunits))) {
+    for (k in seq(length(sites[[i]]$collectionunits[[j]]$datasets))) {
+    idx2 = idx2 + 1
+    for (m in seq(5)) {
+      if (!is.null(sites[[i]][[m]])) {
+        sites_mat[[idx2, m]] = sites[[i]][[m]]
+      }
+    }
+    
+     if (!is.null(sites[[i]]$collectionunits[[j]]$handle)) {
+        sites_mat[[idx2,6]] = sites[[i]]$collectionunits[[j]]$handle
+     }
+       if (!is.null(sites[[i]]$collectionunits[[j]]$collectionunit)) {
+        sites_mat[[idx2,7]] = sites[[i]]$collectionunits[[j]]$collectionunit
+       }
+       if (!is.null(sites[[i]]$collectionunits[[j]]$collectionunitid)) {
+        sites_mat[[idx2,8]] = sites[[i]]$collectionunits[[j]]$collectionunitid
+       }
+       if (!is.null(sites[[i]]$collectionunits[[j]]$collectionunittype)) {
+        sites_mat[[idx2,9]] = sites[[i]]$collectionunits[[j]]$collectionunittype
+       }
+       if (!is.null(sites[[i]]$collectionunits[[j]]$dataset[[k]]$datasetid)) {
+        sites_mat[[idx2,10]] = sites[[i]]$collectionunits[[j]]$dataset[[k]]$datasetid
+       }
+       if (!is.null(sites[[i]]$collectionunits[[j]]$dataset[[k]]$datasettype)) {
+        sites_mat[[idx2,11]] = sites[[i]]$collectionunits[[j]]$dataset[[k]]$datasettype
+       }
+    }
+  }
+}
+
+sites_state_df = as.data.frame(sites_mat)
+
+names(sites_state_df) = c("siteid","sitename","sitedescription","geography","altitude","handle","collectionunit","collectionunitid","collectionunittype","datasetid","datasettype")
+
+numb = state_tri_mapper %>% dplyr::filter(names == states$NAME[[num]]) %>% dplyr::select(trinom_num)
+
+if (states$NAME[[num]] == "Vermont") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "VT")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (states$NAME[[num]] == "Rhode Island") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "RI")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (states$NAME[[num]] == "Connectictut") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "CT")| str_detect(sitename, "6")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (states$NAME[[num]] == "Arizona") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{1,2}:[0-9]{1,2}")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (states$NAME[[num]] == "Alaska") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "[A-Za-z]{3}-[0-9]+")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (states$NAME[[num]] == "New York") {
+  potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename, "\\d{5}")|
+str_detect(sitename,"30")) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+  potentials = rbind(potentials,potentialsites)
+} else if (!is.na(numb[[1]])) {
+potentialsites = sites_state_df %>% dplyr::filter(str_detect(sitename,as.character(numb[[1]]))) %>% dplyr::select(siteid,sitename,geography,collectionunitid) %>% dplyr::mutate(state = states$NAME[[num]])
+potentials = rbind(potentials,potentialsites)
+  } else {
+  #print(paste0("Null mapper value for ", states$NAME[[num]]))
+}}}
+
+
+potentials = potentials %>% dplyr::filter(sitename != "junk") %>% dplyr::filter(!str_detect(sitename,"Jensen 1998"))  %>% dplyr::filter(!str_detect(sitename,"Riegel 1965")) %>% dplyr::filter(!str_detect(sitename,"Haile 8A")) %>% dplyr::filter(!str_detect(sitename,"Santa Fe River 8A")) %>% distinct() %>% dplyr::filter(!sitename %in% c("Site 66 (Delcourt et al. 1983)","Site 110 (G.M. Peterson 1978)","Site 10 (Mack, Bryant, and Pell 1978)","LRRB31","Site 106 (Swain unpublished)","Anthony Cave [MALB 29]","Baldy Peak Cave [MALB 29]","Solar Energy Generating Station II [1.76.42]","Luz Solar Trough [1.76.34]", "Site 13 (Delcourt et al. 1983)","Site 14 (Delcourt et al. 1983)","Site 66 (Delcourt et al. 1983)","CHUSKA29","CHUS29","Upper Alturas [UO Loc 2424; CAS Loc 36805]","Site 35 (Heusser 1978)","BECL360","Stand 45 (Mack and Bryant 1974]","Law's [MSv100]","Seven Springs [CE101x3]","Rock House [MS201]","Mobile Bay, MB0810-GC20","Spring Canyon [A-41]","Pratt Cave [TMM-41172]","Little Sunday Canyon Local Fauna [V5414]","Avery Ranch [s:5:8]","Big Juniper House [1595]","Badger House [1453]","Mesa Verde Site 875","La Poudre LP5 Site","SNMN5","SNMN15","ANIM5","ANIM35","COMO5","LPLT5","GATC26","Mile 49 Lac la Ronge Highway","Stations 49-55 (Lichti-Federovich and Ritchie 1968)","TK-49","49 [HFL49]","Valkenswaard N49","Mosquito Lake Site, [PSM-00049]","BOREA24, Mile 49","LR49","ALTAK49","ABD249","Island 35 [10-Q-7]","Hancock Ditch (ditch #39)","Tunica Bayou Site 22","NLA06608-1232","JHMN24 (McAndrews and Wright 1969)","NLA06608-0439","Twin Peaks, AZ","Tucson Mountains, Pima Co., AZ","Vijdt Polder (B49D0349)","Borteldonk (B49F0399)","Halsteren (B49B0566)","Ossendrecht 49D20-1","Shangri-La Bog","Oskino-09","'White-2 (Le4) Pond'","Mud Pond (VT)")) %>%
+  dplyr::filter(!str_detect(sitename,"Mount Evans Surface")) %>%  dplyr::filter(!str_detect(sitename,"Elliot-Fisk")) %>%  dplyr::filter(!str_detect(sitename,"Raux-Feui")) %>% dplyr::filter(!str_detect(sitename,"Exposure")) %>%
+  dplyr::filter(!str_detect(sitename,"LDDsite")) %>%  dplyr::filter(!str_detect(sitename,"Pond,")) %>%
+  dplyr::filter(!str_detect(sitename,"Begin boardwalk")) %>% dplyr::filter(!str_detect(sitename,"unpublished")) %>%
+  dplyr::filter(!str_detect(sitename,"Colonel's Island Site")) %>%
+  dplyr::filter(!str_detect(sitename,"Delcourt")) %>% dplyr::filter((state !="California") | state == "California" & str_detect(sitename,"CA"))
+
+
+us_bounds = read_sf("cb_2018_us_nation_20m.shp")
+
+
+unique_pot = geojson_sf(potentials$geography) %>% cbind(potentials) %>% distinct(siteid,.keep_all=TRUE) %>% st_transform(crs=st_crs(us_bounds)) %>% st_filter(us_bounds)
+
+
+unique_pot = unique_pot %>% left_join(datasets_df,by=join_by("collectionunitid")) %>% left_join(datasetdatabases_df,by=join_by("datasetid")) %>% left_join(constituentdatabases_df, by=join_by("databaseid"))
+
+faun_smiths = unique_pot %>% dplyr::filter(databasename =="FAUNMAP") %>% distinct(sitename,.keep_all=TRUE)
+```
+
+
+## Sites in FAUNMAP with Smithsonian Trinomials
+```{r show, echo=FALSE,warning=FALSE,message=FALSE}
+datatable(st_drop_geometry(faun_smiths)[c('siteid','sitename','state')],rownames=FALSE)
+
+
+ pointSites = faun_smiths[st_geometry_type(faun_smiths) == "POINT",] 
+    polySites = faun_smiths[st_geometry_type(faun_smiths) == "POLYGON",] 
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+
+  
+
+
+```
+
+## Original FAUNMAP localities
+
+```{r pressure, echo=FALSE,message=FALSE,warning=FALSE}
+faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid)) %>% left_join(depenvttypes_df, by=join_by(depenvtid)) %>% left_join(datasets_df,by=join_by(collectionunitid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid)) %>% dplyr::filter(databaseid=='10') 
+
+faun_sites_nonull = faun_sites %>% dplyr::filter(!is.null(geog)) %>% dplyr::filter(!is.na(geog))
+faun_sfc = st_as_sfc(hex2raw(faun_sites_nonull$geog),EWKB=TRUE) 
+faunsites_sf = st_as_sf(faun_sites_nonull,geom=faun_sfc) %>% dplyr::select(!geog)
+
+precision_df <- data.frame(
+  Code = c("E", "QA", "QP", "QC", "T"),
+  Description = c(
+    "Exact (lat/long)",
+    "Quadrangle Approximate",
+    "Quadrangle Precise",
+    "Quad. in center of county",
+    "USGS Township Coord."
+  )
+)
+
+
+locs = read.csv("LOCALITY.txt",header=FALSE)
+
+names(locs) = c("index","sitename_f","alternate_name","state/province","town","code1","code2","year1","year2","notes","geographic_precision","area","num?","lat","lon","altitude","repository")
+
+#%>% dplyr::mutate(faun_name = str_replace(sitename,"\\s+\\S+$", "")) 
+faun_sites_nonull = faun_sites_nonull %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", ""))
+
+faun_prec = locs %>% left_join(faun_sites_nonull,by=join_by("sitename_f" == "faun_name")) %>% dplyr::select(siteid, sitename,sitename_f,lat,lon,geographic_precision) %>% distinct(siteid,.keep_all = TRUE) %>% left_join(precision_df,by=join_by("geographic_precision" == "Code")) %>% dplyr::filter(!is.na(sitename)) %>% dplyr::select(!geographic_precision)
+
+faun_points = faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",] %>% st_coordinates() %>% cbind(faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",]) %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", "")) %>% left_join(locs,by=join_by("faun_name" == "sitename_f")) %>% dplyr::filter(!is.na(sitename)) %>% dplyr::select(siteid,sitename,faun_name,X,lon, Y,lat) %>% distinct(siteid,.keep_all=TRUE) %>% dplyr::filter(faun_name %in% locs$sitename_f)
+
+names(faun_points) = c("siteid","sitename","faun_name","neo_lon","faun_lon","neo_lat","faun_lat", "geom")
+
+comparison = 
+
+length_orig = length(locs[[1]])
+length_prec = length(faun_prec[[1]])
+length_points = length(faun_points[[1]])
+```
+
+Of the original `r length_orig` sites in FAUNMAP, we matched `r length_prec` to their corresponding site in Neotoma. Precision information from FAUNMAP on these sites is in the table below.
+
+```{r show_origi_prec, message=FALSE,warning=FALSE,echo=FALSE}
+
+datatable(faun_prec,rownames=FALSE)
+
+```
+
+We can also compare the site coordinates in original FAUNMAP to those in Neotoma for the `r length_points` point sites we were able to match for this query.
+
+```{r show_origi_loc, message=FALSE,warning=FALSE,echo=FALSE}
+
+datatable(st_drop_geometry(faun_points),rownames=FALSE)
+
+```
+
+
+# Collection Unit Questions
+
+## Sites with archaeological depositional environments
+
+```{r depenv, echo=FALSE,warning=FALSE,message=FALSE}
+
+
+
+archaeo_faun = faun_sites %>% dplyr::filter(depenvthigherid == "1") %>% distinct(siteid,depenvt,.keep_all = TRUE)
+
+
+arch_sfc = st_as_sfc(hex2raw(archaeo_faun$geog),EWKB=TRUE)
+arch_sf = st_as_sf(archaeo_faun,geom=arch_sfc) %>% dplyr::select(!geog)
+
+
+
+```
+
+```{r show_arch,echo=FALSE,message=FALSE,warning=FALSE}
+datatable(st_drop_geometry(archaeo_faun)[c('siteid','sitename','depenvt')],rownames=FALSE)
+
+
+ pointSites = arch_sf[st_geometry_type(arch_sf) == "POINT",] 
+    polySites = arch_sf[st_geometry_type(arch_sf) == "POLYGON",] 
+
+
+  leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = polySites, 
+              color = "red", 
+              weight = 5, 
+              fillColor = "orange", 
+              fillOpacity = 0.35, 
+              popup = ~sitename)  %>%
+  addCircleMarkers(data = pointSites, 
+                   radius = 5, 
+                   color = "blue", 
+                   fillColor = "blue", 
+                   fillOpacity = 0.5, 
+                   stroke = FALSE, 
+                   popup = ~sitename)
+
+  
+
+```
+
+## Sacred areas
+
+No collection units were found that had any of the below terms in their notes or location fields.
+
+```{r collunits_sacred,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+faun_colls = collectionunits_df %>% left_join(datasets_df,by=join_by(collectionunitid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid)) %>% dplyr::filter(databaseid=='10') %>% distinct(collectionunitid,.keep_all=TRUE)
+
+
+dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People","cairn","Cairn")
+
+
+matches_collunits_location <- grep(paste(dictionary,collapse="|"), 
+                        faun_colls$location)
+
+
+collunits_results= faun_colls[matches_collunits_location,]
+
+
+## collunits notes
+
+matches_collunits_notes <- grep(paste(dictionary,collapse="|"), 
+                        faun_colls$notes)
+
+collunits_results = rbind(collunits_results,faun_colls[matches_collunits_notes,]) %>% distinct()
+
+
+dictionary = as.data.frame(dictionary)
+dictionary <- dictionary[order(dictionary$dictionary),]
+
+datatable(as.data.frame(dictionary),rownames=FALSE)
+
+
+
+
+datatable(collunits_results[c(1,3,6,7,17,18,20,21)],rownames=FALSE) 
+
+
+
+sites = content(GET(paste0("https://api.neotomadb.org/v1.5/data/sites/",paste0(collunits_results$siteid,collapse=","))))$data
+
+
+
+
+
+site_mat = matrix(nrow=length(sites),ncol=length(sites[[1]]))
+for (i in seq(length(sites))) {
+  for (j in seq(length(sites[[1]]))) {
+    if(!is.null(sites[[i]][[j]])) {
+      site_mat[[i,j]] = sites[[i]][[j]]
+    }
+  }
+}
+
+site_df = as.data.frame(site_mat)
+if (length(site_df) != 0) {
+
+names(site_df) = c("siteid","sitename","sitedescription","geography","altitude","collectionunitid","collectionunit","handle","unittype","datasetid","datasettype")
+
+site_df = site_df %>% dplyr::filter(collectionunitid %in% collunits_results$collectionunitid) 
+datasets = site_df %>% dplyr::filter(datasettype != 'geochronologic') %>% dplyr::select(datasetid) %>% distinct()
+
+ds_list = list()
+for (i in seq(14)) {
+  val = 25*i
+  val0 = val - 24
+  ds_list = append(ds_list,content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(datasets[val0:val,],collapse=","))))$data)
+}
+
+summer=0
+for (i in seq(length(ds_list))) {
+  summer = summer + length(ds_list[[i]]$site$datasets)
+}
+
+ds_mat2 = matrix(nrow=summer,ncol=3)
+
+
+idx= 0
+if (length(ds_list) != 0) {
+for (i in seq(length(ds_list))) {
+  for (j in seq(length(ds_list[[i]]$site$datasets))) {
+    idx = idx + 1
+    if (!is.null(ds_list[[i]]$site$datasets[[j]]$datasetid)) {
+  ds_mat2[idx,1] = ds_list[[i]]$site$datasets[[j]]$datasetid
+    }
+      if (!is.null(ds_list[[i]]$site$datasets[[j]]$datasettype)) {
+  ds_mat2[idx,2] = ds_list[[i]]$site$datasets[[j]]$datasettype
+      }
+      if (!is.null(ds_list[[i]]$site$datasets[[j]]$database)) {
+  ds_mat2[idx,3] = ds_list[[i]]$site$datasets[[j]]$database
+      }
+    }
+}
+ds_df2 = as.data.frame(ds_mat2)
+
+
+names(ds_df2) = c("datasetid","datasettype","database")
+
+joiner = left_join(site_df,ds_df2) %>% dplyr::select(collectionunitid,datasetid,datasettype,database)
+
+coll_joined = collunits_results %>% dplyr::left_join(joiner) %>% dplyr::filter(datasettype != "geochronologic") %>% group_by(database,sensitivity) %>% count() %>% arrange(desc(n)) %>% drop_na(database)
+
+
+datatable(coll_joined,rownames=FALSE)}
+}
+```
+
+# Radiocarbon
+
+Below are the human related radiocarbon samples in FAUNMAP
+
+```{r radio, echo=FALSE,message=FALSE,warning=FALSE}
+
+geochrons = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=geochronology&count=false&limit=99999&offset=0"))$data
+
+geochron_mat = matrix(nrow=length(geochrons),ncol=14)
+
+for (i in seq(length(geochrons))) {
+  for(j in seq(14) ) {
+    if (!is.null(geochrons[[i]][[j]])) {
+  geochron_mat[i,j] = geochrons[[i]][[j]]
+    }}}
+
+
+geochron_df = as.data.frame(geochron_mat)
+
+
+names(geochron_df) = c("geochronid","sampleid","geochrontypeid","agetypeid","age","errorolder","erroryounger","infinite","delta13c","labnumber","materialdated","notes","recdatecreated","recdatemodified")
+
+
+matches_geochron_materialDated <- grep(paste(dictionary,collapse="|"), 
+                        geochron_df[[11]])
+
+geochron_results= geochron_df[matches_geochron_materialDated,]
+
+
+samples = list()
+for (i in seq(20)) {
+  val=i*30000 - 30000
+  samples = append(samples,content(GET(paste0('https://api.neotomadb.org/v2.0/data/dbtables/samples?count=false&limit=30000&offset=',val)))$data)
+}
+
+
+
+sample_mat = matrix(nrow=length(samples),ncol=2)
+
+for (i in seq(length(samples))) {
+    if (!is.null(samples[[i]]$sampleid)) {
+  sample_mat[i,1] = samples[[i]]$sampleid
+    }
+      if (!is.null(samples[[i]]$datasetid)) {
+  sample_mat[i,2] = samples[[i]]$datasetid
+    }}
+
+
+sample_df = as.data.frame(sample_mat)
+
+
+names(sample_df) = c("sampleid","datasetid")
+
+
+sample_filtered = sample_df %>% dplyr::filter(sampleid %in% geochron_results$sampleid) 
+
+sample_topaste = sample_filtered %>% dplyr::select(datasetid) %>% distinct() %>% drop_na()
+
+ds_info = content(GET(paste0("https://api.neotomadb.org/v2.0/data/datasets/",paste0(sample_topaste[[1]],collapse=","))))$data
+
+ds_mat = matrix(nrow=length(ds_info),ncol=3)
+
+
+for (i in seq(length(ds_info))) {
+    if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasetid)) {
+  ds_mat[i,1] = ds_info[[i]]$site$datasets[[1]]$datasetid
+    }
+      if (!is.null(ds_info[[i]]$site$datasets[[1]]$datasettype)) {
+  ds_mat[i,2] = ds_info[[i]]$site$datasets[[1]]$datasettype
+      }
+      if (!is.null(ds_info[[i]]$site$datasets[[1]]$database)) {
+  ds_mat[i,3] = ds_info[[i]]$site$datasets[[1]]$database
+    }
+}
+ds_df = as.data.frame(ds_mat)
+
+
+names(ds_df) = c("datasetid","datasettype","database")
+ds_df = ds_df %>% dplyr::mutate(datasetid = as.numeric(datasetid))
+join_df = sample_filtered %>% dplyr::left_join(ds_df)
+
+geochron_results = geochron_results %>% dplyr::mutate(sensitivity =  case_when(
+                                                          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("bone",materialdated,fixed= TRUE) | grepl("Bone",materialdated,fixed= TRUE) | grepl("skull",materialdated,fixed= TRUE) | grepl("Skull",materialdated,fixed= TRUE))
+| grepl(21255,geochronid,fixed= TRUE)| grepl(29333,geochronid,fixed= TRUE)| grepl(29334,geochronid,fixed= TRUE)| grepl(29335,geochronid,fixed= TRUE)
+ ~ 1,          (grepl("Homo",materialdated,fixed= TRUE) | grepl("homo",materialdated,fixed= TRUE) | grepl("human",materialdated,fixed= TRUE) | grepl("Human",materialdated,fixed= TRUE)) & (grepl("dung",materialdated,fixed= TRUE) | grepl("Dung",materialdated,fixed= TRUE) | grepl("coprolite",materialdated,fixed= TRUE) | grepl("Coprolite",materialdated,fixed= TRUE) | grepl("feces",materialdated,fixed= TRUE) | grepl("Feces",materialdated,fixed= TRUE)) ~ 2, grepl("human burial", materialdated, fixed=TRUE) ~ 2, grepl("human grave",notes,fixed=TRUE) ~ 2,TRUE ~ 3))
+
+
+radiocarbon = content(GET('https://api.neotomadb.org/v2.0/data/dbtables/radiocarbon?count=false&limit=99999&offset=0'))$data
+
+
+rc_mat = matrix(nrow=length(radiocarbon),ncol=10)
+
+for (i in seq(length(radiocarbon))) {
+  if (!is.null(radiocarbon[[i]]$geochronid[[1]])) {
+    rc_mat[i,1] = radiocarbon[[i]]$geochronid[[1]]
+  }
+    if (!is.null(radiocarbon[[i]]$radiocarbonmethodid[[1]])) {
+    rc_mat[i,2] = radiocarbon[[i]]$radiocarbonmethodid[[1]]
+  }
+  for(j in seq(6) ) {
+    if (!is.null(radiocarbon[[i]][[(j+2)]])) {
+  rc_mat[i,(j+2)] = radiocarbon[[i]][[(j+2)]]
+    }}
+   for(j in seq(2) ) {
+    if (!is.null(radiocarbon[[i]][[(j+8)]])) {
+  rc_mat[i,(j+8)] = radiocarbon[[i]][[(j+8)]]
+    }}}
+
+
+rc_df = as.data.frame(rc_mat)
+
+
+names(rc_df) = c("geochronid","radiocarbonmethodid","percentc","percentn","delta13c","delta15n","percentcollagen","reservoir","masscmg","cnratio")
+
+
+check = rc_df %>% dplyr::filter(geochronid %in% c(29333,29334,29335))
+
+
+join_df = join_df %>% dplyr::mutate(sampleid = as.character(sampleid))
+geochron_counter = geochron_results %>% left_join(join_df) %>% group_by(database,sensitivity) %>% dplyr::filter(database=="FAUNMAP")
+
+datatable(geochron_counter[c(1,2,5,6,7,10,11,12,15)],rownames=FALSE)%>% formatStyle(target="row",
+  'sensitivity',
+  backgroundColor = styleEqual(c(1,2,3), c('rgba(255, 0, 0, 0.5)','rgba(255, 165, 0, 0.5)','rgba(0, 255, 0, 0.5)'),default="white")
+)
+
+```
+
+# Samples
+
+
+```{r get-taxa,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+## get taxa
+taxalist = content(GET("https://api.neotomadb.org/v2.0/data/dbtables?table=taxa&limit=75000&offset=0"))$data
+
+taxa_df = matrix(nrow=length(taxalist),ncol=14)
+
+for (i in seq(1,length(taxalist))) {
+  for (j in seq(1,14)) {
+    if (!is.null(taxalist[[i]][[j]])) {
+      taxa_df[i,j] = taxalist[[i]][[j]]
+    }
+  }
+}
+
+taxa_df = as.data.frame(taxa_df)
+
+names(taxa_df) = names(taxalist[[1]])
+
+test1 = grep("Homo ",taxa_df$taxonname)
+
+homos = taxa_df[c(grep("Homo ",taxa_df$taxonname),grep("^Homo$", taxa_df$taxonname),grep("^Homini", taxa_df$taxonname)),]
+
+datatable(homos[c(1,3,6,7)],rownames = FALSE)
+
+## relevant indices are 5571, 6261, 6631
+
+##higher taxa indices are 6261, 6262, 5623
+
+
+## get occurrences from taxon id
+homolist = content(GET("https://api.neotomadb.org/v2.0/data/taxa/6116,6821,6822,7196/occurrences?limit=2500&offset=0"))$data
+
+```
+
+
+Then we used a Neotoma API to search for any occurrences of those taxon IDs.
+
+The map below shows the sites where human samples come from, and the table documents what information there is about those samples. Rows colored red are sensitivity level 1 because they come from North America. Rows colored orange are sensitivity level 2 because they come from elsewhere.
+
+It should be noted that lead FAUNMAP steward Jessica Blois has removed all sample-level Homo sapiens occurrences from public access as FAUNMAP works on a policy for managing these data.
+
+```{r occurrences, echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
+
+homo_df = matrix(nrow=length(homolist),ncol=15)
+
+for (i in seq(1,length(homolist))) {
+  for (j in seq(1,1)) {
+    if (!is.null(homolist[[i]][[j]])) {
+      homo_df[i,j] = homolist[[i]][[j]]
+    }
+    
+  }
+   for (k in seq(1,4)) {
+    if (!is.null(homolist[[i]][[2]][[k]])) {
+      homo_df[i,(1+k)] = homolist[[i]][[2]][[k]]
+    }}
+   for (k in seq(1,3)) {
+    if (!is.null(homolist[[i]][[3]][[k]])) {
+      homo_df[i,(5+k)] = homolist[[i]][[3]][[k]]
+    } }
+  
+   for (k in seq(1,7)) {
+    if (!is.null(homolist[[i]][[4]][[k]])) {
+      homo_df[i,(8+k)] = homolist[[i]][[4]][[k]]
+    }}
+}
+
+homo_df = as.data.frame(homo_df)
+
+names(homo_df) = c("occid","taxonid","taxonname","value","sampleunits","age","ageolder","ageyounger","datasetid","siteid","sitename","altitude","location","datasettype","database")
+
+
+homo_df = homo_df %>% dplyr::filter(database=="FAUNMAP")
+homo_sites = homo_df %>% dplyr::select(siteid) %>% distinct()
+
+homo_sites_neo = get_sites(c(as.numeric(homo_sites[[1]])))
+
+homo_sites_sf = as.data.frame(homo_sites_neo) %>%
+  st_as_sf(coords=c("long","lat"),crs="+proj=longlat +datum=WGS84")
+
+homo_full = left_join(homo_sites_sf,homo_df)
+
+homo_bg = osm.raster(homo_sites_sf)
+
+```
+
+``` {r another, echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
+
+rezes = read_sf("tl_2019_us_aiannh.shp") %>% dplyr::select(NAME)
+
+canada_rezes = geojson_sf('https://proxyinternet.nrcan.gc.ca/arcgis/rest/services/CLSS-SATC/CLSS_Administrative_Boundaries/MapServer/0/query?outFields=*&where=1%3D1&f=geojson')
+canada_rezes = canada_rezes %>% dplyr::rename('NAME' = 'adminAreaNameEng') %>% dplyr::select(NAME)
+canada_rezes = st_transform(canada_rezes,crs="NAD83")
+canada_rezes = canada_rezes %>% dplyr::mutate(NAME = str_to_title(NAME))
+
+aust_ipa1 = geojson_sf("https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?where=NAME+BETWEEN+%27A%27+AND+%27LZ%27&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&resultOffset=&resultRecordCount=&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&timeReferenceUnknownClient=false&sqlFormat=none&resultType=&featureEncoding=esriDefault&datumTransformation=&f=geojson")
+
+aust_ipa2 = geojson_sf('https://gis.environment.gov.au/gispubmap/rest/services/ogc_services/Indigenous_Protected_Areas/FeatureServer/0/query?where=NAME+BETWEEN+%27LZ%27+AND+%27ZZ%27&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&resultOffset=&resultRecordCount=&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&timeReferenceUnknownClient=false&sqlFormat=none&resultType=&featureEncoding=esriDefault&datumTransformation=&f=geojson')
+aust_ipa = aust_ipa1 %>% rbind(aust_ipa2)
+aust_ipa = aust_ipa1 %>% dplyr::select(NAME)
+aust_ipa = st_transform(aust_ipa,crs="NAD83")
+
+rezes = rezes %>% rbind(canada_rezes) %>% rbind(aust_ipa)
+
+rez2 = rezes %>% dplyr::filter(!NAME %in% c('Murray Lake 4','Nunavut Land Claims Agreement \u2013 Hall Beach Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Bathurst Inlet Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Repulse Bay Inuit Owned Land','Nunavut Land Claims Agreement \u2013 Taloyoak Inuit Owned Lands','Isadore Harry 12','Ochapowace I.r. 71-131','Nunavut Land Claims Agreement \u2013 Arctic Bay Inuit Owned Land'))
+test = ms_simplify(rez2)
+
+
+plotLeaflet(homo_sites_neo) %>%
+   addPolygons(data = test,
+        stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+        fillColor = ~colors,
+        popup= ~NAME)
+
+
+homo_table = homo_df[c(1,3,4,5,7,8,9,10,11,15)]
+
+
+
+sitestring = paste0(homo_df$siteid,collapse=",")
+
+gps = content(GET(paste0("https://api.neotomadb.org/v2.0/data/sites/",sitestring,"/geopoliticalunits?limit=250&offset=0")))$data
+
+gps_mat = matrix(nrow=52,ncol=6)
+idx_sites = 0
+for (i in seq(length(gps))) {
+  for (j in seq(length(gps[[i]]$geopoliticalunits))) {
+    idx_sites = idx_sites + 1
+    if (!is.null(gps[[i]]$siteid)) {
+    gps_mat[idx_sites,1] = gps[[i]]$siteid}
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[1]])) {
+    gps_mat[idx_sites,2] = gps[[i]]$geopoliticalunits[[j]][[1]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[2]])) {
+    gps_mat[idx_sites,3] = gps[[i]]$geopoliticalunits[[j]][[2]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[3]])) {
+    gps_mat[idx_sites,4] = gps[[i]]$geopoliticalunits[[j]][[3]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[4]])) {
+    gps_mat[idx_sites,5] = gps[[i]]$geopoliticalunits[[j]][[4]] }
+    if (!is.null(gps[[i]]$geopoliticalunits[[j]][[5]])) {
+    gps_mat[idx_sites,6] = gps[[i]]$geopoliticalunits[[j]][[5]] }
+  }
+}
+
+
+gps_df = as.data.frame(gps_mat)
+
+names(gps_df) = c("siteid","rank","gp_id","gp_name","gp_unit","higher_gp_id")
+
+#datatable(gps_df,rownames=FALSE)
+
+gps_sum1 = gps_df %>% dplyr::filter(rank==1) 
+
+homo_table = left_join(homo_table,gps_sum1,by="siteid") %>% dplyr::rename("country" = "gp_name") %>% dplyr::mutate(country = as.factor(country)) %>% mutate(sensitivity = case_when(country == "United States" | country == "Mexico" | country == "Canada" ~ 1, TRUE ~ 2))
+
+datatable(homo_table[c(2:6,8,9,13,16)],rownames=FALSE) %>% formatStyle(target="row",
+  'sensitivity',
+  backgroundColor = styleEqual(c(1), c('rgba(255,0,0,0.5)'),default="rgba(255, 165, 0, 0.5)")
+)
+
+```
