@@ -72,7 +72,7 @@ cat(paste0("<style>",
 
 # Introduction
 
-For stewards of data in which Indigenous peoples have rights (i.e., Indigenous data), ethical data stewardship requires honoring such rights. Theorists of Indigenous data sovereignty are exhorting stewards to honor these rights by aligning with the CARE principles of Indigenous data governance (Kukutai & Taylor, 2016; Carroll, 2020; Taitingfong forthcoming ?). The Neotoma Paleoecology Database is working to align with the CARE principles through its participation in the Ethical Open Science for Past Global Change Data Research Coordination Network.  
+For data in which Indigenous peoples have rights (i.e., Indigenous data), ethical data stewardship requires honoring such rights. Theorists of Indigenous data sovereignty are exhorting stewards to honor these rights by aligning with the CARE principles of Indigenous data governance (Kukutai & Taylor, 2016; Carroll, 2020; Taitingfong forthcoming ?). The Neotoma Paleoecology Database is working to align with the CARE principles through its participation in the Ethical Open Science for Past Global Change Data Research Coordination Network.  
 
 Neotoma holds paleodata of many proxy types (e.g., pollen, vertebrate fauna, diatoms) from across the world (Williams et al 2018). Expertise concerning the different proxies stewarded by Neotoma is distributed among different kinds of specialists (e.g., palynologists, vertebrate paleoecologists, diatomists), and knowledge of all the datasets in Neotoma is likewise distributed. Because they derive from Indigenous lands, or concern the human and nonhuman relations of Indigenous peoples, some of these datasets are Indigenous. But so far, there is no complete record of the extent of these Indigenous data in Neotoma.  
 

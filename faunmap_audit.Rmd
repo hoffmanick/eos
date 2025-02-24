@@ -13,6 +13,15 @@ output:
     theme: journal
 ---
 
+```{r, results='asis', echo = F}
+toc_depth <- rmarkdown::metadata$output$html_document$toc_depth
+sel <- paste0("h",(toc_depth+1):10, collapse = " > span, ")
+cat(paste0("<style>",
+           sel, 
+           " > .header-section-number { display: none; } </style>"))
+```
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(httr)
@@ -79,11 +88,31 @@ else {
 assign(paste0(table,"_df"), dsl_df)
 }
 
+faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid)) %>% left_join(depenvttypes_df, by=join_by(depenvtid)) %>% left_join(datasets_df,by=join_by(collectionunitid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid)) %>% dplyr::filter(databaseid=='10') 
 
+
+num_sites = length(faun_sites[[1]])
 ```
 
+# Introduction
 
-# Site Questions
+For stewards of data in which Indigenous peoples have rights (i.e., Indigenous data), ethical data stewardship requires honoring such rights. Theorists of Indigenous data sovereignty are exhorting stewards to honor these rights by aligning with the CARE principles of Indigenous data governance (Kukutai & Taylor, 2016; Carroll, 2020; Taitingfong forthcoming ?). The Neotoma Paleoecology Database is working to align with the CARE principles through its participation in the Ethical Open Science for Past Global Change Data Research Coordination Network.
+
+One of Neotoma's constituent databases is FAUNMAP: an effort originally by vertebrate paleontologists Ernest Lundelius and Russell Graham to compile data from across the United States on mammal faunas of the Late Quaternary period for the purpose of generating paleobiological and paleoclimatic insights. By 1995, FAUNMAP consisted of over 2900 sites. In the 2000s, FAUNMAP merged with the Global Pollen Databases and others to form Neotoma. It is a living database which as of `r Sys.Date()` consists of `r num_sites` sites.
+
+In order to achieve alignment with CARE, it is necessary to have a more complete accounting of 1) what Indigenous data FAUNMAP currently stewards and 2) how FAUNMAP’s stewardship of those data conforms or not to best practice. We present here an account of our attempt to perform such a data audit, as well as our preliminary findings.
+
+We searched programmatically through FAUNMAP’s metadata for any sensitive Indigenous data. Such sensitive Indigenous data include those that concern Indigenous ancestors (e.g., human skeletal elements and human-derived radiocarbon dates) or derive from sacred sites (e.g., burial mounds). We also searched for any records in which purposeful imprecision has been introduced into the site coordinates because introducing imprecision is one way to protect sensitive sites. Lastly, we searched for datasets that were collected from federally recognized Indigenous lands, since these may be most relevant to nation building activities of tribal governments.
+
+We documented sensitive Indigenous records, fuzzed sites, and data from federally recognized Indigenous lands. Although limitations in FAUNMAP’s metadata led us to systematically undercount or overcount records in different circumstances, we are hopeful that this preliminary inventory will spur us to better steward these data.
+
+<i>Note: the following audit contains potentially sensitive information about Indigenous ancestors. Our intent is to expose this information in order to work toward better management in the future.</i>
+
+# FAUNMAP's sites
+
+The sites table is a central element of Neotoma's data structure. We searched FAUNMAP sites in Neotoma for any which 
+* are associated with a Smithsonian trinomial, and
+* are fuzzed according to the original FAUNMAP data.
 
 ```{r smiths, echo=FALSE, message=FALSE,warning=FALSE}
 
@@ -216,10 +245,16 @@ unique_pot = geojson_sf(potentials$geography) %>% cbind(potentials) %>% distinct
 unique_pot = unique_pot %>% left_join(datasets_df,by=join_by("collectionunitid")) %>% left_join(datasetdatabases_df,by=join_by("datasetid")) %>% left_join(constituentdatabases_df, by=join_by("databaseid"))
 
 faun_smiths = unique_pot %>% dplyr::filter(databasename =="FAUNMAP") %>% distinct(sitename,.keep_all=TRUE)
+
+num_smiths = length(faun_smiths[[1]])
 ```
 
 
-## Sites in FAUNMAP with Smithsonian Trinomials
+## Smithsonian Trinomials
+
+Smithsonian trinomials are codes developed by the Smithsonian Institution in the 1930s to uniquely identify archaeological sites which its staff excavated. Later, the duty of minting these trinomials was delegated to the various states. Smithsonian trinomials consist of a 2-digit number indexing a particular US state, a 2-letter abbreviation of the county in which the excavation took place, and a number of arbitrary length to differentiate the site from all others in that county. Because the presence of a Smithsonian trinomial is a convenient way to identify archaeological sites, which are more likely to involve sensitive data, we search here for all the sites in FAUNMAP with Smithsonian trinomials.
+
+The following table offers information on the `r num_sites` sites in FAUNMAP associated with Smithsonian trinomials, and we map them below the table.
 ```{r show, echo=FALSE,warning=FALSE,message=FALSE}
 datatable(st_drop_geometry(faun_smiths)[c('siteid','sitename','state')],rownames=FALSE)
 
@@ -249,10 +284,15 @@ datatable(st_drop_geometry(faun_smiths)[c('siteid','sitename','state')],rownames
 
 ```
 
-## Original FAUNMAP localities
+## Original FAUNMAP fuzzing
+
+The original FAUNMAP database contained information that Neotoma no longer maintains on the precision with which its sites' coordinates were delimited. FAUNMAP's original authors write: 
+
+"Site location was established in a variety of ways. In many cases, precise locations (quadrangle, township and range, or latitude and longitude) were actually given in the literature. For all sites with radiocarbon dates that weer reported in the journal <i>Radiocarbon</i>, the latitude and longitude of the site were reported with the dates. In some cases, the reference may not have listed the precise location of the site, but it might have identified the quadrangle that contained the site. If the precise location was not given in the literature, then an approximate location was determined by the person coding the site based upon descriptions of the site location in the reference (e.g., the site is located five miles west of Springfield, IL). These descriptions were then transferred to index maps for the 48 states, provided by the United States Geological Survey (USGS), showing the location of all quadrangles. These maps were used to determine the quadrangle in which the site was located (e.g., the site five miles west of Springfield, IL, is in the Farmingdale Quadrangle). After determining the quadrangle, the latitude and longitude were taken from a USGS list giving the coordinates for the southeast corners of all USGS quadranges (e.g., the longitude and latitude for the southeast corner of the Farmingdale Quadrangle are 89 &deg; 45' W and 39 &deg; 45'N, respectively). These coordinates were used as the location for the site in the FAUNMAP database (e.g., the location of the site five miles west of Springfield, Illinois, is 89 &deg; 45' W longitude and 39 &deg; 45'N latitude)."
+
 
 ```{r pressure, echo=FALSE,message=FALSE,warning=FALSE}
-faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid)) %>% left_join(depenvttypes_df, by=join_by(depenvtid)) %>% left_join(datasets_df,by=join_by(collectionunitid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid)) %>% dplyr::filter(databaseid=='10') 
+
 
 faun_sites_nonull = faun_sites %>% dplyr::filter(!is.null(geog)) %>% dplyr::filter(!is.na(geog))
 faun_sfc = st_as_sfc(hex2raw(faun_sites_nonull$geog),EWKB=TRUE) 
@@ -271,8 +311,17 @@ precision_df <- data.frame(
 
 
 locs = read.csv("LOCALITY.txt",header=FALSE)
+recov = read.csv("L_RECOV.txt",header=FALSE)
+depo = read.csv("DEPOSIT.txt",header=FALSE)
+faun= read.csv("FAUNAL.txt",header=FALSE)
 
-names(locs) = c("index","sitename_f","alternate_name","state/province","town","code1","code2","year1","year2","notes","geographic_precision","area","num?","lat","lon","altitude","repository")
+names(faun) = c("locid","analysisunit","taxon","confidence","mni","nisp","context","modifications")
+names(depo) = c("locid","analysisunit","recoverymethod","depsys","depenv","facies","mixing")
+
+names(locs) = c("locid","sitename_f","alternate_name","state/province","county","sitenumber","coded_by","recdatecreated","recdatemodified","notes","geographic_precision","quadrangle","quadrangle_size","lat","lon","altitude","repository")
+
+
+sd_faun = locs %>% dplyr::filter(`state/province` == "SD") %>% left_join(depo)
 
 #%>% dplyr::mutate(faun_name = str_replace(sitename,"\\s+\\S+$", "")) 
 faun_sites_nonull = faun_sites_nonull %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", ""))
@@ -283,33 +332,126 @@ faun_points = faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",] %>% st_co
 
 names(faun_points) = c("siteid","sitename","faun_name","neo_lon","faun_lon","neo_lat","faun_lat", "geom")
 
-comparison = 
 
 length_orig = length(locs[[1]])
 length_prec = length(faun_prec[[1]])
 length_points = length(faun_points[[1]])
+
+
+fuzz_overview = faun_prec %>% group_by(Description) %>% count() %>% arrange(desc(n))
+
 ```
 
-Of the original `r length_orig` sites in FAUNMAP, we matched `r length_prec` to their corresponding site in Neotoma. Precision information from FAUNMAP on these sites is in the table below.
+
+
+"'Exact location' indicates that the actual latitude and longitude of the site were used in determining its location. 'Quadrangle Approximate' was coded if the person coding had to determine the quadrangle based upon a locational description in the reference, as described above. 'Quadrangle Precise' was used if the quadrangle was named in the reference or if township and ranges were given. 'Quadrangle in the center of the county' was used if the county was known but exactly location within the county was not known. In these cases, the latitude and longitude of the quadrangle in the center of the county were coded as the location for the site."
+
+
+In the table below, we matched `r length_prec` of the original `r length_orig` FAUNMAP sites to their corresponding site in Neotoma and documented the precision originally associated with them.
 
 ```{r show_origi_prec, message=FALSE,warning=FALSE,echo=FALSE}
 
+
 datatable(faun_prec,rownames=FALSE)
+
+original_smiths = faun_prec %>% dplyr::filter(sitename %in% faun_smiths$sitename) 
+
+original_smiths = length(original_smiths[[1]])
+
+original_smiths_overview = faun_prec %>% dplyr::filter(sitename %in% faun_smiths$sitename) %>% group_by(Description) %>% count() %>% arrange(desc(n))
+
 
 ```
 
-We can also compare the site coordinates in original FAUNMAP to those in Neotoma for the `r length_points` point sites we were able to match for this query.
+Next we show an overview of fuzzed site numbers in the original FAUNMAP database.
+
+```{r counter, echo=FALSE,message=FALSE,warning=FALSE}
+datatable(fuzz_overview,rownames=FALSE)
+
+```
+`r original_smiths` of these sites have Smithsonian trinomials associated with them. Here is a on overall breakdown of the precision of those sites:
+
+```{r original_smiths, echo=FALSE,message=FALSE,warning=FALSE}
+
+
+datatable(original_smiths_overview, rownames=FALSE)
+
+
+faun_points = faun_points %>% dplyr::mutate(faun_lon = as.character(faun_lon),faun_lat = as.character(faun_lat))
+
+faun_points2 = faun_points %>% dplyr::mutate(faun_lon_deg = case_when(
+  str_length(faun_lon) == 7 ~ as.numeric(str_sub(faun_lon,1,3)),
+  str_length(faun_lon) == 6 ~ as.numeric(str_sub(faun_lon,1,2))
+)) %>% 
+  dplyr::mutate(faun_lon_min = case_when(
+  str_length(faun_lon) == 7 ~ as.numeric(str_sub(faun_lon,4,5)),
+  str_length(faun_lon) == 6 ~ as.numeric(str_sub(faun_lon,3,4))
+)) %>% 
+  dplyr::mutate(faun_lon_sec = case_when(
+  str_length(faun_lon) == 7 ~ as.numeric(str_sub(faun_lon,6,7)),
+  str_length(faun_lon) == 6 ~ as.numeric(str_sub(faun_lon,5,6))
+)) %>%
+  dplyr::mutate(faun_lat_deg = as.numeric(str_sub(faun_lat,1,2)))  %>%
+  dplyr::mutate(faun_lat_min = as.numeric(str_sub(faun_lat,3,4))) %>%
+  dplyr::mutate(faun_lat_sec = as.numeric(str_sub(faun_lat,5,6)))
+
+
+faun_points2 = faun_points2 %>% dplyr::mutate(faun_lon_dec = faun_lon_deg + faun_lon_min/60 + faun_lon_sec/3600) %>% dplyr::mutate(faun_lat_dec = faun_lat_deg + faun_lat_min/60 + faun_lat_sec/3600) %>% dplyr::mutate(neo_lon = as.numeric(neo_lon), neo_lat = as.numeric(neo_lat)) %>% dplyr::mutate(neo_lon = abs(neo_lon))
+
+faun_points_discrep = faun_points2 %>% dplyr::filter(abs(neo_lon - faun_lon_dec) > 1e-6 | abs(neo_lat - faun_lat_dec) > 1e-6) %>% select(siteid,sitename,faun_name,neo_lon,faun_lon_dec,neo_lat,faun_lat_dec)
+
+
+
+num_discrep = length(faun_points_discrep[[1]])
+```
+
+It is also interesting to note that there are `r num_discrep` sites in the original FAUNMAP database which have different site coordinates now in Neotoma than they did then:
 
 ```{r show_origi_loc, message=FALSE,warning=FALSE,echo=FALSE}
 
-datatable(st_drop_geometry(faun_points),rownames=FALSE)
 
+datatable(st_drop_geometry(faun_points_discrep),rownames=FALSE)
+
+dictionary = c("human","Human","Homo","homo","indian","Indian","native","Native","indigenous","Indigenous","mound","Mound","buri","Buri","bury","Bury","archaeo","Archaeo","person","Person","people","People","cairn","Cairn")
+
+
+matches_sitename <- grep(paste(dictionary,collapse="|"), 
+                        faun_sites$sitename)
+
+
+sitename_results= faun_sites[matches_sitename,]
+
+dictionary = as.data.frame(dictionary)
+dictionary <- dictionary[order(dictionary$dictionary),]
+
+
+num_sacredsites = length(sitename_results[[1]])
 ```
 
+## Sacred Areas
 
-# Collection Unit Questions
+We search in the names of our sites for any which indicate a potential for sensitivity using the list of terms below. We find `r num_sacredsites` such sites.
 
-## Sites with archaeological depositional environments
+```{r sacredsitesareas,message=FALSE,warning=FALSE,echo=FALSE}
+
+
+datatable(as.data.frame(dictionary),rownames=FALSE)
+
+
+datatable(sitename_results[c(1,2)],rownames=FALSE) 
+```
+
+# FAUNMAP's collection units
+
+Another important element of Neotoma's datastructure is the collectionunits table. A single site can have multiple collection units, which may correspond to a sediment core, or in FAUNMAP's case, more likely an excavation.
+
+We query FAUNMAP's collection units to
+
+* search for archaeological depositional environments, and
+* sacred sites.
+
+## Archaeological depositional environments
+
 
 ```{r depenv, echo=FALSE,warning=FALSE,message=FALSE}
 
@@ -321,9 +463,19 @@ archaeo_faun = faun_sites %>% dplyr::filter(depenvthigherid == "1") %>% distinct
 arch_sfc = st_as_sfc(hex2raw(archaeo_faun$geog),EWKB=TRUE)
 arch_sf = st_as_sf(archaeo_faun,geom=arch_sfc) %>% dplyr::select(!geog)
 
+num_archaeo_coll = length(archaeo_faun[[1]])
+
+overlap1 = archaeo_faun %>% dplyr::filter(siteid %in% faun_smiths$siteid) %>% distinct()
 
 
+overlap2 = faun_smiths %>% dplyr::filter(siteid %in% archaeo_faun$siteid) %>% distinct()
+
+num_overlap2 = length(overlap2[[1]])
+num_overlap = length(overlap1[[1]])
 ```
+
+
+Neotoma associates a depositional environment with every collection unit. Below we display all the sites in FAUNMAP for which at least one collection unit has a depositional environment in the archaeological class. We find `r num_archaeo_coll` such sites, `r num_overlap` of which sites also have Smithsonian trinomials in their name. Conversely, `r num_overlap2` of sites with Smithsonian trinomials have archaeological depositional environments associated with at least one of their collection units in FAUNMAP.
 
 ```{r show_arch,echo=FALSE,message=FALSE,warning=FALSE}
 datatable(st_drop_geometry(archaeo_faun)[c('siteid','sitename','depenvt')],rownames=FALSE)
@@ -355,7 +507,7 @@ datatable(st_drop_geometry(archaeo_faun)[c('siteid','sitename','depenvt')],rowna
 
 ## Sacred areas
 
-No collection units were found that had any of the below terms in their notes or location fields.
+Sensitive sites may be identified through their collection unit metadata. However, no collection units were found that had any of the below terms in their notes or location fields.
 
 ```{r collunits_sacred,echo=FALSE,include=TRUE,message = FALSE, warning=FALSE}
 
@@ -589,6 +741,8 @@ datatable(geochron_counter[c(1,2,5,6,7,10,11,12,15)],rownames=FALSE)%>% formatSt
 ```
 
 # Samples
+
+Below are the records of human ancestors in FAUNMAP. Note that many of FAUNMAP's human records have been shielded from public view as Neotoma reevaluates its access policy for sensitive data.
 
 
 ```{r get-taxa,echo=FALSE,include=TRUE,message = FALSE,warning=FALSE}
