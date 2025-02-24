@@ -119,7 +119,7 @@ This page provides information on anomalies in Neotoma, on a constituent databas
 for (i in seq(length(db_list))) {
   cat("\n")
   cat(paste0("## ", db_list[[i]]$db_name, "\n"))
-#  cat("<h1>", (i+1), db_list[[i]]$db_name, "</h1>\n")
+  cat(paste0("### ", db_list[[i]]$db_name, "\n"))
 
 cat("### Duplicate Geographies \n") 
 if (!is.null(db_list[[i]]$dup_map)) {
