@@ -1,0 +1,11 @@
+"NOSC","not screened"
+"CRSE","all coarse screened"
+"FINE","all fine screened"
+"FISM","sample fine screened"
+"MESE","medium screen, 1/8""
+"CRFI","all coarse screened"
+"FLOT","Flot sample"
+"TOTL","Total tech. used"
+"DONA","Material donated"
+"SASC","Sample screened"
+

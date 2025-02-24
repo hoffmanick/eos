@@ -77,4 +77,40 @@ max-width: 85%
 .nav.nav-pills .nav-item {
     flex: none; /* Prevents flexbox from resizing the nav items */
 }
+
+.nav.nav-pills li {
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+.nav.nav-pills li:active {
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+.nav.nav-pills li:hover {
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+.nav-pills li.active a {
+  border-radius:20px;
+}
+
+.nav-pills li:hover a {
+  border-radius:20px;
+}
+.nav-pills li:focus a {
+  border-radius:20px;
+}
+
+.tab-content {
+  margin-left: 5%;
+  width: 95%;
+}
+
+
 </style>

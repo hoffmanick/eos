@@ -1,0 +1,8 @@
+"OC","Date too old, contamination probable"
+"YC","Date too young, contamination probable"
+"YM","Date too young, context disturbed"
+"OM","Date too old, context disturbed"
+"RJ","Date rejected"
+"QD","Date questioned but not rejected"
+"IN","Infinite"
+

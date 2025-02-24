@@ -1,0 +1,11 @@
+"LC","Lacustrine"
+"FL","Fluvial"
+"GR","Gravity"
+"AE","Aeolian"
+"CV","Cave"
+"SP","Spring"
+"VC","Volcanic"
+"MA","Marine"
+"BI","Biological"
+"AN","Anthropogenic"
+

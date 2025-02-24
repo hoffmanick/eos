@@ -1,0 +1,6 @@
+"UC","Upper contact of Analysis unit"
+"UP","Upper portion of Analysis unit"
+"MP","Middle portion of Analysis unit"
+"LP","Lower portion of Analysis unit"
+"LC","Lower contact of Analysis unit"
+

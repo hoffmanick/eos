@@ -11,31 +11,6 @@ output:
     theme: journal
 editor_options:
     chunk_output_type: inline
-    
-  ### IPPD duplicate sites map is weird
-  ## add text above the tabset etc saying what the page is for and how to read the "menu"
-  
-  # if li role no class, make it gray
-  # give padding to all li roles, to make it clear that they're clickable buttons
-  # add padding everywhere, include to maps to avoid gray issues -> left padding to panel with map
-  # take a lot of code out and source it
-  # sites that contain duplicate datasets -> two datasets in same collectionunit of same datasettype
-  select st.sitename, cu.collectionunitid, dst.datasettype, count(*), array_agg(ds.datasetid) as datasetids
-from ndb.collectionunits as cu
-inner join ndb.datasets as ds on ds.collectionunitid = cu.collectionunitid
-inner join ndb.sites as st on st.siteid = cu.siteid
-inner join ndb.datasettypes as dst on dst.datasettypeid = ds.datasettypeid 
-group by
-ds.datasettypeid,
-cu.collectionunitid,
-st.siteid,
-st.sitename,
-dst.datasettype
-having count(*) > 1
-order by dst.datasettype ASC
-
-## taxa landing table
-
 ---
 
 ```{r setup, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE}
@@ -55,15 +30,21 @@ datatable(iris)
 
 ```{r download_analysisunits, message=FALSE,warning=FALSE,echo=FALSE}
 
-analysisunits1 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999"))$data
+length_analysisunits = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=true"))$data
+if (is.null(length_analysisunits)) {
+  length_analysisunits = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=true"))$data
+}
 
-analysisunits2 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=99999"))$data
-analysisunits3 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=199998"))$data
-analysisunits4 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=299997"))$data
-analysisunits5 = content(GET("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&limit=99999&offset=399996"))$data
+num_reps = ceiling(as.numeric(length_analysisunits[[1]]$count)/80000)
 
-
-analysisunits = append(analysisunits1,analysisunits2) %>% append(analysisunits3) %>% append(analysisunits4) %>% append(analysisunits5)
+analysisunits = list()
+for (i in seq(num_reps)) {
+  start= (i-1)*80000
+  end = i*80000
+  newnits = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/analysisunits?count=false&offset=",start,"&limit=",end)))$data
+  
+  analysisunits = append(analysisunits,newnits)
+}
 
 
 analysis_mat = matrix(nrow=length(analysisunits),ncol=11)
@@ -71,7 +52,7 @@ analysis_mat = matrix(nrow=length(analysisunits),ncol=11)
 for (i in seq(length(analysisunits))) {
   for(j in seq(11) ) {
     if (!is.null(analysisunits[[i]][[j]])) {
-  analysis_mat[i,j] = analysisunits[[i]][[j]]
+      analysis_mat[i,j] = analysisunits[[i]][[j]]
     }}}
 
 
@@ -85,177 +66,49 @@ names(analysis_df) = c("analysisunitid","collectionunitid","analysisunitname","d
 
 ```{r download-tables, echo=FALSE,message=FALSE,warning=FALSE}
 
-tables = c("dslinks", "sites", "datasetdatabases","constituentdatabases","collectionunits","datasets")
+tables = c("dslinks","sites", "datasetdatabases","constituentdatabases","collectionunits","datasets")
 
 
 for (i in seq(length(tables))) {
-
+  
   table = tables[[i]]
-dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
-
-
-dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
-
-for (j in seq(1,length(dslinks))) {
-  for (k in seq(length(dslinks[[1]]))) {
-    if (!is.null(dslinks[[j]][[k]])) {
-      dsl_df[j,k] = dslinks[[j]][[k]]
+  dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+  if (is.null(dslinks)) {
+    print("uh oh")
+    paste("uh oh")
+    dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
+  }
+  
+  dsl_df = matrix(nrow=length(dslinks),ncol=length(dslinks[[1]]))
+  
+  for (j in seq(1,length(dslinks))) {
+    for (k in seq(length(dslinks[[1]]))) {
+      if (!is.null(dslinks[[j]][[k]])) {
+        dsl_df[j,k] = dslinks[[j]][[k]]
+      }
     }
   }
-}
-
-dsl_df = as.data.frame(dsl_df)
-
-names(dsl_df) = names(dslinks[[1]]) 
-
-assign(paste0(table,"_df"), dsl_df)
+  
+  dsl_df = as.data.frame(dsl_df)
+  
+  names(dsl_df) = names(dslinks[[1]]) 
+  
+  assign(paste0(table,"_df"), dsl_df)
 }
 
 sites_df = sites_df %>% dplyr::mutate(siteid = as.numeric(siteid))
 
 collectionunits_df = collectionunits_df %>% dplyr::mutate(siteid = as.numeric(siteid))
 dslinks_df = dslinks_df %>% dplyr::mutate(datasetid=as.character(datasetid))
+
 ```
 
 
 ``` {r firstquery, message=FALSE,warning=FALSE,echo=FALSE}
 
+source('no_db_analysis.R')
 
-joiner = dslinks_df %>% left_join(sites_df, by = join_by(siteid)) %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) 
-
-dups = joiner %>% group_by(siteid) %>% summarize(toString(unique(datasetid))) %>% left_join(sites_df) %>% group_by(geog) %>% count() %>% dplyr::filter(n>1) %>% left_join(joiner)
-
-missers = sites_df %>% left_join(collectionunits_df,by=join_by(siteid)) %>% left_join(datasets_df,by=join_by(collectionunitid))  %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) %>% dplyr::filter(is.na(collectionunitid) | is.na(datasetid)) %>% dplyr::select(c(siteid,sitename,collectionunitid,datasetid,databasename,databaseid,geog))
-
-
-m_sfc = st_as_sfc(hex2raw(missers$geog),EWKB=TRUE)
-missers_sf = st_as_sf(missers,geom=m_sfc) %>% dplyr::select(!geog)
-
-
-missers_sf = missers_sf %>% dplyr::mutate(whatmiss = case_when(
-  is.na(datasetid) & is.na(collectionunitid) ~ paste0(sitename, " missing: dataset + collectionunit"),
-  is.na(datasetid) & !is.na(collectionunitid) ~ paste0(sitename, " missing: dataset"),
-  !is.na(datasetid) & is.na(collectionunitid) ~ paste0(sitename, " missing: collectionunit"),
-  !is.na(datasetid) & !is.na(collectionunitid) ~ paste0("none missing from ",sitename)))
-                                                               
-
- pointSites_m = missers_sf[st_geometry_type(missers_sf) == "POINT",] 
-    polySites_m = missers_sf[st_geometry_type(missers_sf) == "POLYGON",] 
-
-  
-analy_missers = sites_df %>% left_join(collectionunits_df,by=join_by(siteid)) %>% left_join(analysis_df, by=join_by(collectionunitid)) %>% left_join(datasets_df,by=join_by(collectionunitid))  %>% left_join(datasetdatabases_df, by = join_by(datasetid)) %>% left_join(constituentdatabases_df) %>% dplyr::filter(is.na(analysisunitid)) %>% dplyr::select(c(siteid,sitename,collectionunitid,datasetid,databasename,databaseid,analysisunitid, geog)) 
-
-
-am_sfc = st_as_sfc(hex2raw(analy_missers$geog),EWKB=TRUE)
-analy_missers_sf = st_as_sf(analy_missers,geom=am_sfc) %>% dplyr::select(!geog)
-
-
-analy_missers_nodb = analy_missers_sf %>% dplyr::filter(is.na(databaseid))
-
-
-    
-db_map = read.csv('dbids_names.csv') %>% dplyr::select(Database,dbid) %>% drop_na()
-db_list = list()
-for ( i in c(2,3,4,5,6,7,10,11,12,13,14,15,17,18,19,20,22,23,25,26,27,28,29,30,31, 32,33,35,36,37,38,39,41,42,43)) {
-     if (exists('nullloc')) {
-  rm(nullloc)}
-      if (exists('db_name')) {
-  rm(db_name)}
-      if (exists('db_specific')) {
-  rm(db_specific)}
-      if (exists('map_dups')) {
-  rm(map_dups)}
-      if (exists('db_spec_analymiss')) {
-  rm(db_spec_analymiss)}
-      if (exists('whereanaly')) {
-  rm(whereanaly)}
-  db_mapper = db_map %>% dplyr::filter(dbid == i)
-  db_name = db_mapper$Database[[1]]
-  db_specific = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct()
-    db_specific2 = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct() %>% group_by(geog) %>% summarize(toString(unique(siteid)),toString(unique(sitename)))
-    
-        db_specific3 = dups %>% dplyr::filter(databaseid == i) %>% group_by(siteid) %>% summarize(toString(unique(datasetid)),geog,sitename) %>% distinct() %>% group_by(geog) %>% summarize(toString(unique(siteid)),toString(unique(sitename))) %>% ungroup() %>% dplyr::filter(!is.na(geog))
-          
-if (length(db_specific3[[1]]) > 0) {
-  coords3 = st_coordinates(st_centroid(st_as_sfc(hex2raw(db_specific3$geog),EWKB=TRUE)))
-  db_specific3 = cbind(db_specific3,coords3) %>% ungroup() %>% dplyr::select(!geog)
-  names(db_specific3) = c("siteids", "sitenames", "longitude","latitude")}
-    
-    notnullloc = db_specific2 %>% dplyr::filter(!is.na(geog))
-    rm(db_sf)
-    if(length(notnullloc[[1]]) > 0) {
-    sfc = st_as_sfc(hex2raw(notnullloc$geog),EWKB=TRUE)
-  
-    db_sf = st_as_sf(notnullloc,geom=sfc) %>% dplyr::select(!geog)
-    names(db_sf) = c("siteids","sitenames","geom")
-    }
-    nullloc = db_specific %>% dplyr::filter(is.na(geog)) %>% dplyr::select(!geog)
-    names(nullloc) = c("siteid", "datasetids","sitename")
-    
-if (exists("db_sf")) {
-    pointSites = db_sf[st_geometry_type(db_sf) == "POINT",] 
-    polySites = db_sf[st_geometry_type(db_sf) == "POLYGON",] 
-
-   map_dups =  leaflet() %>%
-  addTiles() %>%
-  addPolygons(data = polySites, 
-              color = "red", 
-              weight = 5, 
-              fillColor = "orange", 
-              fillOpacity = 0.35, 
-              popup = ~sitenames)  %>%
-  addCircleMarkers(data = pointSites, 
-                   radius = 5, 
-                   color = "blue", 
-                   fillColor = "blue", 
-                   fillOpacity = 0.5, 
-                   stroke = FALSE, 
-                   popup = ~sitenames)
-    
-      if(length(polySites[[1]]) > 0 | length(pointSites[[1]]) > 0) {
-   assign(paste0("map_dups_",i),map_dups)}} else {
-     map_dups = NULL
-   }
-   
-    datatable(nullloc,rownames=FALSE)
-    
-     assign(paste0("dups_na_",i),nullloc)
-
-    db_spec_analymiss = analy_missers_sf %>% dplyr::filter(databaseid==i)
-    
-    datatable(db_spec_analymiss)
-    
-       assign(paste0("analymiss_",i),db_spec_analymiss)
-   
-       
-
-   pointSites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POINT",] 
-    polySites_am = db_spec_analymiss[st_geometry_type(db_spec_analymiss) == "POLYGON",] 
-
-    whereanaly = leaflet() %>%
-  addTiles() %>%
-  addPolygons(data = polySites_am, 
-              color = "red", 
-              weight = 5, 
-              fillColor = "orange", 
-              fillOpacity = 0.35, 
-              popup = ~sitename)  %>%
-  addCircleMarkers(data = pointSites_am, 
-                   radius = 5, 
-                   color = "blue", 
-                   fillColor = "blue", 
-                   fillOpacity = 0.5, 
-                   stroke = FALSE, 
-                   popup = ~sitename)
-    
-    if(length(polySites_am[[1]]) > 0 | length(pointSites_am[[1]]) > 0) {
-       assign(paste0("whereanaly_",i),whereanaly)}
-    
-    db_spec_analymiss = db_spec_analymiss %>% dplyr::select(!c(databasename,databaseid)) %>% st_drop_geometry()
-       specific_list = list(dbid=i,db_name=db_name,nulls = nullloc, dups = db_specific3, dup_map=map_dups,missing_analysis = db_spec_analymiss,map_missing_analysis = whereanaly)
-
-db_list = append(db_list,list(specific_list))
-}
+source("figure_looper.R")
 ```
 # Data anomalies by constituent database
 
