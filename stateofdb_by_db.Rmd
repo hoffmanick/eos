@@ -74,8 +74,8 @@ for (i in seq(length(tables))) {
   table = tables[[i]]
   dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
   if (is.null(dslinks)) {
-    print("uh oh")
-    paste("uh oh")
+    #print("uh oh")
+    #paste("uh oh")
     dslinks = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables?table=",table,"&limit=75000&offset=0")))$data
   }
   
