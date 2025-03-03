@@ -409,6 +409,11 @@ We find `r num_sacredsites` sites with a hit for one of our dictionary terms in 
 
 
 datatable(sitename_results[c(1,2)],rownames=FALSE) 
+
+
+faun_smiths_abb = faun_smiths %>% dplyr::select(siteid,sitename) %>% st_drop_geometry()
+archaeo_faun_abb = archaeo_faun %>% dplyr::select(siteid,sitename) %>% rbind(faun_smiths_abb)
+sitename_results_abb = sitename_results %>% dplyr::select(siteid,sitename) %>% rbind(archaeo_faun_abb) %>% distinct(siteid, sitename)
 ```
 
 
@@ -519,7 +524,7 @@ datatable(coll_joined,rownames=FALSE)}
 
 The original FAUNMAP database contained information that Neotoma no longer maintains on the precision with which its sites' coordinates were delimited. FAUNMAP's original authors write: 
 
-"Site location was established in a variety of ways. In many cases, precise locations (quadrangle, township and range, or latitude and longitude) were actually given in the literature. For all sites with radiocarbon dates that weer reported in the journal <i>Radiocarbon</i>, the latitude and longitude of the site were reported with the dates. In some cases, the reference may not have listed the precise location of the site, but it might have identified the quadrangle that contained the site. If the precise location was not given in the literature, then an approximate location was determined by the person coding the site based upon descriptions of the site location in the reference (e.g., the site is located five miles west of Springfield, IL). These descriptions were then transferred to index maps for the 48 states, provided by the United States Geological Survey (USGS), showing the location of all quadrangles. These maps were used to determine the quadrangle in which the site was located (e.g., the site five miles west of Springfield, IL, is in the Farmingdale Quadrangle). After determining the quadrangle, the latitude and longitude were taken from a USGS list giving the coordinates for the southeast corners of all USGS quadranges (e.g., the longitude and latitude for the southeast corner of the Farmingdale Quadrangle are 89&deg; 45' W and 39&deg; 45'N, respectively). These coordinates were used as the location for the site in the FAUNMAP database (e.g., the location of the site five miles west of Springfield, Illinois, is 89&deg; 45' W longitude and 39&deg; 45'N latitude)."
+"Site location was established in a variety of ways. In many cases, precise locations (quadrangle, township and range, or latitude and longitude) were actually given in the literature. For all sites with radiocarbon dates that were reported in the journal <i>Radiocarbon</i>, the latitude and longitude of the site were reported with the dates. In some cases, the reference may not have listed the precise location of the site, but it might have identified the quadrangle that contained the site. If the precise location was not given in the literature, then an approximate location was determined by the person coding the site based upon descriptions of the site location in the reference (e.g., the site is located five miles west of Springfield, IL). These descriptions were then transferred to index maps for the 48 states, provided by the United States Geological Survey (USGS), showing the location of all quadrangles. These maps were used to determine the quadrangle in which the site was located (e.g., the site five miles west of Springfield, IL, is in the Farmingdale Quadrangle). After determining the quadrangle, the latitude and longitude were taken from a USGS list giving the coordinates for the southeast corners of all USGS quadranges (e.g., the longitude and latitude for the southeast corner of the Farmingdale Quadrangle are 89&deg; 45' W and 39&deg; 45'N, respectively). These coordinates were used as the location for the site in the FAUNMAP database (e.g., the location of the site five miles west of Springfield, Illinois, is 89&deg; 45' W longitude and 39&deg; 45'N latitude)."
 
 
 ```{r pressure, echo=FALSE,message=FALSE,warning=FALSE}
@@ -559,9 +564,9 @@ faun_sites_nonull = faun_sites_nonull %>% dplyr::mutate(faun_name = str_replace(
 
 faun_prec = locs %>% left_join(faun_sites_nonull,by=join_by("sitename_f" == "faun_name")) %>% dplyr::select(siteid, sitename,sitename_f,lat,lon,geographic_precision, sitenumber) %>% distinct(siteid,.keep_all = TRUE) %>% left_join(precision_df,by=join_by("geographic_precision" == "Code")) %>% dplyr::filter(!is.na(sitename)) %>% dplyr::select(!geographic_precision) %>% group_by(sitename_f) %>% dplyr::filter(sitenumber == str_extract(sitename, "(?<=\\[).*?(?=\\])") | n() == 1 )
 
-faun_points = faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",] %>% st_coordinates() %>% cbind(faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",]) %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", "")) %>% left_join(locs,by=join_by("faun_name" == "sitename_f")) %>% dplyr::filter(!is.na(sitename)) %>% dplyr::select(siteid,sitename,faun_name,X,lon, Y,lat) %>% distinct(siteid,.keep_all=TRUE) %>% dplyr::filter(faun_name %in% locs$sitename_f)
+faun_points = faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",] %>% st_coordinates() %>% cbind(faunsites_sf[st_geometry_type(faunsites_sf) == "POINT",]) %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", "")) %>% left_join(locs,by=join_by("faun_name" == "sitename_f")) %>% dplyr::filter(!is.na(sitename)) %>% dplyr::select(siteid,sitename,faun_name,X,lon, Y,lat, sitenumber) %>% distinct(siteid,.keep_all=TRUE) %>% dplyr::filter(faun_name %in% locs$sitename_f)
 
-names(faun_points) = c("siteid","sitename","faun_name","neo_lon","faun_lon","neo_lat","faun_lat", "geom")
+names(faun_points) = c("siteid","sitename","faun_name","neo_lon","faun_lon","neo_lat","faun_lat","sitenumber" ,"geom")
 
 
 length_orig = length(locs[[1]])
@@ -629,7 +634,10 @@ faun_points2 = faun_points %>% dplyr::mutate(faun_lon_deg = case_when(
 
 faun_points2 = faun_points2 %>% dplyr::mutate(faun_lon_dec = faun_lon_deg + faun_lon_min/60 + faun_lon_sec/3600) %>% dplyr::mutate(faun_lat_dec = faun_lat_deg + faun_lat_min/60 + faun_lat_sec/3600) %>% dplyr::mutate(neo_lon = as.numeric(neo_lon), neo_lat = as.numeric(neo_lat)) %>% dplyr::mutate(neo_lon = abs(neo_lon))
 
-faun_points_discrep = faun_points2 %>% dplyr::filter(abs(neo_lon - faun_lon_dec) > 1e-6 | abs(neo_lat - faun_lat_dec) > 1e-6) %>% select(siteid,sitename,faun_name,neo_lon,faun_lon_dec,neo_lat,faun_lat_dec)
+faun_points_discrep = faun_points2 %>% dplyr::filter(abs(neo_lon - faun_lon_dec) > 1e-6 | abs(neo_lat - faun_lat_dec) > 1e-6) %>% select(siteid,sitename,sitenumber,faun_name,neo_lon,faun_lon_dec,neo_lat,faun_lat_dec)
+
+
+faun_points_discrep = faun_points_discrep %>% dplyr::filter(sitenumber == "" | (sitenumber ==str_extract(sitename, "(?<=\\[).*?(?=\\])") ))
 
 
 
