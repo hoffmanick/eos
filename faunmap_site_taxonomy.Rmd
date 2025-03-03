@@ -42,7 +42,9 @@ library(neotoma2)
 library(lubridate)
 ```
 
+# Faunmap sites
 
+This table shows all FAUNMAP sites as well as their geographic precision when known and their archaeological status.
 
 ```{r download-tables,message=FALSE,warning=FALSE,echo=FALSE}
 
@@ -99,14 +101,6 @@ faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid
 
 ```{r smiths, echo=FALSE, message=FALSE,warning=FALSE}
 
-# FAUNMAP's sites
-
-#The sites table is a central element of Neotoma's data structure. We searched FAUNMAP sites in Neotoma for any which 
-  
-# are associated with a Smithsonian trinomial,
-# are fuzzed according to the original FAUNMAP data,
-# have discrepancies in their coordinates, or
-# may be a sacred site.
 states = read_sf("tl_2024_us_state.shp")
 states = ms_simplify(states)
 
@@ -271,29 +265,110 @@ num_sacredsites = length(sitename_results[[1]])
 
 ```
 
-
-```{r join,missing=FALSE,echo=FALSE,warning=FALSE}
-
-faun_smiths_abb = faun_smiths %>% dplyr::select(siteid,sitename) %>% st_drop_geometry()
-archaeo_faun_abb = archaeo_faun %>% dplyr::select(siteid,sitename) %>% rbind(faun_smiths_abb)
-sitename_results_abb1 = sitename_results %>% dplyr::select(siteid,sitename) %>% rbind(archaeo_faun_abb) %>% distinct(siteid, sitename)
-
-sitename_results_abb = sitename_results_abb1 %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", "")) %>% left_join(locs, by=join_by('faun_name' == 'sitename_f')) %>% dplyr::filter(sitenumber == "" | is.na(sitenumber) | (sitenumber ==str_extract(sitename, "(?<=\\[).*?(?=\\])") ))
-
-addendum_sites1 = sitename_results_abb1 %>% dplyr::filter(! sitename %in% sitename_results_abb$sitename) %>% left_join(locs, by=join_by('sitename' == 'sitename_f')) %>% dplyr::filter(!is.na(locid))
-
-addendum_sites2 = sitename_results_abb1 %>% dplyr::filter(! sitename %in% sitename_results_abb$sitename) %>%left_join(locs, by=join_by('sitename' == 'sitename_f')) %>% dplyr::filter(is.na(locid))  %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", "")) %>% dplyr::select(siteid,sitename,faun_name) %>% left_join(locs, by=join_by('faun_name' == 'sitename_f')) %>% dplyr::mutate(extracted = str_extract(sitename,  "(?:(?:\\[[^\\]]*\\]){2}|\\[[^\\]]*\\])$")) %>% dplyr::mutate(extracted = str_replace_all(extracted,  "[\\[\\]]", "")) %>% group_by(sitename) %>% dplyr::filter(sitenumber == extracted | n() == 1 )
+```{r origifuzz, echo=FALSE,warning=FALSE,message=FALSE}
 
 
-sitename_joined = sitename_results_abb %>% dplyr::select(siteid,sitename,sitenumber,geographic_precision)
+precision_df <- data.frame(
+  Code = c("E", "QA", "QP", "QC", "T"),
+  Description = c(
+    "Exact (lat/long)",
+    "Quadrangle Approximate",
+    "Quadrangle Precise",
+    "Quad. in center of county",
+    "USGS Township Coord."
+  )
+)
 
-addendum_joined = addendum_sites1 %>% dplyr::select(siteid,sitename,sitenumber,geographic_precision) %>% rbind(sitename_joined) 
 
-addendum_joined2 = addendum_sites2 %>% dplyr::select(siteid,sitename,sitenumber,geographic_precision) %>% rbind(addendum_joined) %>% distinct(siteid,.keep_all=TRUE)
+locs = read.csv("LOCALITY.txt",header=FALSE)
+recov = read.csv("L_RECOV.txt",header=FALSE)
+depo = read.csv("DEPOSIT.txt",header=FALSE)
+faun= read.csv("FAUNAL.txt",header=FALSE)
+
+names(faun) = c("locid","analysisunit","taxon","confidence","mni","nisp","context","modifications")
+names(depo) = c("locid","analysisunit","recoverymethod","depsys","depenv","facies","mixing")
+
+names(locs) = c("locid","sitename_f","alternate_name","state/province","county","sitenumber","coded_by","recdatecreated","recdatemodified","notes","geographic_precision","quadrangle","quadrangle_size","lat","lon","altitude","repository")
+
+
+faun_sites2 = faun_sites %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", ""))  %>% dplyr::mutate(extracted = str_extract(sitename,  "(?:(?:\\[[^\\]]*\\]){2}|\\[[^\\]]*\\])$")) %>% dplyr::mutate(extracted = str_replace_all(extracted,  "[\\[\\]]", "")) %>% distinct(siteid,sitename,faun_name,extracted) %>% left_join(locs, by=join_by("faun_name" == "sitename_f")) %>% group_by(faun_name) %>% dplyr::filter(sitenumber == extracted | n() == 1 | is.na(extracted)) %>% dplyr::select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,quadrangle,quadrangle_size,lat,lon,repository) %>% dplyr::mutate(sitename_sensitive = case_when(siteid %in% sitename_results$siteid ~ "yes", TRUE ~ "no")) %>% mutate(smith = case_when(siteid %in% faun_smiths$siteid ~ "yes", TRUE ~ "no")) %>% mutate(archaeo = case_when(siteid %in% archaeo_faun$siteid ~ "yes", TRUE ~ "no"))
+
+faun_dt = faun_sites2 %>% select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,sitename_sensitive,smith,archaeo)
+
+datatable(faun_dt,rownames=FALSE)
 
 ```
 
+# Highest Priority: very archaeo and exact
+
+The highest priority sites have 
+
+* sensitive site name, 
+* archaeological depositional environment, 
+* a smithsonian trinomial, and 
+* exact geographic precision:
 
 ```{r dinaa, echo=FALSE,warning=FALSE,message=FALSE}
 
-dinaa = content(GET('https://opencontext.org/query/Americas/United+States.json?response=metadata,geo-reco[…]ite&proj=52-digital-index-of-north-american-archaeology-dinaa'))
+priority1 = faun_dt %>% dplyr::filter(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" & geographic_precision == "E")
+
+datatable(priority1,rownames=FALSE)
+
+
+```
+
+# High Priority: archaeo and exact
+
+Still high priority are those sites which have at least one of
+
+* sensitive site name,
+* archaeological depositional environment, or
+* smithsonian trinomial
+
+and also have exact geographic precision.
+
+```{r stillhigh, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority2 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & !(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" ) & geographic_precision == "E")
+
+datatable(priority2,rownames=FALSE)
+```
+
+# High Priority: archaeo and unknown
+
+Also high priority are sites that have at least one of
+
+* sensitive site name,
+* archaeological depositional environment, or
+* smithsonian trinomial
+
+and have unknown geographic precision:
+
+```{r stillhigh2, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority3 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & is.na(geographic_precision))
+
+datatable(priority3,rownames=FALSE)
+```
+
+# Lower Priority: archaeo and QA/QP//Q/T
+
+These sites are archaeological by some indicator and are fuzzed to the quadrangle level. Well, "Q" is a little ambiguous. Only five sites have geographic precision Q and there's no metadata about what it means. To be safe, we'll assume it means quadrangle level fuzzing.
+
+```{r lower, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority4 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T"))
+
+datatable(priority4,rownames=FALSE)
+```
+
+# Low priority: Paleontological and Archaeological/QC
+
+The lowest priority are those archaeological sites already obfuscated to the county level or any sites which fail all tests for archaeological status.
+
+```{r lowerstill, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority5 = faun_dt %>% dplyr::filter(((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QC")) | ((sitename_sensitive == "no" & archaeo=="no" & smith =="no")))
+
+datatable(priority5,rownames=FALSE)
+```
