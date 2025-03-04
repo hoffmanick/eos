@@ -357,7 +357,7 @@ These sites are archaeological by some indicator and are fuzzed to the quadrangl
 
 ```{r lower, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority4 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T"))
+priority4 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T","Q"))
 
 datatable(priority4,rownames=FALSE)
 ```
