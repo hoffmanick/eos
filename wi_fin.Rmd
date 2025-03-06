@@ -14,7 +14,6 @@ theme: journal
 ---
 
 
-Here are the metadata for all the [finance reports](https://cfis.wi.gov/Public/Registration.aspx?page=FiledReports#) WI has between Jan 2000 and today. Potentially you could search for even earlier dates, but I think these might be sufficient for us.
 ``` {r read,echo=FALSE,message=FALSE,warning=FALSE}
 library(tidyverse)
 library(DT)
@@ -24,18 +23,21 @@ library(dplyr)
 
 wi_fin = read.csv("Report_WI.csv") %>% dplyr::mutate(DATEFILED=mdy(DATEFILED))
 
+numreports = length(wi_fin[[2]])
 
 
-
-datatable(wi_fin,rownames=FALSE)
+##datatable(wi_fin,rownames=FALSE)
 
 ```
-Here are counts of registrant types:
+
+
+I searched the metadata for all the [finance reports](https://cfis.wi.gov/Public/Registration.aspx?page=FiledReports#) WI has between Jan 2000 and today. There are `r numreports` of these reports. Potentially you could search for even earlier dates, but I think these might be sufficient for us. 
+Here are counts of registrant types for those `r numreports` reports:
 ```{r next,echo=FALSE,message=FALSE,warning=FALSE}
 wi_fin %>% group_by(REGISTRANTTYPE) %>% count() %>% datatable(rownames=FALSE)
 ```
 
-These ones have the string "Sever" in the name:
+These ones have Severson in the name:
 ```{r nextag, message=FALSE,warning=FALSE,echo=FALSE}
 
 wi_fin %>% dplyr::filter(str_detect(REGISTRANTNAME,"Sever")) %>% datatable(rownames=FALSE)
