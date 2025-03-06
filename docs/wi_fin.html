@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nick Hoffman" />
+
+<meta name="date" content="2025-03-05" />
+
+<title>WI Finance Report Metadata</title>
+
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.19/datatables.js"></script>
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="db_by_db.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+#TOC {
+  display: none !important;
+}
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">WI Finance Report Metadata</h1>
+<h4 class="author">Nick Hoffman</h4>
+<h4 class="date">2025-03-05</h4>
+
+</div>
+
+
+<p>I searched the metadata for all the <a
+href="https://cfis.wi.gov/Public/Registration.aspx?page=FiledReports#">finance
+reports</a> WI has between Jan 2000 and today. There are 65535 of these
+reports. Potentially you could search for even earlier dates, but I
+think these might be sufficient for us. Here are counts of registrant
+types for those 65535 reports:</p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-e33e4fbd70a5b54fa457" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-e33e4fbd70a5b54fa457">{"x":{"filter":"none","vertical":false,"data":[["Conduit","Independent Expenditure Committee","Legislative Campaign Committee","PAC","Political Party","Recall","Referendum","Sponsoring Organization","State Candidate","Unregistered Express Advocacy"],[8224,2779,430,15651,7988,160,78,2635,27202,388]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>REGISTRANTTYPE<\/th>\n      <th>n<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":1}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>These ones have Severson in the name:</p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3dd42bd0c869c35d4cc3" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-3dd42bd0c869c35d4cc3">{"x":{"filter":"none","vertical":false,"data":[["July Continuing 2011","July Continuing 2020","January Continuing 2013","Fall Pre-Primary 2020","January Continuing 2014","July Continuing 2012","January Continuing 2016","Fall Pre-Election 2020","July Continuing 2014","September Report 2020","January Continuing 2015","July Continuing 2015","Fall Pre-Primary 2012","July Continuing 2013","January Continuing 2021","January Continuing 2021","Fall Pre-Primary 2010","January Continuing 2012","Fall Pre-Election 2010","July Continuing 2010","January Continuing 2011","Fall Pre-Election 2012","January Continuing 2011"],["EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB3","EB2","EB2","EB2","EB2","EB2","EB2","EB3"],["Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Receipt - 72-Hour Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Receipt - 72-Hour Report"],["State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate","State Candidate"],["2011-07-20","2020-07-10","2013-01-30","2020-08-01","2014-01-21","2012-07-20","2016-01-05","2020-10-25","2014-07-18","2020-09-19","2015-01-30","2015-07-14","2012-08-06","2013-07-11","2020-12-26","2020-10-27","2010-09-07","2012-01-31","2010-10-25","2012-07-10","2011-01-31","2012-10-29","2010-10-24"],["","","","","","","","","","","","","","","12/29/2020","","3/14/2012","","","7/10/2012","3/14/2012","",""],[104915,106218,104915,106218,104915,104915,104915,106218,104915,106218,104915,104915,104915,104915,106218,106218,104915,104915,104915,104915,104915,104915,104915],["Severson for Assembly","DuWayne Severson Moving Forward","Severson for Assembly","DuWayne Severson Moving Forward","Severson for Assembly","Severson for Assembly","Severson for Assembly","DuWayne Severson Moving Forward","Severson for Assembly","DuWayne Severson Moving Forward","Severson for Assembly","Severson for Assembly","Severson for Assembly","Severson for Assembly","DuWayne Severson Moving Forward","DuWayne Severson Moving Forward","Severson for Assembly","Severson for Assembly","Severson for Assembly","Severson for Assembly","Severson for Assembly","Severson for Assembly","Severson for Assembly"],[null,null,null,2020,null,null,null,2020,null,null,null,null,2012,null,null,null,2010,null,2010,null,null,2012,null],["State Assembly  District No. 28","State Assembly  District No. 44","State Assembly  District No. 28","State Assembly  District No. 44","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 44","State Assembly  District No. 28","State Assembly  District No. 44","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 44","State Assembly  District No. 44","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28","State Assembly  District No. 28"],[2011,2020,2012,2020,2013,2012,2015,2020,2014,2020,2014,2015,2012,2013,2020,2020,2010,2011,2010,2010,2010,2012,2010],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False"],["","","","","","","","","","","","","","","","","","","","","","",""],[1,0,1,0,1,1,0,0,1,0,1,0,1,1,0,0,1,1,1,1,1,1,1],["2011-01-20T21:29:41.623","2020-04-22T08:25:04.403","2012-04-13T08:57:21.883","2020-04-22T08:25:04.403","2013-07-09T14:55:08.893","2012-04-13T08:57:21.883","2015-07-14T09:54:53.580","2020-04-22T08:25:04.403","2014-07-14T08:56:23.417","2020-04-22T08:25:04.403","2014-07-14T08:56:23.417","2015-07-14T09:54:53.580","2012-04-13T08:57:21.883","2013-07-09T14:55:08.893","2020-04-22T08:25:04.403","2020-04-22T08:25:04.403","2010-03-11T13:11:54.937","2011-01-20T21:29:41.623","2010-03-11T13:11:54.937","2012-04-13T08:57:21.883","2011-01-20T21:29:41.623","2012-04-13T08:57:21.883","2010-03-11T13:11:54.937"],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>FILINGPERIODNAME<\/th>\n      <th>REPORTTYPECODE<\/th>\n      <th>REPORTNAME<\/th>\n      <th>REGISTRANTTYPE<\/th>\n      <th>DATEFILED<\/th>\n      <th>AMENDEDDATE<\/th>\n      <th>COMMITTEE.ID<\/th>\n      <th>REGISTRANTNAME<\/th>\n      <th>ELECTIONYEAR<\/th>\n      <th>BRANCH<\/th>\n      <th>FILINGYEAR<\/th>\n      <th>EXTENSION<\/th>\n      <th>COMMENTFLAG<\/th>\n      <th>ATTACHMENT<\/th>\n      <th>VIEWREPORTTYPE<\/th>\n      <th>CREATEDDATE<\/th>\n      <th>X<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[6,8,10,14]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>These ones have Waukesha in the name:</p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-f4d6d53b781c1b107587" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f4d6d53b781c1b107587">{"x":{"filter":"none","vertical":false,"data":[["July Continuing 2024","January Continuing 2016","Fall Pre-Election 2008","Fall Pre-Primary 2008","July Continuing 2009","July Continuing 2009","July Continuing 2022","July Continuing 2022","January Continuing 2009","January Continuing 2009","January Continuing 2015","January Continuing 2015","January Continuing 2015","Fall Pre-Primary 2008","Fall Pre-Election 2008","Fall Pre-Election 2008","Fall Pre-Election 2008","January Continuing 2015","January Continuing 2023","January Continuing 2023","January Continuing 2023","January Continuing 2023","January Continuing 2011","January Continuing 2011","January Continuing 2018","January Continuing 2018","January Continuing 2018","January Continuing 2018","January Continuing 2025","January Continuing 2012","Spring Pre-Primary 2011","July Continuing 2011","July Continuing 2020","July Continuing 2020","July Continuing 2020","Spring Pre-Primary 2012","September Report 2020","Spring Pre-Election 2024","Fall Pre-Election 2010","January Continuing 2011","January Continuing 2011","Special Pre-Election 2011 (60th  83rd  94th Assembly)","July Continuing 2011","98th Assembly / Spring Pre-Election 2013","98th Assembly Candidates Post Election reporting period for special elections 2013","July Continuing 2013","July Continuing 2013","July Continuing 2022","July Continuing 2013","July Continuing 2013","July Continuing 2013","July Continuing 2013","January Continuing 2014","Spring 2023 / 8th Senate Spring Pre-Primary 2023","Fall Pre-Primary 2014","Spring Pre-Election 2019","Spring Pre-Election 2019","Fall Pre-Election 2012","Fall Pre-Election 2012","January Continuing 2013","Special Pre-Election 2012 (33rd Senate)","July Continuing 2009","January Continuing 2010","July Continuing 2015","July Continuing 2015","January Continuing 2016","January Continuing 2016","January Continuing 2013","July Continuing 2020","98th Assembly / Spring Pre-Primary 2013","98th Assembly / Spring Pre-Primary 2013","July Continuing 2021","July Continuing 2021","July Continuing 2014","January Continuing 2022","July Continuing 2014","January Continuing 2009","January Continuing 2015","Spring 2023 / 8th Senate Spring Pre-Election 2023","Spring 2023 / 8th Senate Spring Pre-Election 2023","Spring 2023 / 8th Senate Spring Pre-Election 2023","July Continuing 2009","January Continuing 2010","January Continuing 2010","July Continuing 2010","July Continuing 2010","July Continuing 2010","Spring Pre-Election 2015 (/ 20th Senate Special)","July Continuing 2009","July Continuing 2015","January Continuing 2022","July Continuing 2014","July Continuing 2014","Spring Pre-Election 2022","Spring Pre-Election 2022","Spring Pre-Election 2022","July Continuing 2022","Fall Pre-Election 2008","Fall Pre-Election 2014","January Continuing 2009","January Continuing 2010","Spring Pre-Election 2009","Spring Pre-Election 2009","July Continuing 2015","July Continuing 2015","July Continuing 2015","January Continuing 2023","January Continuing 2010","January Continuing 2016","July Continuing 2023","July Continuing 2023","July Continuing 2023","July Continuing 2023","July Continuing 2012","July Continuing 2012","July Continuing 2012","July Continuing 2012","January Continuing 2020","January Continuing 2020","January Continuing 2020","January Continuing 2013","January Continuing 2013","January Continuing 2013","July Continuing 2021","July Continuing 2014","July Continuing 2014","13th Senate/89th Assembly Post Election reporting period for special elections 2021","Spring Pre-Primary 2022","Fall Pre-Election 2014","Fall Pre-Election 2014","Fall Pre-Election 2014","January Continuing 2009","January Continuing 2009","January Continuing 2015","January Continuing 2015","8th Senate Post Election reporting period for special elections 2023","July Continuing 2023","Spring 2023 / 8th Senate Spring Pre-Election 2023","Fall Pre-Election 2014","July Continuing 2024","July Continuing 2024","January Continuing 2015","January Continuing 2015","July Continuing 2015","January Continuing 2011","January Continuing 2011","January Continuing 2012","January Continuing 2012","July Continuing 2011","January Continuing 2012","July Continuing 2012","January Continuing 2013","January Continuing 2013","July Continuing 2013","January Continuing 2021","January Continuing 2014","January Continuing 2014","January Continuing 2014","January Continuing 2021","July Continuing 2016","Fall Pre-Primary 2010","January Continuing 2017","July Continuing 2018","July Continuing 2018","July Continuing 2018","July Continuing 2011","September Report 2018","Post Election reporting period for special elections 2012 (Gov.  Lt. Gov.  Sen. 13  21 23  &amp; 29)","July Continuing 2012","January Continuing 2019","July Continuing 2019","July Continuing 2012","January Continuing 2021","January Continuing 2021","Spring Pre-Election 2021","Spring Pre-Election 2021","January Continuing 2013","January Continuing 2013","July Continuing 2017","January Continuing 2012","January Continuing 2012","January Continuing 2012","Special Pre-Primary 2012 (Gov.  Lt. Gov.  Sen. 13  21  23  29)","Special Pre-Primary 2012 (Gov.  Lt. Gov.  Sen. 13  21  23  29)","July Continuing 2010","Spring Pre-Election 2010","Fall Pre-Primary 2010","July Continuing 2010","July Continuing 2016","July Continuing 2016","July Continuing 2016","Fall Pre-Primary 2010","Fall Pre-Primary 2010","Fall Pre-Election 2010","September Report 2016","September Report 2016","July Continuing 2016","January Continuing 2017","January Continuing 2017","January Continuing 2017","July Continuing 2013","January Continuing 2014","January Continuing 2014","July Continuing 2014","July Continuing 2014","January Continuing 2022","January Continuing 2022","July Continuing 2020","January Continuing 2021","January Continuing 2014","January Continuing 2014","July Continuing 2021","July Continuing 2014","January Continuing 2022","July Continuing 2016","Spring Pre-Primary 2010","Spring Pre-Primary 2010","Spring Pre-Election 2010","Spring Pre-Election 2010","January Continuing 2024","July Continuing 2016","July Continuing 2010","July Continuing 2024","Fall Pre-Election 2010","January Continuing 2010","January Continuing 2010","July Continuing 2017","July Continuing 2017","July Continuing 2017","July Continuing 2010","July Continuing 2018","January Continuing 2011","January Continuing 2011","July Continuing 2009","July Continuing 2009","July Continuing 2009","July Continuing 2015","8th Senate Post Election reporting period for special elections 2023","January Continuing 2016","January Continuing 2016","January Continuing 2010","January Continuing 2010","January Continuing 2016","July Continuing 2015","January Continuing 2024","January Continuing 2024","January Continuing 2024","July Continuing 2010","July Continuing 2010","Fall Pre-Election 2010","Fall Pre-Election 2016","Spring Pre-Election 2011","July Continuing 2011","January Continuing 2012","July Continuing 2011","January Continuing 2025","January Continuing 2025","July Continuing 2011","Spring Pre-Election 2011","January Continuing 2012","Special Pre-Election 2012 (Gov.  Lt. Gov.  Sen. 13  21  23  29)","January Continuing 2019","January Continuing 2019","January Continuing 2019","July Continuing 2012","July Continuing 2019","July Continuing 2019","July Continuing 2019","January Continuing 2020","January Continuing 2025","July Continuing 2011","Fall Pre-Primary 2008"],["EB7","EB2","EB2","EB2","EB10","EB2","EB2","EB50","EB2A","EB2","EB2","EB12A","EB2","EB2","EB2","EB2","EB10","EB4","EB2","EB50","EB2","EB2","EB12A","EB2A","EB10","EB2","EB50","EB2","EB7","EB2","EB10","EB2","EB10","EB50","EB2","EB10","EB10","EB2","EB2","EB10","EB2","EB10","EB10","EB10","EB10","EB10","EB2","EB2","EB2","EB2","EB12A","EB2","EB2A","EB2","EB10","EB2A","EB2","EB10","EB2","EB4","EB4","EB2","EB10","EB12A","EB2A","EB2A","EB10","EB2","EB2","EB10","EB2A","EB50","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB12A","EB2","EB3","EB2","EB12A","EB10","EB2","EB2","EB10","EB2A","EB2A","EB50","EB2","EB2","EB2","EB2","EB2","EB2","EB4","EB2A","EB10","EB10","EB2","EB2","EB7","EB2","EB2","EB50","EB2","EB2","EB2","EB2","EB2","EB2","EB2","EB10","EB50","EB2","EB2","EB2","EB2","EB2","EB12A","EB2","EB7","EB2","EB2","EB10","EB2","EB2A","EB10","EB2","EB2","EB7","EB3","EB7","EB2","EB2","EB50","EB2A","EB2A","EB2","EB2","EB2","EB2","EB2","EB2","EB3","EB2","EB2","EB12A","EB2","EB10","EB10","EB2","EB2","EB3","EB2","EB2","EB2","EB2","EB10","EB50","EB2","EB10","EB10","EB10","EB2","EB2","EB2","EB50","EB2","EB2","EB50","EB10","EB2","EB2","EB2","EB2A","EB2","EB2","EB10","EB10","EB2","EB10","EB2","EB2","EB50","EB10","EB2","EB2","EB10","EB10","EB2","EB2A","EB10","EB50","EB2","EB2","EB2","EB2","EB10","EB2","EB2","EB50","EB7","EB2","EB12A","EB2","EB10","EB2","EB2","EB2","EB10","EB2","EB10","EB2","EB2A","EB2","EB2A","EB2","EB2","EB2","EB2","EB10","EB2","EB50","EB2","EB2","EB2","EB2","EB12A","EB2","EB2A","EB2","EB2","EB2A","EB2","EB2","EB2","EB2","EB4","EB2","EB50","EB2","EB2","EB2","EB2","EB2","EB10","EB12A","EB10","EB2","EB50","EB2","EB2","EB2A","EB12A","EB10","EB10","EB2","EB50","EB12A","EB50","EB10","EB2","EB2","EB2","EB2","EB10"],["Independent Expenditure","Committee Report","Committee Report","Committee Report","Conduit Report","Committee Report","Committee Report","Segregated Fund","Committee Report - No Activity","Committee Report","Committee Report","GAB-12A","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","GAB-04","Committee Report","Segregated Fund","Committee Report","Committee Report","GAB-12A","Committee Report - No Activity","Conduit Report","Committee Report","Segregated Fund","Committee Report","Independent Expenditure","Committee Report","Conduit Report","Committee Report","Conduit Report","Segregated Fund","Committee Report","Conduit Report","Conduit Report","Committee Report","Committee Report","Conduit Report","Committee Report","Conduit Report","Conduit Report","Conduit Report","Conduit Report","Conduit Report","Committee Report","Committee Report","Committee Report","Committee Report","GAB-12A","Committee Report","Committee Report - No Activity","Committee Report","Conduit Report","Committee Report - No Activity","Committee Report","Conduit Report","Committee Report","GAB-04","GAB-04","Committee Report","Conduit Report","GAB-12A","Committee Report - No Activity","Committee Report - No Activity","Conduit Report","Committee Report","Committee Report","Conduit Report","Committee Report - No Activity","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","GAB-12A","Committee Report","Receipt - 72-Hour Report","Committee Report","GAB-12A","Conduit Report","Committee Report","Committee Report","Conduit Report","Committee Report - No Activity","Committee Report - No Activity","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","GAB-04","Committee Report - No Activity","Conduit Report","Conduit Report","Committee Report","Committee Report","Independent Expenditure","Committee Report","Committee Report","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","GAB-12A","Committee Report","Independent Expenditure","Committee Report","Committee Report","Conduit Report","Committee Report","Committee Report - No Activity","Conduit Report","Committee Report","Committee Report","Independent Expenditure","Receipt - 72-Hour Report","Independent Expenditure","Committee Report","Committee Report","Segregated Fund","Committee Report - No Activity","Committee Report - No Activity","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Receipt - 72-Hour Report","Committee Report","Committee Report","GAB-12A","Committee Report","Conduit Report","Conduit Report","Committee Report","Committee Report","Receipt - 72-Hour Report","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","Segregated Fund","Committee Report","Conduit Report","Conduit Report","Conduit Report","Committee Report","Committee Report","Committee Report","Segregated Fund","Committee Report","Committee Report","Segregated Fund","Conduit Report","Committee Report","Committee Report","Committee Report","Committee Report - No Activity","Committee Report","Committee Report","Conduit Report","Conduit Report","Committee Report","Conduit Report","Committee Report","Committee Report","Segregated Fund","Conduit Report","Committee Report","Committee Report","Conduit Report","Conduit Report","Committee Report","Committee Report - No Activity","Conduit Report","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","Committee Report","Committee Report","Segregated Fund","Independent Expenditure","Committee Report","GAB-12A","Committee Report","Conduit Report","Committee Report","Committee Report","Committee Report","Conduit Report","Committee Report","Conduit Report","Committee Report","Committee Report - No Activity","Committee Report","Committee Report - No Activity","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","Committee Report","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","GAB-12A","Committee Report","Committee Report - No Activity","Committee Report","Committee Report","Committee Report - No Activity","Committee Report","Committee Report","Committee Report","Committee Report","GAB-04","Committee Report","Segregated Fund","Committee Report","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report","GAB-12A","Conduit Report","Committee Report","Segregated Fund","Committee Report","Committee Report","Committee Report - No Activity","GAB-12A","Conduit Report","Conduit Report","Committee Report","Segregated Fund","GAB-12A","Segregated Fund","Conduit Report","Committee Report","Committee Report","Committee Report","Committee Report","Conduit Report"],["Unregistered Express Advocacy","Political Party","PAC","Political Party","Conduit","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Sponsoring Organization","PAC","Political Party","Political Party","Political Party","Conduit","Conduit","Political Party","Political Party","Political Party","State Candidate","Sponsoring Organization","PAC","Conduit","Political Party","Political Party","Political Party","Unregistered Express Advocacy","Political Party","Conduit","Political Party","Conduit","Political Party","Political Party","Conduit","Conduit","Political Party","Political Party","Conduit","Political Party","Conduit","Conduit","Conduit","Conduit","Conduit","PAC","PAC","Political Party","PAC","Sponsoring Organization","Political Party","Political Party","State Candidate","Conduit","Political Party","Political Party","Conduit","Political Party","Conduit","Conduit","Political Party","Conduit","Sponsoring Organization","PAC","PAC","Conduit","Political Party","Political Party","Conduit","PAC","Political Party","Political Party","Political Party","PAC","PAC","Political Party","Political Party","State Candidate","PAC","Political Party","Political Party","Sponsoring Organization","PAC","Political Party","PAC","Sponsoring Organization","Conduit","Political Party","Political Party","Conduit","PAC","Political Party","Political Party","PAC","Political Party","Political Party","PAC","PAC","PAC","Conduit","PAC","Conduit","Conduit","Political Party","Political Party","Unregistered Express Advocacy","Political Party","Political Party","Political Party","Political Party","State Candidate","Political Party","Political Party","PAC","PAC","Political Party","Conduit","Political Party","Political Party","Political Party","Political Party","PAC","Political Party","Sponsoring Organization","PAC","Unregistered Express Advocacy","PAC","Political Party","Conduit","Political Party","PAC","Conduit","PAC","Political Party","Unregistered Express Advocacy","State Candidate","Unregistered Express Advocacy","PAC","Political Party","Political Party","Political Party","PAC","PAC","Political Party","PAC","Political Party","Political Party","Political Party","Political Party","Political Party","PAC","Sponsoring Organization","Political Party","Conduit","Conduit","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Conduit","Political Party","PAC","Conduit","Conduit","Conduit","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Conduit","Political Party","Political Party","Political Party","PAC","PAC","Political Party","Conduit","Conduit","PAC","Conduit","Political Party","Political Party","Political Party","Conduit","Political Party","PAC","Conduit","Conduit","Political Party","PAC","Conduit","Political Party","Political Party","Political Party","Political Party","PAC","Conduit","Political Party","Political Party","Political Party","Unregistered Express Advocacy","Political Party","Sponsoring Organization","PAC","Conduit","Political Party","Political Party","PAC","Conduit","Political Party","Conduit","PAC","State Candidate","Political Party","Political Party","Political Party","PAC","Political Party","Political Party","Conduit","Political Party","Political Party","Political Party","Political Party","Political Party","Political Party","Sponsoring Organization","PAC","PAC","PAC","Political Party","PAC","PAC","Political Party","PAC","Political Party","Conduit","Political Party","Political Party","Political Party","PAC","Political Party","Political Party","Political Party","Conduit","Sponsoring Organization","Conduit","Political Party","Political Party","Political Party","PAC","PAC","Sponsoring Organization","Conduit","Conduit","Political Party","Political Party","Sponsoring Organization","Political Party","Conduit","Political Party","Political Party","Political Party","Political Party","Conduit"],["2024-04-01","2016-01-14","2008-10-27","2008-08-27","2009-05-28","2009-07-13","2022-07-15","2022-07-15","2009-01-28","2009-01-29","2015-01-22","2015-01-26","2015-01-26","2008-09-03","2008-10-28","2008-10-28","2008-10-23","2014-11-01","2023-01-17","2023-01-17","2023-01-17","2023-01-17","2011-02-27","2011-02-28","2018-01-06","2018-01-09","2018-01-09","2018-01-10","2024-10-27","2012-01-13","2011-01-18","2011-07-20","2020-07-08","2020-07-09","2020-07-09","2012-01-23","2020-09-11","2024-03-25","2010-10-18","2010-10-19","2011-01-29","2011-03-29","2011-04-13","2013-03-20","2013-05-01","2013-07-02","2013-08-19","2022-07-11","2013-07-15","2013-07-15","2013-07-15","2013-07-16","2014-01-20","2023-02-13","2014-07-30","2019-03-22","2019-03-22","2012-10-24","2012-10-24","2012-10-24","2012-11-01","2009-07-22","2009-08-07","2015-07-28","2015-08-25","2016-01-04","2016-01-06","2013-01-29","2020-07-15","2013-02-07","2013-03-04","2021-07-13","2021-07-13","2014-07-18","2022-01-18","2014-09-10","2009-01-30","2015-01-27","2023-03-27","2023-03-27","2023-03-27","2009-07-16","2010-01-27","2010-01-26","2010-07-06","2010-07-16","2010-07-16","2015-03-29","2009-07-20","2015-07-20","2021-11-24","2014-07-21","2014-07-22","2022-03-24","2022-03-28","2022-03-28","2022-07-02","2008-10-22","2014-10-27","2009-02-13","2009-08-24","2009-03-30","2009-03-30","2015-07-05","2015-07-07","2015-07-07","2022-11-16","2010-01-14","2016-01-08","2023-07-17","2023-07-17","2023-07-17","2023-07-17","2012-07-18","2012-07-19","2012-07-20","2012-07-20","2020-01-04","2020-01-07","2020-01-07","2013-01-11","2013-01-18","2013-03-04","2021-07-14","2014-07-21","2014-07-21","2021-04-07","2022-02-06","2014-10-26","2014-10-27","2014-10-27","2009-02-02","2009-02-02","2015-02-01","2015-02-02","2023-04-11","2023-03-31","2023-04-11","2014-10-27","2024-07-15","2024-07-15","2015-03-06","2015-04-09","2015-07-13","2011-01-10","2011-01-31","2012-01-21","2011-01-19","2011-07-20","2011-08-03","2012-07-06","2012-01-31","2013-02-01","2013-07-03","2021-01-02","2014-01-02","2014-01-08","2014-01-11","2020-11-06","2016-07-15","2010-09-07","2017-01-16","2018-07-07","2018-07-07","2018-07-09","2011-07-20","2018-09-20","2012-05-30","2012-07-02","2019-01-13","2019-07-12","2012-07-15","2021-01-09","2021-01-09","2021-03-28","2021-03-28","2013-01-04","2013-01-04","2017-07-17","2012-01-31","2012-01-31","2012-01-31","2012-04-25","2012-04-25","2010-03-25","2010-04-01","2010-07-02","2010-07-06","2016-07-06","2016-07-06","2016-07-06","2010-09-03","2010-09-02","2010-09-03","2016-09-09","2016-09-13","2016-09-07","2017-01-06","2017-01-11","2017-01-11","2013-07-20","2014-01-26","2014-01-27","2014-07-07","2014-07-08","2022-01-14","2022-01-14","2020-04-16","2021-01-15","2014-01-28","2014-01-28","2021-07-07","2014-07-15","2022-01-18","2016-04-06","2010-01-06","2010-02-04","2010-02-09","2010-02-12","2024-01-16","2016-08-11","2010-08-06","2024-07-10","2010-10-25","2010-01-20","2010-01-26","2017-07-08","2017-07-12","2017-07-12","2010-07-07","2018-07-16","2011-01-07","2011-01-13","2009-07-20","2009-07-17","2009-07-20","2015-07-20","2023-05-19","2016-01-21","2016-02-02","2010-01-31","2010-02-01","2016-01-15","2015-04-01","2024-01-15","2024-01-15","2024-01-15","2010-07-20","2010-07-20","2010-10-24","2016-10-31","2011-02-04","2011-07-21","2011-07-26","2011-06-30","2025-01-15","2025-01-15","2011-08-27","2011-08-27","2012-02-02","2012-05-07","2019-01-06","2019-01-06","2019-01-06","2012-07-23","2019-07-05","2019-07-05","2019-07-05","2020-01-15","2025-01-04","2011-07-15","2008-09-15"],["4/5/2024","1/2/2017","10/27/2008","3/25/2009","6/26/2009","","","","1/28/2009","1/29/2009","","","","4/30/2009","5/7/2009","5/1/2009","4/18/2013","11/1/2014","","","","","","","","","","","10/30/2024","","1/28/2011","","","","5/3/2022","","","","","11/29/2010","","","6/23/2011","","","","","","","","","","","","","","","","","11/6/2012","","7/23/2009","12/30/2009","","","","","","","","","7/13/2021","","","","1/4/2016","1/30/2009","","","","","","","","","","","","8/1/2009","","","","","","","","","10/22/2008","","11/6/2009","","","","","","","11/16/2022","","","","","","","","","3/4/2013","","","","","","","","","","","","","","","","2/2/2009","4/22/2013","","","4/11/2023","","","11/21/2014","","","","","","4/29/2011","4/26/2011","","","5/15/2012","","","","","","9/5/2021","","","","","7/16/2017","","7/20/2017","","","8/27/2018","5/3/2012","","","","10/23/2019","","","","","4/18/2021","","","","","","","","","","6/28/2010","","8/19/2010","7/6/2010","","","","","","10/18/2010","","","","","","6/26/2017","","","","","","","","","","","","","","","","1/26/2010","","3/18/2010","","","","","","","","","","","","","","","","7/20/2009","","","","","","","1/31/2010","2/1/2010","7/25/2016","6/13/2015","","","","","","","7/16/2017","3/16/2011","","12/16/2011","6/30/2011","","","","","","5/17/2012","","","","","","","8/25/2020","","","","4/18/2013"],[1200044,300052,500574,300227,900073,300227,300226,300226,300406,300052,300227,800195,500851,300226,300227,300226,900073,900073,300226,300226,300052,106666,800195,500574,900073,300226,300226,300052,1200044,300227,900073,300226,900073,300226,300226,900073,900073,300226,300227,900073,300226,900073,900073,900073,900073,900073,500574,501765,300406,500851,800195,300226,300406,106666,900073,300226,300226,900073,300227,900073,900073,300406,900073,800195,501625,501625,900073,300226,300052,900073,500574,300226,300226,300052,501765,501625,300226,300226,106666,501765,300226,300052,800195,500851,300227,500851,800195,900073,300226,300052,900073,500574,300406,300226,501765,300226,300052,500851,500574,500851,900073,500574,900073,900073,300226,300227,1200044,300406,300226,300226,300226,106666,300052,300226,500851,500574,300406,900073,300226,300226,300052,300406,500574,300052,800195,500851,1200044,501765,300227,900073,300052,500574,900073,500574,300052,1200044,106666,1200044,500851,300226,300226,300406,501625,500574,300406,500851,300052,300406,300406,300227,300227,500851,800195,300227,900073,900073,300227,300226,300052,300052,300226,300052,300226,900073,300226,500851,900073,900073,900073,300052,300052,300052,300226,300226,300226,300226,900073,300227,300052,300226,500574,500851,300227,900073,900073,500851,900073,300227,300226,300226,900073,300227,500851,900073,900073,300226,500574,900073,300226,300226,300052,300052,500574,900073,300227,300226,300226,1200044,300052,800195,500851,900073,300226,300052,500851,900073,300227,900073,500574,106666,300227,300406,300052,500574,300052,300227,900073,300226,300226,300052,300052,300227,300052,800195,500851,500574,500851,300226,500574,500851,300226,500574,300227,900073,300226,300226,300052,500574,300226,300226,300052,900073,800195,900073,300227,300226,300226,500574,500574,800195,900073,900073,300226,300226,800195,300226,900073,300226,300052,300052,300052,900073],["Blue Sky Waukesha  Inc.","Waukesha County Democratic Party","Waukesha Co Labor Council","Republican Women-Waukesha Co.","Direct Givers/Waukesha County ","Republican Women-Waukesha Co.","Waukesha County Republican Party","Waukesha County Republican Party","Constitution Party-Waukesha Co","Waukesha Co Democratic Party","Republican Women-Waukesha County","Education Association of Waukesha","Education Association of Waukesha - Political Action Committee","Waukesha Co Republican Party","Republican Women-Waukesha Co.","Waukesha Co Republican Party","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Judge Fred Strampe for Waukesha County","Education Assn of Waukesha","Waukesha Co Labor Council","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Blue Sky Waukesha  Inc.","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha County Republican Party","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Republican Party","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha County Republican Party","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Waukesha United","Constitution Party-Waukesha Co","Education Association of Waukesha - Political Action Committee","Education Assn of Waukesha","Waukesha County Republican Party","Constitution Party-Waukesha Co","Judge Fred Strampe for Waukesha County","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Constitution Party-Waukesha Co","Direct Givers/Waukesha County ","Education Association of Waukesha","Waukesha County Taxpayers Association","Waukesha County Taxpayers Association","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Democratic Party","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha United","Waukesha County Taxpayers Association","Waukesha Co Republican Party","Waukesha County Republican Party","Judge Fred Strampe for Waukesha County","Waukesha United","Waukesha County Republican Party","Waukesha Co Democratic Party","Education Assn of Waukesha","Education Assn of Waukesha PAC","Republican Women-Waukesha County","Education Association of Waukesha PAC","Education Assn of Waukesha","Direct Givers/Waukesha County ","Waukesha Co Republican Party","Waukesha County Democratic Party","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Constitution Party-Waukesha Co","Waukesha County Republican Party","Waukesha United","Waukesha County Republican Party","Waukesha County Democratic Party","Education Assn of Waukesha PAC","Waukesha Co Labor Council","Education Assn of Waukesha PAC","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Republican Party","Republican Women-Waukesha County","Blue Sky Waukesha  Inc.","Constitution Party-Waukesha Co","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Republican Party","Judge Fred Strampe for Waukesha County","Waukesha County Democratic Party","Waukesha County Republican Party","Education Association of Waukesha - Political Action Committee","Waukesha Co Labor Council","Constitution Party-Waukesha Co","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Constitution Party-Waukesha Co","Waukesha Co Labor Council","Waukesha County Democratic Party","Education Assn of Waukesha","Education Association of Waukesha - Political Action Committee","Blue Sky Waukesha  Inc.","Waukesha United","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha County Democratic Party","Waukesha Co Labor Council","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Waukesha County Democratic Party","Blue Sky Waukesha  Inc.","Judge Fred Strampe for Waukesha County","Blue Sky Waukesha  Inc.","Education Association of Waukesha - Political Action Committee","Waukesha County Republican Party","Waukesha County Republican Party","Constitution Party-Waukesha Co","Waukesha County Taxpayers Association","Waukesha Co Labor Council","Constitution Party-Waukesha Co","Education Association of Waukesha - Political Action Committee","Waukesha County Democratic Party","Constitution Party-Waukesha Co","Constitution Party-Waukesha Co","Republican Women-Waukesha County","Republican Women-Waukesha County","Education Association of Waukesha - Political Action Committee","Education Assn of Waukesha","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha County Republican Party","Direct Givers/Waukesha County ","Waukesha County Republican Party","Education Association of Waukesha - Political Action Committee","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Democratic Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Republican Party","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Waukesha County Democratic Party","Waukesha County Republican Party","Waukesha Co Labor Council","Education Association of Waukesha - Political Action Committee","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Education Association of Waukesha PAC","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Waukesha County Republican Party","Waukesha County Republican Party","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Education Association of Waukesha - Political Action Committee","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha Co Labor Council","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Waukesha Co Labor Council","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Waukesha County Republican Party","Waukesha County Republican Party","Blue Sky Waukesha  Inc.","Waukesha County Democratic Party","Education Assn of Waukesha","Education Association of Waukesha - Political Action Committee","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Democratic Party","Education Association of Waukesha - Political Action Committee","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha Co Labor Council","Judge Fred Strampe for Waukesha County","Republican Women-Waukesha County","Constitution Party-Waukesha Co","Waukesha County Democratic Party","Waukesha Co Labor Council","Waukesha Co Democratic Party","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Republican Women-Waukesha County","Waukesha County Democratic Party","Education Assn of Waukesha","Education Assn of Waukesha PAC","Waukesha Co Labor Council","Education Association of Waukesha - Political Action Committee","Waukesha County Republican Party","Waukesha Co Labor Council","Education Association of Waukesha - Political Action Committee","Waukesha County Republican Party","Waukesha Co Labor Council","Republican Women-Waukesha County","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha Co Labor Council","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha County Democratic Party","Direct Givers/Waukesha County ","Education Assn of Waukesha","Direct Givers/Waukesha County ","Republican Women-Waukesha County","Waukesha County Republican Party","Waukesha County Republican Party","Waukesha Co Labor Council","Waukesha Co Labor Council","Education Assn of Waukesha","Direct Givers/Waukesha County ","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Republican Party","Education Assn of Waukesha","Waukesha County Republican Party","Direct Givers/Waukesha County ","Waukesha County Republican Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Waukesha County Democratic Party","Direct Givers/Waukesha County "],[null,null,2008,2008,null,null,null,null,null,null,null,null,null,2008,2008,2008,2008,null,null,null,null,null,null,null,null,null,null,null,null,null,2011,null,null,null,null,2012,null,2024,2010,null,null,2011,null,2013,null,null,null,null,null,null,null,null,null,2023,2014,2019,2019,2012,2012,null,2012,null,null,null,null,null,null,null,null,2013,2013,null,null,null,null,null,null,null,2023,2023,2023,null,null,null,null,null,null,2015,null,null,null,null,null,2022,2022,2022,null,2008,2014,null,null,2009,2009,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2022,2014,2014,2014,null,null,null,null,2023,null,2023,2014,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2010,null,null,null,null,null,null,2012,null,null,null,null,null,null,2021,2021,null,null,null,null,null,null,2012,2012,null,2010,2010,null,null,null,null,2010,2010,2010,2016,2016,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2010,2010,2010,2010,null,null,null,null,2010,null,null,null,null,null,null,null,null,null,null,null,null,null,2023,null,null,null,null,null,null,null,null,null,null,null,2010,2016,2011,null,null,null,null,null,null,2011,null,2012,null,null,null,null,null,null,null,null,null,null,2008],["","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Waukesha County Circuit Court  Branch 07","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],[2024,2015,2008,2008,2009,2009,2022,2022,2008,2008,2014,2014,2014,2008,2008,2008,2008,2014,2022,2022,2022,2022,2010,2010,2017,2017,2017,2017,2024,2011,2011,2011,2020,2020,2020,2012,2020,2024,2010,2010,2010,2011,2011,2013,2013,2013,2013,2022,2013,2013,2013,2013,2013,2023,2014,2019,2019,2012,2012,2012,2012,2009,2009,2015,2015,2015,2015,2012,2020,2013,2013,2021,2021,2014,2021,2014,2008,2014,2023,2023,2023,2009,2009,2009,2010,2010,2010,2015,2009,2015,2021,2014,2014,2022,2022,2022,2022,2008,2014,2008,2009,2009,2009,2015,2015,2015,2022,2009,2015,2023,2023,2023,2023,2012,2012,2012,2012,2019,2019,2019,2012,2012,2012,2021,2014,2014,2021,2022,2014,2014,2014,2008,2008,2014,2014,2023,2023,2023,2014,2024,2024,2014,2014,2015,2010,2010,2011,2011,2011,2011,2012,2012,2012,2013,2020,2013,2013,2013,2020,2016,2010,2016,2018,2018,2018,2011,2018,2012,2012,2018,2019,2012,2020,2020,2021,2021,2012,2012,2017,2011,2011,2011,2012,2012,2010,2010,2010,2010,2016,2016,2016,2010,2010,2010,2016,2016,2016,2016,2016,2016,2013,2013,2013,2014,2014,2021,2021,2020,2020,2013,2013,2021,2014,2021,2016,2010,2010,2010,2010,2023,2016,2010,2024,2010,2009,2009,2017,2017,2017,2010,2018,2010,2010,2009,2009,2009,2015,2023,2015,2015,2009,2009,2015,2015,2023,2023,2023,2010,2010,2010,2016,2011,2011,2011,2011,2024,2024,2011,2011,2011,2012,2018,2018,2018,2012,2019,2019,2019,2019,2024,2011,2008],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True","False","True","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","False","True"],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","30f2667f-85ad-4558-9d38-768b2b1e12b4418201310346PM.pdf"],[0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1],["2020-04-16T21:55:05.903","2015-12-20T14:50:53.327","2009-01-27T21:42:27.457","2008-12-18T10:30:23.893","2009-04-07T15:39:35.853","2008-12-18T10:30:23.893","2022-07-11T10:29:13.080","2022-07-11T10:29:13.080","2008-09-02T07:08:11.653","2009-01-29T10:02:56.357","2015-01-16T18:24:27.683","2015-01-05T14:01:04.960","2014-10-03T16:18:49.093","2009-05-11T15:04:14.677","2008-12-18T10:30:23.893","2009-05-11T15:04:14.677","2009-01-20T20:26:34.263","2014-01-07T09:26:55.117","2022-07-11T10:29:13.080","2022-07-11T10:29:13.080","2022-03-26T16:45:36.640","2023-01-16T16:38:22.347","2009-10-22T16:33:48.310","2009-12-01T10:55:00.863","2017-01-24T14:56:43.120","2017-07-12T09:45:47.987","2017-07-12T09:45:47.987","2017-07-20T13:13:09.533","2020-04-16T21:55:05.903","2009-10-23T16:32:01.230","2009-04-07T15:39:35.853","2009-09-09T12:56:04.523","2019-02-07T09:02:46.480","2020-07-09T09:20:15.477","2020-07-09T09:20:15.477","2009-04-07T15:39:35.853","2019-02-07T09:02:46.480","2024-03-25T16:44:57.667","2009-10-23T16:32:01.230","2009-04-07T15:39:35.853","2009-09-09T12:56:04.523","2009-04-07T15:39:35.853","2009-04-07T15:39:35.853","2013-01-04T11:27:15.753","2013-04-22T09:09:44.877","2013-04-22T09:09:44.877","2013-03-04T14:10:45.690","2022-06-17T19:22:45.550","2010-08-09T09:28:13.643","2011-02-05T18:33:01.937","2009-10-22T16:33:48.310","2013-01-16T19:17:42.960","2010-08-09T09:28:13.643","2023-01-16T16:38:22.347","2014-01-07T09:26:55.117","2018-08-27T14:05:44.777","2018-08-27T14:05:44.777","2009-04-07T15:39:35.853","2009-10-23T16:32:01.230","2009-04-07T15:39:35.853","2009-04-07T15:39:35.853","2008-09-02T07:08:11.653","2009-04-07T15:39:35.853","2015-01-05T14:01:04.960","2015-08-25T14:01:10.530","2015-08-25T14:01:10.530","2015-01-12T09:19:24.473","2013-01-16T19:17:42.960","2020-01-12T18:05:44.670","2013-01-04T11:27:15.753","2013-03-04T14:10:45.690","2021-06-26T14:25:49.827","2021-06-26T14:25:49.827","2014-01-25T16:48:15.797","2021-12-29T11:22:08.157","2014-03-31T15:23:21.663","2009-05-11T15:04:14.677","2015-01-27T22:28:37.840","2023-01-16T16:38:22.347","2022-06-17T19:22:45.550","2022-07-11T10:29:13.080","2009-01-29T10:02:56.357","2009-10-22T16:33:48.310","2009-08-26T07:26:10.220","2009-10-23T16:32:01.230","2010-01-31T08:39:39.693","2009-10-22T16:33:48.310","2015-01-12T09:19:24.473","2009-06-23T13:31:17.210","2015-07-20T18:30:33.163","2021-06-26T13:16:05.773","2014-07-21T16:01:10.210","2010-08-09T09:28:13.643","2021-06-26T14:25:49.827","2021-12-29T11:22:08.157","2021-06-26T14:25:49.827","2022-03-26T16:45:36.640","2009-01-25T22:31:34.757","2014-07-21T16:01:10.210","2009-01-25T22:31:34.757","2009-04-07T15:39:35.853","2009-01-27T21:42:27.457","2009-03-02T10:45:02.807","2015-01-12T09:19:24.473","2015-03-31T19:53:28.673","2015-01-16T18:24:27.683","2020-04-16T21:55:05.903","2009-09-01T13:29:22.590","2015-03-31T19:53:28.673","2023-07-13T10:29:20.763","2023-07-13T10:29:20.763","2023-01-16T16:38:22.347","2022-03-26T16:45:36.640","2009-09-09T12:56:04.523","2011-02-05T18:33:01.937","2012-02-29T14:13:53.673","2010-08-09T09:28:13.643","2019-02-07T09:02:46.480","2019-06-21T15:16:02.347","2019-06-21T15:16:02.347","2011-07-15T20:10:22.283","2010-08-09T09:28:13.643","2013-03-04T14:10:45.690","2021-01-14T10:19:32.143","2009-10-22T16:33:48.310","2014-01-28T10:06:51.163","2020-04-16T21:55:05.903","2021-12-29T11:22:08.157","2014-01-08T16:34:31.840","2014-01-07T09:26:55.117","2014-01-25T16:48:15.797","2009-01-27T21:42:27.457","2009-01-20T20:26:34.263","2014-07-21T16:01:10.210","2014-01-25T16:48:15.797","2020-04-16T21:55:05.903","2023-01-16T16:38:22.347","2020-04-16T21:55:05.903","2014-10-03T16:18:49.093","2024-03-25T16:44:57.667","2024-03-25T16:44:57.667","2015-03-06T12:21:03.907","2015-04-09T10:42:56.487","2014-07-21T16:01:10.210","2010-08-09T09:28:13.643","2010-09-02T10:43:24.477","2011-07-15T20:10:22.283","2010-08-09T09:28:13.643","2010-08-09T09:28:13.643","2009-10-23T16:32:01.230","2009-10-23T16:32:01.230","2011-02-05T18:33:01.937","2009-10-22T16:33:48.310","2013-07-02T16:18:17.010","2019-02-07T09:02:46.480","2013-04-22T09:09:44.877","2014-01-08T16:34:31.840","2014-01-11T18:18:10.207","2020-01-12T18:05:44.670","2016-07-14T18:29:46.973","2009-09-09T12:56:04.523","2017-01-02T15:48:22.997","2017-07-12T09:45:47.987","2018-01-31T10:52:00.243","2017-07-12T09:45:47.987","2011-02-05T18:33:01.937","2018-01-31T10:52:00.243","2009-04-07T15:39:35.853","2009-04-07T15:39:35.853","2018-12-31T11:56:19.360","2018-12-31T11:56:19.360","2011-07-15T20:10:22.283","2020-07-09T09:20:15.477","2020-07-09T09:20:15.477","2020-07-09T09:20:15.477","2020-07-09T09:20:15.477","2013-01-04T11:27:15.753","2009-10-23T16:32:01.230","2017-01-02T15:48:22.997","2009-09-09T12:56:04.523","2011-04-17T19:09:01.180","2011-02-05T18:33:01.937","2009-10-23T16:32:01.230","2009-04-07T15:39:35.853","2009-04-07T15:39:35.853","2010-01-31T08:39:39.693","2009-04-07T15:39:35.853","2009-10-23T16:32:01.230","2016-06-21T11:46:14.063","2016-06-21T11:46:14.063","2016-01-21T08:52:39.160","2009-10-23T16:32:01.230","2010-09-02T10:43:24.477","2009-04-07T15:39:35.853","2016-01-21T08:52:39.160","2016-09-12T13:57:30.743","2016-01-21T08:08:22.397","2016-01-21T08:52:39.160","2016-09-12T13:57:30.743","2016-09-12T13:57:30.743","2013-07-10T18:57:01.730","2014-01-25T16:48:15.797","2013-03-04T14:10:45.690","2014-01-07T09:26:55.117","2014-01-08T16:34:31.840","2021-06-26T14:25:49.827","2021-06-26T14:25:49.827","2020-04-16T21:55:05.903","2021-01-14T10:19:32.143","2009-10-22T16:33:48.310","2014-01-28T10:06:51.163","2021-06-26T13:16:05.773","2014-01-11T18:18:10.207","2021-01-14T10:19:32.143","2016-03-21T07:06:36.587","2009-04-07T15:39:35.853","2009-10-23T16:32:01.230","2009-04-07T15:39:35.853","2009-12-01T10:55:00.863","2024-01-16T12:38:57.413","2015-08-04T10:47:49.140","2009-09-01T13:29:22.590","2024-01-15T10:48:46.850","2009-12-01T10:55:00.863","2009-12-12T11:06:05.943","2009-10-23T16:32:01.230","2017-01-24T14:56:43.120","2017-07-12T09:45:47.987","2017-07-12T09:45:47.987","2010-01-23T16:01:13.220","2017-07-20T13:13:09.533","2009-10-23T16:32:01.230","2010-01-23T16:01:13.220","2009-01-08T19:57:30.307","2009-01-25T22:31:34.757","2009-01-27T21:42:27.457","2014-10-03T16:18:49.093","2022-07-11T10:29:13.080","2016-01-21T08:08:22.397","2014-10-03T16:18:49.093","2009-09-09T12:56:04.523","2009-12-01T10:55:00.863","2015-08-04T10:47:49.140","2015-01-12T09:19:24.473","2023-07-13T10:29:20.763","2023-07-13T10:29:20.763","2024-01-15T10:48:46.850","2009-12-01T10:55:00.863","2009-09-09T12:56:04.523","2009-09-09T12:56:04.523","2016-10-30T16:31:20.853","2009-04-07T15:39:35.853","2009-10-22T16:33:48.310","2009-04-07T15:39:35.853","2009-10-23T16:32:01.230","2024-03-25T16:44:57.667","2024-03-25T16:44:57.667","2011-04-17T19:09:01.180","2011-04-17T19:09:01.180","2009-10-22T16:33:48.310","2009-04-07T15:39:35.853","2018-01-31T10:52:00.243","2018-08-27T14:05:44.777","2018-08-27T14:05:44.777","2009-10-22T16:33:48.310","2019-06-21T15:16:02.347","2019-02-07T09:02:46.480","2019-06-21T15:16:02.347","2020-01-12T18:05:44.670","2025-01-04T14:08:35.550","2011-07-15T20:10:22.283","2009-01-20T20:26:34.263"],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>FILINGPERIODNAME<\/th>\n      <th>REPORTTYPECODE<\/th>\n      <th>REPORTNAME<\/th>\n      <th>REGISTRANTTYPE<\/th>\n      <th>DATEFILED<\/th>\n      <th>AMENDEDDATE<\/th>\n      <th>COMMITTEE.ID<\/th>\n      <th>REGISTRANTNAME<\/th>\n      <th>ELECTIONYEAR<\/th>\n      <th>BRANCH<\/th>\n      <th>FILINGYEAR<\/th>\n      <th>EXTENSION<\/th>\n      <th>COMMENTFLAG<\/th>\n      <th>ATTACHMENT<\/th>\n      <th>VIEWREPORTTYPE<\/th>\n      <th>CREATEDDATE<\/th>\n      <th>X<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[6,8,10,14]}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

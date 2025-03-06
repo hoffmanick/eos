@@ -1,0 +1,51 @@
+---
+title: "WI Finance Report Metadata"
+author: "Nick Hoffman"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+  df_print: paged
+css: db_by_db.css
+toc: true
+number_sections: true
+toc_depth: 1
+toc_float: true
+theme: journal
+---
+
+
+``` {r read,echo=FALSE,message=FALSE,warning=FALSE}
+library(tidyverse)
+library(DT)
+library(stringr)
+library(lubridate)
+library(dplyr)
+
+wi_fin = read.csv("Report_WI.csv") %>% dplyr::mutate(DATEFILED=mdy(DATEFILED))
+
+numreports = length(wi_fin[[2]])
+
+
+##datatable(wi_fin,rownames=FALSE)
+
+```
+
+
+I searched the metadata for all the [finance reports](https://cfis.wi.gov/Public/Registration.aspx?page=FiledReports#) WI has between Jan 2000 and today. There are `r numreports` of these reports. Potentially you could search for even earlier dates, but I think these might be sufficient for us. 
+Here are counts of registrant types for those `r numreports` reports:
+```{r next,echo=FALSE,message=FALSE,warning=FALSE}
+wi_fin %>% group_by(REGISTRANTTYPE) %>% count() %>% datatable(rownames=FALSE)
+```
+
+These ones have Severson in the name:
+```{r nextag, message=FALSE,warning=FALSE,echo=FALSE}
+
+wi_fin %>% dplyr::filter(str_detect(REGISTRANTNAME,"Sever")) %>% datatable(rownames=FALSE)
+```
+
+These ones have Waukesha in the name:
+```{r wauk, message=FALSE,warning=FALSE,echo=FALSE}
+
+
+wi_fin %>% dplyr::filter(str_detect(REGISTRANTNAME,"Waukesha"))%>% datatable(rownames=FALSE)
+```
