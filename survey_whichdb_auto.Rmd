@@ -1,0 +1,77 @@
+---
+title: "Answers from Const DB Survey"
+author: "Nick Hoffman"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+  df_print: paged
+css: db_by_db.css
+toc: true
+number_sections: true
+toc_depth: 1
+toc_float: true
+theme: journal
+---
+  
+```{r libs, message=FALSE,warning=FALSE,echo=FALSE}
+library(dplyr)
+library(DT)
+
+surv= read.csv("constdbsurvey.csv")
+
+names(surv) = c("time","name","db","other_db","africa","arctic","farEast","China","Japan","otherAsia","atlantic","europe","centralAmerica","Alaska","NorthAmerica","Canada","Oceania","Pacific","SouthAmerica","geoscope_other","post1850","Quaternary","preQuaternary","timescope_other","biomarker","charcoal","diatom","dinoflag","insect","aDNA","ostracode","plantmacro","pollen","specstableisotope","testateamoebae","vertfauna","waterchem","biochem","chironomid","cladocera","geochem","loi","macroinvert","organiccarbon","paleomag","physsed","phytolith","stableisotope","xrayfluor","proxyscope_other","leadstewards_dbdescrip","dbdescrip","otherlinks_dbdescrip","newdata","wholead","qualdescribe_scope","arcticocean","atlanticocean","indianocean","pacificocean","southernocean","oceania","asia","antarctica","otherproxy_share","othertime_share","othergeo_share","changename")
+
+surv = surv %>% dplyr::select(!c(arctic,farEast,China,Japan,otherAsia,atlantic,Alaska,Canada,Oceania,Pacific))
+```
+
+
+# Who answered?
+
+```{r answers, echo=FALSE,warning=FALSE,message=FALSE}
+
+surv=  surv %>% dplyr::mutate(db = case_when(
+  other_db != "" & db == "Other" ~ other_db,
+  other_db != "" & db != "Other" ~ paste0(db,", ", other_db),
+  TRUE ~ db
+)) %>% dplyr::select(!other_db)
+surv %>% group_by(db) %>% summarize(name,wholead,qualdescribe_scope,changename,leadstewards_dbdescrip,dbdescrip,otherlinks_dbdescrip,newdata) %>% datatable(rownames=FALSE)
+```
+
+# Who didn't answer?
+
+As of March 6, these have not answered:
+
+* Pollen Database of Siberia and the Russian Far East
+* FAUNMAP
+* Neotoma
+* NDSU Insect Database
+* Japanese Pollen Database
+* Neotoma Midden Database
+* Chinese Pollen Database
+* Holocene Perspective on Peatland Biogeochemistry
+* Deep-Time Palynology Database
+* Neotoma Biomarker Database
+* Faunal Isotope Database
+* Neotoma Charcoal Data (but PaleoFire did - are these the same or different?)
+* Pollen Monitoring Programme
+* Nonmarine Ostracod Distribution in Europe Database
+
+# Geographic Scope
+
+```{r geoscope, message=FALSE,warning=FALSE,echo=FALSE}
+surv %>% dplyr::select(name,db,africa,europe,centralAmerica,NorthAmerica,SouthAmerica,oceania,asia,antarctica,arcticocean,atlanticocean,indianocean,pacificocean,southernocean,geoscope_other,othergeo_share) %>% datatable(rownames=FALSE)
+```
+
+## Temporal Scope
+
+```{r tempscope, message=FALSE,warning=FALSE,echo=FALSE}
+
+surv %>% dplyr::select(name,db,post1850,Quaternary,preQuaternary,timescope_other,othertime_share) %>% datatable(rownames=FALSE)
+```
+
+## Proxy Scope
+
+```{r proxyscope, message=FALSE,warning=FALSE,echo=FALSE}
+
+surv %>% dplyr::select(name,db,biomarker,charcoal,diatom,dinoflag,insect,aDNA,ostracode,plantmacro,pollen,specstableisotope,testateamoebae,vertfauna,waterchem,biochem,chironomid,cladocera,geochem,loi,macroinvert,organiccarbon,paleomag,physsed,phytolith,stableisotope,xrayfluor,proxyscope_other,otherproxy_share) %>% datatable(rownames=FALSE)
+```

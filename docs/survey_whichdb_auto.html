@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nick Hoffman" />
+
+<meta name="date" content="2025-03-06" />
+
+<title>Answers from Const DB Survey</title>
+
+<script src="site_libs/header-attrs-2.26/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.32/datatables.js"></script>
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="db_by_db.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+#TOC {
+  display: none !important;
+}
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Answers from Const DB Survey</h1>
+<h4 class="author">Nick Hoffman</h4>
+<h4 class="date">2025-03-06</h4>
+
+</div>
+
+
+<div id="who-answered" class="section level1">
+<h1>Who answered?</h1>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-da6bfd5abdb995f6e633" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-da6bfd5abdb995f6e633">{"x":{"filter":"none","vertical":false,"data":[["Academy of Natural Sciences at Drexel University","African Pollen Database","Alaskan Archaeofaunas","Alpine Palynological Database","Canadian Pollen Database","Diatom Paleolimnology Data Cooperative","East Asian Nonmarine Ostracod Database","European Pollen Database","European Pollen Database","European Pollen Database, PaleoFire","French Institute of Pondicherry Palynology and Paleoecology Database","Indo-Pacific Pollen Database","Indo-Pacific Pollen Database","Latin American Pollen Database","Marine Dinoflagellates Database","Neotoma Testate Amoebae Database","North American Non-Marine Ostracode Database Project (NANODe), Also, the Neotoma Ostracode Database AND the Canadian Museum of Nature Ostracoda - Surface Samples","North American Plant Macrofossil Database","North American Pollen Database (NAPD)","PaleoVertebrates of Latin America","St. Croix Watershed Research Station of the Science Museum of Minnesota","Tropical South American Diatom Database"],["Don Charles","Sarah Ivory","Mike Etnier","Willy Tinner","K Gajewski","Don Charles","Robin Smith","Walter Finsinger","Thomas Giesecke","BÃ©rangÃ¨re Leys","ANUPAMA Krishnamurthy","Simon Haberle","Annika Herbert","Suzette Flantua","Nicolas Van Nieuwenhove","Bob Booth","Alison Smith","Jack Williams","Jack Williams","Deborah Veranea Espinosa MartÃ­nez","Joy Hobbs","Xavier Benito"],["yes","yes","yes","Yes, but not responsible for daily, technical issues. The curator is Dr. CÃ©sar Morales del Molino","I am the person who created and maintains it.","Yes","Yes","Co-lead Data Steward, together with Berangere Leys and Thomas Giesecke","yes","Yes","Yes","Co-Lead with Annika Herbert","Yes","Yes","yes","Yes","yes","Camille Holmgren","I am","JoaquÃ­n Arroyo Cabrales and Jessica Blois","Yes","Yes"],["This CD primarily includes diatom count data for cores and surface samples.  The great majority are for North America, but there are no geographic restrictions on sites.  Most stratigraphic datasets are for the Holocene and post-1700.","sub-Saharan African pollen","Late Holocene (primarily) vertebrate faunal remains (birds, fish, mammals), with some macroinverts (mostly molluscs); Primarily from human habitation sites (middens)","Primary region are the European Alps with their forelands and neighboring countries, mainly Switzerland and Italy","The database spans the post-glacial from northern North America (including Greenland). It archives pollen data from across Canada, and also multi-proxy data especially from the Arctic, northern Quebec and Yukon. There are modern calibration datasets, which include fossil and matched water chemistry from northern North America for chironomids, ostracods, diatoms, etc, as well as the North American Modern Pollen Database. There are also derived data such as reconstructions.","This CD contains stratigraphic and surface sampe diatom counts, plus water chemistry for lakes in North America.  Most stratigraphic datasets represent post-European settlement time periods.","East Asian, non-marine, living (recent, modern) ostracods","The EPD currently covers palaeoecological records from Europe and northern Asia (Eurasia) for the Middle Pleistocene to present-day part of the Geological time scale. It mostly includes records from terrestrial sites, but accomodates also data from marine sites (Mediterranean Sea, Black Sea, northern European continental platform).","Pollen data and associated datasets from Europe and adjacent areas from the Quaternary and Neogene","Quaternary European pollen DB","This is a pollen database with a major geographic focus on tropical Peninsular India and is valuable in defining Tropical Pollen types that are not exhaustively listed or defined elsewhere in terms of the vegetation (plant taxa) they represent. The database also has reports of mainly Late Holocene terrestrial pollen records though Marine records from both the Arabian Sea and the Bay of Bengal are available. The number of records from Mangroves is limited. This also includes pollen records from Archeological sites.","The Indo-Pacific Pollen Database (IPPD) is a collection of modern and fossil Australian,\nSoutheast Asian, and Oceanian pollen assemblages collected from Quaternary period\ndepositional contexts. This compilation has been in the making since the late 1980s and\nis now being made available as a constituent database of Neotoma, thereby providing\nmuch needed palaeo-data coverage of the previously often underrepresented Indo-\nPacific region. ","","I am not sure what you mean here. ","Late-Pleistocene to Holocene dinoflagellate (cyst) records from the Northern Hemisphere","Global surface samples and stratigraphic records of testate amoebae. Quaternary coverage although almost all records are Holocene.","NANODe provides modern (after 1850)  ostracode assemblage data for the contiguous 48 states of the US, with associated major ion water chemistry.  The Canadian Museum of Nature Ostracode Database provides modern (after 1850) ostracode assemblage data with associated major ion water chemistry data for the provinces of western Canada.  The Neotoma Ostracode Database provides ostracode data from paleolimnologic sediment cores ranging in age from Pliocene through Holocene in North America.","The NAPMD primarily curates plant macrofossil data from North America, mostly for the late Quaternary.","North American Pollen Database is a pretty good description of region and proxies!  Mostly sediment cores from lakes, mires, and coastal settings, so there are sometimes other proxies.  Time period is mostly Quaternary, but I think there is some Miocene and maybe earlier data","","The work that we're doing at the St. Croix Watershed Research Station (SCWRS) primarily focuses on lead-210 dated cores from the recent past (post 1850). Lead-210 and diatoms are the core proxy types. Most of the records uploaded so far are from the upper midwest region of the United States, but this will likely expand in geographic scope, especially with the addition of more lead-210 records. ",""],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["Lead Steward is correct.  Mariena Hurley will also be a lead seward as soon as her training is completed.","yes","","correct, but please change e-mail to willy.tinner@unibe.ch","There is no entry for the Canadian Pollen Database on the page. The CPD is basically my effort (K Gajewski, Laboratoire de PalÃ©oclimatologie et Climatologie, UniversitÃ© d'Ottawa, gajewski@uottawa.ca).","Stewards are correct.","The database is not listed (it is still being prepared for bulk upload, so that is probably why) ","Yes, they seem to be correct.","ok","BÃ©rangÃ¨re Leys, AMAP lab (Montpellier France), berangere.leys@cnrs.fr ","I think this is not available yet for the French Institute of Pondicherry Palynology and Paleoecology Database","Please add a co-lead steward (Prof Simon Haberle, Simon.haberle@anu.edu.au, Australian National University)","","All correct","not listed! add Research Assistant Nicolas Van Nieuwenhove (nvan2@unb.ca), University of New Brunswick, Dept. of Earth Sciences, Fredericton, New Brunswick, Canada","Correct","only one of the databases is listed under my name-the Neotoma Ostracode Database.  I am also serving as the ostracode steward for NANODe and for the Canadian Museum database","Please remove Simon's name and move my name to second position.  For lead steward, please add:  Camille Holmgren, holmgrca@buffalostate.edu","I'm correct, but Simon Goring's name should be replaced with Nicola Cullen, neotomapollen@gmail.com, Cullen Ironworks Inc.","It is correct","Joy Ramstack Hobbs, jramstack@smm.org, Senior Scientist, St. Croix Watershed Research Station of the Science Museum of Minnesota","Tropical South American Diatom Database is not listed on this site"],["Description on website is current and accurate.","yes","Archaeofaunal data primarily from archaeological context but occasionally includes paleontological (e.g., not anthropogenic) deposits","Yes, still OK","The Canadian Pollen Database was created by K Gajewski in the mid-1980s, as a postdoc working with JC Ritchie in Toronto. In the 1990s, the pollen data were sent to Eric Grimm when he was developing the NAPD (ie before Neotoma), and simply incorporated into the NAPD. Most sites from the CPD in Neotoma are listed as NAPD in origin. Since the mid-1990s the CPD was on the LPC website (lpc.uottawa.ca). Some of the data on the LPC website are simply originals of data Grimm incorporated into the NAPD, but kept there for people who want easy access (Excel spreadsheet). In addition, the LPC website is used to fulfill open-access responsibilities - as a place to put newly created pollen and paleolimnology data (mostly from the Arctic and northern Canada), for modern calibration databases (which include matched microfossil and environmental data), and also for climate reconstructions, protocols, and other work. So although it is being updated, updates are from the LPC lab. ","Please substitute the following text for the current description:\n\n\"The main types of data included in the DPDC are site information, diatom counts, water chemistry and other environmental data, and chronologies. The DPDC was initially funded by NOAA and NSF from 1994 - 2008 with grants to the Academy of Natural Sciences in Philadelphia.  NSF provided continued support to facilitate transfer of data to Neotoma.  Data that were included in the original DPDC and available via the DPDC website at ANSP have not been accessible to retrieve since 2021.  This  constituent database within Neotoma is now the primary source of DPDC data.\n\nData downloaded from this constituent database should be cited, as well as the original source publications and investigators whenever possible. Please use the following as an example: â€œData were obtained from the Diatom Paleolimnology Data Cooperative, a constituent database of the Neotoma Paleoecology Database (https://www.neotomadb.org/). The work of data contributors, data stewards, and the Neotoma and DPDC communities is gratefully acknowledged.â€","The database is not listed.","","ok","It is correct.","I think this is not available yet for the French Institute of Pondicherry Palynology and Paleoecology Database","The following could be added to the front of the existing text:\n\"The Indo-Pacific Pollen Database (IPPD) is a collection of modern and fossil Australian,\nSoutheast Asian, and Oceanian pollen assemblages collected from Quaternary period\ndepositional contexts.\"","","All correct","not listed; The database contains late Pleistocene to Holocene marine dinoflagellate cyst records, mostly from the Northern Hemisphere.","The Neotoma testate amoeba database contains modern surface-samples and stratigraphic records of testate amoebae. ","All three of these databases should give my contact as the steward.  The Canadian Museum of Nature Ostracode Database is closed (not taking new data).  NANODe and Neotoma Ostracode Database are both taking new data, NANODe is surface samples only.  ","it's ok","[Lightly edited/updated:] The North American Pollen Database (NAPD) was launched in 1990 by Eric Grimm at the Illinois State Museum, and drew heavily on precursor efforts by Tom Webb and others at Brown University to gather, organize, and map pollen data for the COHMAP and earlier projects. The NAPD was then incorporated into the Global Pollen Database and was served from NOAA's Paleoclimatology World Data Service, before becoming one of the founding constituent databases of Neotoma.  The NAPD remains active and regularly accepts data contributions from the community.","There is no description of the data base","This constituent database was formed in 2020 with funding from the National Science Foundation. The primary focus is lead-210 dated lake sediment cores from the recent past (post 1850), with lead-210 and diatoms as the core proxy types. The database also contains a number of diatom surface sediment samples from lakes and associated water chemistry values. Many of the records are from the Upper Midwest region of the United States, including records from National Park Service units within that region. ","Tropical South American Diatom Database is not listed on this site"],["no","the one in there is correct","","","The server hosting the LPC website (lpc.uottawa.ca) crashed a while ago, and we are in the process of remaking it. I think the old version may be available on the wayback machine. I am making a new website and hopefully it will be up again soon.","","There will be a link to FADA ostracod dataset of valid species.","","is in place","","www.ifpindia.org","OCTOPUS link: https://octopusdata.org","","Information is correct","","","Not at this time but coming soon.","no other links","","","","https://github.com/xbenitogranell/diatoms-biogeography-southamerica"],["Yes","Yes","Yes","Yes","Yes","No","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","","Yes","Yes","Yes","Yes","Yes"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>db<\/th>\n      <th>name<\/th>\n      <th>wholead<\/th>\n      <th>qualdescribe_scope<\/th>\n      <th>changename<\/th>\n      <th>leadstewards_dbdescrip<\/th>\n      <th>dbdescrip<\/th>\n      <th>otherlinks_dbdescrip<\/th>\n      <th>newdata<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"name":"db","targets":0},{"name":"name","targets":1},{"name":"wholead","targets":2},{"name":"qualdescribe_scope","targets":3},{"name":"changename","targets":4},{"name":"leadstewards_dbdescrip","targets":5},{"name":"dbdescrip","targets":6},{"name":"otherlinks_dbdescrip","targets":7},{"name":"newdata","targets":8}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="who-didnt-answer" class="section level1">
+<h1>Who didn’t answer?</h1>
+<p>As of March 6, these have not answered:</p>
+<ul>
+<li>Pollen Database of Siberia and the Russian Far East</li>
+<li>FAUNMAP</li>
+<li>Neotoma</li>
+<li>NDSU Insect Database</li>
+<li>Japanese Pollen Database</li>
+<li>Neotoma Midden Database</li>
+<li>Chinese Pollen Database</li>
+<li>Holocene Perspective on Peatland Biogeochemistry</li>
+<li>Deep-Time Palynology Database</li>
+<li>Neotoma Biomarker Database</li>
+<li>Faunal Isotope Database</li>
+<li>Neotoma Charcoal Data (but PaleoFire did - are these the same or
+different?)</li>
+<li>Pollen Monitoring Programme</li>
+<li>Nonmarine Ostracod Distribution in Europe Database</li>
+</ul>
+</div>
+<div id="geographic-scope" class="section level1">
+<h1>Geographic Scope</h1>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-0fc0ac78daf32cd0bf19" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-0fc0ac78daf32cd0bf19">{"x":{"filter":"none","vertical":false,"data":[["Sarah Ivory","K Gajewski","Nicolas Van Nieuwenhove","ANUPAMA Krishnamurthy","Walter Finsinger","Deborah Veranea Espinosa MartÃ­nez","Thomas Giesecke","Bob Booth","Joy Hobbs","Simon Haberle","BÃ©rangÃ¨re Leys","Suzette Flantua","Annika Herbert","Don Charles","Don Charles","Alison Smith","Xavier Benito","Mike Etnier","Robin Smith","Willy Tinner","Jack Williams","Jack Williams"],["African Pollen Database","Canadian Pollen Database","Marine Dinoflagellates Database","French Institute of Pondicherry Palynology and Paleoecology Database","European Pollen Database","PaleoVertebrates of Latin America","European Pollen Database","Neotoma Testate Amoebae Database","St. Croix Watershed Research Station of the Science Museum of Minnesota","Indo-Pacific Pollen Database","European Pollen Database, PaleoFire","Latin American Pollen Database","Indo-Pacific Pollen Database","Academy of Natural Sciences at Drexel University","Diatom Paleolimnology Data Cooperative","North American Non-Marine Ostracode Database Project (NANODe), Also, the Neotoma Ostracode Database AND the Canadian Museum of Nature Ostracoda - Surface Samples","Tropical South American Diatom Database","Alaskan Archaeofaunas","East Asian Nonmarine Ostracod Database","Alpine Palynological Database","North American Pollen Database (NAPD)","North American Plant Macrofossil Database"],["Yes","","No","","Marginally","No","Marginally","Yes","","","","No","No","Marginally","","No","No","No","No","Marginally","","No"],["","","No","","Yes","No","Yes","Yes","","","Yes","No","No","Yes","","No","No","No","No","Yes","","No"],["","","No","","No","Yes","No","Yes","","","","Yes","No","Marginally","","No","Marginally","No","No","","","Marginally"],["","Yes","No","","No","Yes","No","Yes","","","","No","No","Yes","Yes","Yes","No","Yes","No","Marginally","Yes","Yes"],["","","No","","No","Yes","No","Yes","","","","Yes","No","Yes","","","Yes","No","No","Marginally","","No"],["","","No","","No","No","No","Yes","","Yes","","No","Yes","No","","No","No","No","No","","","No"],["Marginally","","No","Yes","Yes","No","Yes","Yes","","Yes","Marginally","No","Yes","No","","No","No","No","Yes","Marginally","","No"],["","","No","","No","No","No","Yes","","","","No","No","No","","No","No","No","No","","","No"],["","No","Yes","","No","No","Yes","No","","No","","No","No","","No","No","No","Marginally","No","No","No","No"],["Marginally","No","Yes","","Marginally","No","Yes","No","","No","","No","No","Marginally","No","No","No","No","No","No","Marginally","No"],["Marginally","No","No","Marginally","No","No","No","No","","Marginally","","No","Yes","","No","No","No","No","No","No","No","No"],["","No","Marginally","","No","No","No","No","","Marginally","","No","Yes","Marginally","No","No","No","Yes","No","No","Marginally","No"],["","No","Marginally","","No","No","No","No","","Marginally","","No","No","","No","No","No","No","No","No","No","No"],["","Canada, Alaska and Greenland; with the modern database being all of North America.","","The focus of this database is mainly in the Asian countries of India, Cambodia and Sri Lanka","Rather \"Asia\": the EPD is restricted to \"Eurasia\". That is, the Middle East and Asia north of the Himalaya.","Latin America","","","","","","","","","","","","archaeofaunas, primarily from human habitation sites (middens); fish, birds, mammals, macroinverts","East Asia (Japan, China, Korea, Mongolia, Russian Far East)","","",""],["The geography of the APD is pretty straightforward, but we do have some data from Arabia, which is technically Asia, and we also don't take in a lot of North African data, which typically goes to the EPD.  We do also have some other proxy types in the APD if that is relevant here.","In addition to recently published work, it also archives older data from western Canada and Greenland. ","","The database is currently mainly in areas with Tropical to subtropical vegetation in Peninsular India","","Currently only data from Mexico is available.","In the absence of a dedicated database EPD will curate data from Asia generally north of 40 degrees latitude and the Middle East","","","The region includes New Zealand, however there are many sites from New Zealand that are not in the database. This will require stewards from New Zealand to contribute in the future.","This is a European DB also considering data from Russia.","","","This database can potentially include diatom data from anywhere in the world.  But data forsites in South America might be better placed in the South American Tropical Diatom Database.","","","Although the constituentDB name has \"tropical\" in its name the database goes beyond this geographic scope.","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>name<\/th>\n      <th>db<\/th>\n      <th>africa<\/th>\n      <th>europe<\/th>\n      <th>centralAmerica<\/th>\n      <th>NorthAmerica<\/th>\n      <th>SouthAmerica<\/th>\n      <th>oceania<\/th>\n      <th>asia<\/th>\n      <th>antarctica<\/th>\n      <th>arcticocean<\/th>\n      <th>atlanticocean<\/th>\n      <th>indianocean<\/th>\n      <th>pacificocean<\/th>\n      <th>southernocean<\/th>\n      <th>geoscope_other<\/th>\n      <th>othergeo_share<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"name":"name","targets":0},{"name":"db","targets":1},{"name":"africa","targets":2},{"name":"europe","targets":3},{"name":"centralAmerica","targets":4},{"name":"NorthAmerica","targets":5},{"name":"SouthAmerica","targets":6},{"name":"oceania","targets":7},{"name":"asia","targets":8},{"name":"antarctica","targets":9},{"name":"arcticocean","targets":10},{"name":"atlanticocean","targets":11},{"name":"indianocean","targets":12},{"name":"pacificocean","targets":13},{"name":"southernocean","targets":14},{"name":"geoscope_other","targets":15},{"name":"othergeo_share","targets":16}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="temporal-scope" class="section level2">
+<h2>Temporal Scope</h2>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-ddd65b643d8ef5f5740d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-ddd65b643d8ef5f5740d">{"x":{"filter":"none","vertical":false,"data":[["Sarah Ivory","K Gajewski","Nicolas Van Nieuwenhove","ANUPAMA Krishnamurthy","Walter Finsinger","Deborah Veranea Espinosa MartÃ­nez","Thomas Giesecke","Bob Booth","Joy Hobbs","Simon Haberle","BÃ©rangÃ¨re Leys","Suzette Flantua","Annika Herbert","Don Charles","Don Charles","Alison Smith","Xavier Benito","Mike Etnier","Robin Smith","Willy Tinner","Jack Williams","Jack Williams"],["African Pollen Database","Canadian Pollen Database","Marine Dinoflagellates Database","French Institute of Pondicherry Palynology and Paleoecology Database","European Pollen Database","PaleoVertebrates of Latin America","European Pollen Database","Neotoma Testate Amoebae Database","St. Croix Watershed Research Station of the Science Museum of Minnesota","Indo-Pacific Pollen Database","European Pollen Database, PaleoFire","Latin American Pollen Database","Indo-Pacific Pollen Database","Academy of Natural Sciences at Drexel University","Diatom Paleolimnology Data Cooperative","North American Non-Marine Ostracode Database Project (NANODe), Also, the Neotoma Ostracode Database AND the Canadian Museum of Nature Ostracoda - Surface Samples","Tropical South American Diatom Database","Alaskan Archaeofaunas","East Asian Nonmarine Ostracod Database","Alpine Palynological Database","North American Pollen Database (NAPD)","North American Plant Macrofossil Database"],["Yes","Yes","Marginally","Yes","Yes","No","Yes","Yes","Yes","Yes","Marginally","Marginally","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes"],["Yes","Yes","Yes","Yes","Yes","Yes","Yes","Yes","No","Yes","Yes","Yes","Yes","Yes","Yes","Yes","Marginally","Yes","No","Yes","Yes","Yes"],["Yes","No","No","","Yes","No","Yes","No","No","Marginally","","Marginally","No","Marginally","Marginally","Yes","No","Marginally","No","No","Marginally","Marginally"],["","Basically Holocene and a lot of modern data (North American Modern Pollen Database); maybe a bit into the late Glacial. ","Mostly Holocene and Last Glacial Maximum","Within the Quaternary the focus is on Holocene mainly","","","","","","","","","","","","","","","","","",""],["We've been very open about time, but most of the data is Quaternary.","","","Within the main geographic focus (Peninsular India) the database currently has more modern analogue sites than fossil","","","","","The work that we're doing at the St. Croix Watershed Research Station (SCWRS) primarily focuses on lead-210 dated cores from the recent past (post 1850). ","","","","","","","NANODe and the Canadian Museum ostracode database are both modern surface sample collections, so post 1850.  Neotoma Ostracode Database is Pliocene through Holocene","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>name<\/th>\n      <th>db<\/th>\n      <th>post1850<\/th>\n      <th>Quaternary<\/th>\n      <th>preQuaternary<\/th>\n      <th>timescope_other<\/th>\n      <th>othertime_share<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"name":"name","targets":0},{"name":"db","targets":1},{"name":"post1850","targets":2},{"name":"Quaternary","targets":3},{"name":"preQuaternary","targets":4},{"name":"timescope_other","targets":5},{"name":"othertime_share","targets":6}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="proxy-scope" class="section level2">
+<h2>Proxy Scope</h2>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-a8ed4ddb01d875f3b05d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-a8ed4ddb01d875f3b05d">{"x":{"filter":"none","vertical":false,"data":[["Sarah Ivory","K Gajewski","Nicolas Van Nieuwenhove","ANUPAMA Krishnamurthy","Walter Finsinger","Deborah Veranea Espinosa MartÃ­nez","Thomas Giesecke","Bob Booth","Joy Hobbs","Simon Haberle","BÃ©rangÃ¨re Leys","Suzette Flantua","Annika Herbert","Don Charles","Don Charles","Alison Smith","Xavier Benito","Mike Etnier","Robin Smith","Willy Tinner","Jack Williams","Jack Williams"],["African Pollen Database","Canadian Pollen Database","Marine Dinoflagellates Database","French Institute of Pondicherry Palynology and Paleoecology Database","European Pollen Database","PaleoVertebrates of Latin America","European Pollen Database","Neotoma Testate Amoebae Database","St. Croix Watershed Research Station of the Science Museum of Minnesota","Indo-Pacific Pollen Database","European Pollen Database, PaleoFire","Latin American Pollen Database","Indo-Pacific Pollen Database","Academy of Natural Sciences at Drexel University","Diatom Paleolimnology Data Cooperative","North American Non-Marine Ostracode Database Project (NANODe), Also, the Neotoma Ostracode Database AND the Canadian Museum of Nature Ostracoda - Surface Samples","Tropical South American Diatom Database","Alaskan Archaeofaunas","East Asian Nonmarine Ostracod Database","Alpine Palynological Database","North American Pollen Database (NAPD)","North American Plant Macrofossil Database"],["No","","No","Marginally","Yes","Marginally","Marginally","Marginally","","","","No","No","No","","","","No","No","","Marginally","No"],["Yes","Core","No","Marginally","Yes","No","Marginally","Yes","","Yes","Yes","Marginally","Yes","No","","","","Marginally","No","Yes","Yes","Marginally"],["No","Marginally","No","Marginally","Yes","No","Marginally","Marginally","Core","","","No","Marginally","Core","Core","","Core","No","No","","No","No"],["Marginally","","Core","","Yes","No","Marginally","No","","","","No","No","No","","","","No","No","","No","No"],["No","","No","","Yes","No","Marginally","No","","","","No","No","No","","","","No","No","","No","No"],["No","","No","","No","No","No","No","","","","No","No","No","","","","No","No","","No","Marginally"],["No","Marginally","No","","Yes","No","No","No","","","","No","No","No","","Core","","No","Core","","No","No"],["Marginally","Marginally","No","","Yes","No","Marginally","No","","","","No","Yes","No","","","","No","No","Yes","Marginally","Core"],["Core","Core","Marginally","Core","Core","No","Core","Marginally","","Yes","Core","Core","Core","Marginally","","","","No","No","Yes","Core","Marginally"],["No","","No","","No","No","No","No","","","","No","Marginally","Marginally","","","","Marginally","No","","No","No"],["No","","No","","Yes","No","Marginally","Core","","","","No","No","No","","","","No","No","","No","No"],["No","","No","","No","Yes","No","No","","","","No","No","No","","","","Core","No","","No","Marginally"],["No","Yes","No","","No","No","No","Yes","Yes","","","No","No","Core","Core","Core","Yes","No","No","","No","No"],["No","","No","","No","No","No","No","","","","No","Marginally","No","","","","Marginally","No","","No","No"],["No","Marginally","No","","Yes","No","Marginally","Marginally","","","Marginally","No","No","No","","","","No","No","","No","No"],["No","Marginally","No","","No","No","Marginally","Marginally","","","","No","No","No","","","","No","No","","No","No"],["Marginally","Marginally","No","Marginally","Yes","Marginally","Marginally","No","","","","No","Yes","Marginally","","","Yes","No","No","","Marginally","No"],["Marginally","Yes","No","","Core","No","Yes","Yes","Yes","Marginally","Yes","No","Marginally","Yes","","","","No","No","","Yes","Marginally"],["No","","No","","No","No","Marginally","No","","","","No","No","No","","","","Yes","No","","","No"],["Marginally","","No","Marginally","No","No","","Marginally","","","","No","Marginally","Marginally","","","","No","No","","Marginally","Marginally"],["Marginally","","No","","Yes","No","No","No","","","","No","Marginally","Marginally","","","","No","No","","Marginally","No"],["Marginally","Yes","No","Marginally","No","","Marginally","Marginally","","Marginally","","No","Marginally","No","","","","No","No","","Yes","Marginally"],["No","","No","Yes","No","","Marginally","No","","","","No","No","No","","","","No","No","","No","No"],["Marginally","","No","Marginally","Yes","Yes","No","No","","","","No","Marginally","Marginally","","","","Marginally","No","","Marginally","Marginally"],["Marginally","","No","","Yes","","Marginally","No","","","","No","No","Marginally","","","","No","No","","Marginally","No"],["","n/a","","","","Obsidian hydration","","","","","","","","","","","","","Non-marine ostracods","","",""],["","The pollen data includes data from the geographic area from many contributors. The other data types are those that we developed in the lab over the past 40 years. The diatom data were sent to Don Charles, who kindly incorporated them into the diatom database.","","With the emphasis on modern analogues currently there is more data on pollen-vegetation links (for example, the plant taxa that make up the pollen types) than is possible to represent very explicitly via Neotoma currently","The EPD was founded 1989 and established in 1990 as a database for pollen and spores, and loss-on-ignition data. In recent times, the stewards of the database have also curated other data set types (see all the \"Yes\" listed above).","","","","We are working with Simon and Socorro to bulk upload lead-210 records to this constituent database. I would consider lead-210 and diatoms to be our core proxy types. ","The IPPD is also being hosted by the OCTOPUS database, which\nintegrates archaeology, sedimentology, geomorphology, charcoal, and non-human\nvertebrate fossil collections in a thoroughly Australasian context. These collections are\nall available in the same flattened table format, thereby providing regional researchers\nwith multiple data types in an easily accessible manner.","Charcoal data are discussed to be sorted apart in a PaleoFire DB","","","Data for the proxy types listed a marginal were entered because they were contributed along with diatom data and it made sense to upload them at the same time as the diatom data.","","NANODe and the Canadian Museum Ostracode Database both have associated water chemistry data.  Neotoma Ostracode Database does not.","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>name<\/th>\n      <th>db<\/th>\n      <th>biomarker<\/th>\n      <th>charcoal<\/th>\n      <th>diatom<\/th>\n      <th>dinoflag<\/th>\n      <th>insect<\/th>\n      <th>aDNA<\/th>\n      <th>ostracode<\/th>\n      <th>plantmacro<\/th>\n      <th>pollen<\/th>\n      <th>specstableisotope<\/th>\n      <th>testateamoebae<\/th>\n      <th>vertfauna<\/th>\n      <th>waterchem<\/th>\n      <th>biochem<\/th>\n      <th>chironomid<\/th>\n      <th>cladocera<\/th>\n      <th>geochem<\/th>\n      <th>loi<\/th>\n      <th>macroinvert<\/th>\n      <th>organiccarbon<\/th>\n      <th>paleomag<\/th>\n      <th>physsed<\/th>\n      <th>phytolith<\/th>\n      <th>stableisotope<\/th>\n      <th>xrayfluor<\/th>\n      <th>proxyscope_other<\/th>\n      <th>otherproxy_share<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"name":"name","targets":0},{"name":"db","targets":1},{"name":"biomarker","targets":2},{"name":"charcoal","targets":3},{"name":"diatom","targets":4},{"name":"dinoflag","targets":5},{"name":"insect","targets":6},{"name":"aDNA","targets":7},{"name":"ostracode","targets":8},{"name":"plantmacro","targets":9},{"name":"pollen","targets":10},{"name":"specstableisotope","targets":11},{"name":"testateamoebae","targets":12},{"name":"vertfauna","targets":13},{"name":"waterchem","targets":14},{"name":"biochem","targets":15},{"name":"chironomid","targets":16},{"name":"cladocera","targets":17},{"name":"geochem","targets":18},{"name":"loi","targets":19},{"name":"macroinvert","targets":20},{"name":"organiccarbon","targets":21},{"name":"paleomag","targets":22},{"name":"physsed","targets":23},{"name":"phytolith","targets":24},{"name":"stableisotope","targets":25},{"name":"xrayfluor","targets":26},{"name":"proxyscope_other","targets":27},{"name":"otherproxy_share","targets":28}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
