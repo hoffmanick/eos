@@ -49,7 +49,7 @@ This table shows all FAUNMAP sites as well as their geographic precision when kn
 ```{r download-tables,message=FALSE,warning=FALSE,echo=FALSE}
 
 
-tables = c("datasets","publications", "datasetpublications","collectionunits","datasetdatabases","constituentdatabases","sites","depenvttypes")
+tables = c("datasets","publications", "datasetpublications","collectionunits","datasetdatabases","constituentdatabases","sites","depenvttypes", "variables")
 
 
 
@@ -99,7 +99,84 @@ faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid
 
 
 
+
+# MNI or NISP
+
+```{r mni, message=FALSE,warning=FALSE,echo=FALSE}
+
+faun_ds = faun_sites %>% distinct(datasetid) 
+
+
+
+#all = list()
+#for (i in seq(length(faun_ds[[1]]))) {
+#  dsid= faun_ds[i,]
+#  print(i)
+  
+#  return = content(GET(paste0('https://api.neotomadb.org/v2.0/data/downloads/',dsid)))$data
+  
+ # all = append(all,return)
+#}
+
+#saveRDS(all, file = "all.rds")
+
+all <- readRDS("all.rds")
+idx = 0
+for (i in seq(length(all))) {
+  samp = all[[i]]$site$collectionunit$dataset$samples
+  for (j in seq(length(samp))) {
+    for (k in seq(length(samp[[j]]$datum))) {
+      idx = idx + 1
+    }
+  }
+}
+
+faun_dats = matrix(nrow=idx,ncol=7)
+
+idx = 0
+for (i in seq(length(all))) {
+  samp = all[[i]]$site$collectionunit$dataset$samples
+  for (j in seq(length(samp))) {
+    for (k in seq(length(samp[[j]]$datum))) {
+      idx = idx +1
+      if(!is.null(samp[[j]]$datum[[k]]$value)) {
+        faun_dats[[idx,1]] = samp[[j]]$datum[[k]]$value
+      }
+     if(!is.null(samp[[j]]$datum[[k]]$units)) {
+       faun_dats[[idx,2]] = samp[[j]]$datum[[k]]$units
+        
+     }
+     if(!is.null(samp[[j]]$datum[[k]]$elementtype)) {
+       faun_dats[[idx,3]] = samp[[j]]$datum[[k]]$elementtype
+        
+     }
+    if(!is.null(samp[[j]]$datum[[k]]$variablename)) {
+      faun_dats[[idx,4]] = samp[[j]]$datum[[k]]$variablename
+        
+    }
+      
+      faun_dats[[idx, 5]] = all[[i]]$site$collectionunit$dataset$datasetid
+       faun_dats[[idx, 6]] = all[[i]]$site$siteid
+        faun_dats[[idx, 7]] = all[[i]]$site$sitename
+    }
+  }
+}
+
+faun_dat_df = as.data.frame(faun_dats)
+names(faun_dat_df) = c("value","units","elementtype","variablename","datasetid","siteid","sitename")
+
+
+specific = faun_dat_df %>% dplyr::filter(units %in% c("NISP","MNI","individual specimen","ml","1-4 scale","g/m^2", "MNE"))
+
+
+specsites = specific %>% group_by(sitename) %>% count()
+numspecsites = length(specsites[[1]])
+```
+
+
+
 ```{r smiths, echo=FALSE, message=FALSE,warning=FALSE}
+
 
 states = read_sf("tl_2024_us_state.shp")
 states = ms_simplify(states)
@@ -293,48 +370,78 @@ names(locs) = c("locid","sitename_f","alternate_name","state/province","county",
 
 faun_sites2 = faun_sites %>% dplyr::mutate(faun_name = str_replace(sitename, "\\s*\\[.*$", ""))  %>% dplyr::mutate(extracted = str_extract(sitename,  "(?:(?:\\[[^\\]]*\\]){2}|\\[[^\\]]*\\])$")) %>% dplyr::mutate(extracted = str_replace_all(extracted,  "[\\[\\]]", "")) %>% distinct(siteid,sitename,faun_name,extracted) %>% left_join(locs, by=join_by("faun_name" == "sitename_f")) %>% group_by(faun_name) %>% dplyr::filter(sitenumber == extracted | n() == 1 | is.na(extracted)) %>% dplyr::select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,quadrangle,quadrangle_size,lat,lon,repository) %>% dplyr::mutate(sitename_sensitive = case_when(siteid %in% sitename_results$siteid ~ "yes", TRUE ~ "no")) %>% mutate(smith = case_when(siteid %in% faun_smiths$siteid ~ "yes", TRUE ~ "no")) %>% mutate(archaeo = case_when(siteid %in% archaeo_faun$siteid ~ "yes", TRUE ~ "no"))
 
-faun_dt = faun_sites2 %>% select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,sitename_sensitive,smith,archaeo)
+unittypes = specific %>% group_by(siteid,sitename) %>% summarize(toString(unique(units))) 
+names(unittypes) = c("siteid","sitename","units")
+faun_dt = faun_sites2 %>% select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,sitename_sensitive,smith,archaeo) %>% left_join(unittypes)
 
 datatable(faun_dt,rownames=FALSE)
 
+
+
 ```
 
-# Highest Priority: very archaeo and exact
+`r numspecsites` sites in FAUNMAP have units associated with them that are more specific than presence absence. Here are counts of those units:
+
+
+```{r specsitesshow,message=FALSE,warning=FALSE,echo=FALSE}
+
+specific %>% group_by(siteid,sitename) %>% summarize(toString(unique(units))) %>% datatable(rownames=FALSE)
+```
+# Priorities
+## Highest Priority: very archaeo, exact, specific
 
 The highest priority sites have 
 
 * sensitive site name, 
 * archaeological depositional environment, 
-* a smithsonian trinomial, and 
-* exact geographic precision:
+* a smithsonian trinomial,
+* exact geographic precision, and
+* data more specific than presence/absence:
 
 ```{r dinaa, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority1 = faun_dt %>% dplyr::filter(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" & geographic_precision == "E")
+priority1 = faun_dt %>% dplyr::filter(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" & geographic_precision == "E" & !is.na(units))
 
 datatable(priority1,rownames=FALSE)
+
+
+```
+Still high priority: very archaeo, exact, just presence/absence
+```{r dinaa100, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority10 = faun_dt %>% dplyr::filter(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" & geographic_precision == "E" & is.na(units))
+
+datatable(priority10,rownames=FALSE)
 
 
 ```
 
 # High Priority: archaeo and exact
 
-Still high priority are those sites which have at least one of
+Also high priority are those sites which have at least one of
 
 * sensitive site name,
 * archaeological depositional environment, or
 * smithsonian trinomial
 
-and also have exact geographic precision.
+also have exact geographic precision, and have specific units.
 
 ```{r stillhigh, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority2 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & !(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" ) & geographic_precision == "E")
+priority2 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & !(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" ) & geographic_precision == "E" & !is.na(units))
 
 datatable(priority2,rownames=FALSE)
 ```
 
-# High Priority: archaeo and unknown
+Sites that are archaeo, exact, and not specific are still high priority.
+```{r stillhigh100, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority20 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & !(sitename_sensitive == "yes" & archaeo=="yes" & smith =="yes" ) & geographic_precision == "E" & is.na(units))
+
+datatable(priority20,rownames=FALSE)
+```
+
+## High Priority: archaeo and unknown
 
 Also high priority are sites that have at least one of
 
@@ -342,33 +449,61 @@ Also high priority are sites that have at least one of
 * archaeological depositional environment, or
 * smithsonian trinomial
 
-and have unknown geographic precision:
+have unknown geographic precision, and specific units:
 
 ```{r stillhigh2, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority3 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & is.na(geographic_precision))
+priority3 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & is.na(geographic_precision) & !is.na(units))
 
 datatable(priority3,rownames=FALSE)
 ```
 
-# Lower Priority: archaeo and QA/QP//Q/T
+These sites are archaeo, uknown, and presence/absence:
+```{r stillhigh200, echo=FALSE,warning=FALSE,message=FALSE}
 
-These sites are archaeological by some indicator and are fuzzed to the quadrangle level. Well, "Q" is a little ambiguous. Only five sites have geographic precision Q and there's no metadata about what it means. To be safe, we'll assume it means quadrangle level fuzzing.
+priority30 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & is.na(geographic_precision) & is.na(units))
+
+datatable(priority30,rownames=FALSE)
+```
+
+## Lower Priority: archaeo and QA/QP//Q/T
+
+These sites are archaeological by some indicator and are fuzzed to the quadrangle level, and they have units more specific than presence/absence. Well, "Q" is a little ambiguous. Only five sites have geographic precision Q and there's no metadata about what it means. To be safe, we'll assume it means quadrangle level fuzzing.
 
 ```{r lower, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority4 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T","Q"))
+priority4 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T","Q") & !is.na(units))
 
 datatable(priority4,rownames=FALSE)
 ```
 
-# Low priority: Paleontological and Archaeological/QC
+
+These sites are archaeo, quadrangle-fuzzed, and presence/absence:
+```{r lower100, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority40 = faun_dt %>% dplyr::filter((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QA","QP","T","Q") & is.na(units))
+
+datatable(priority40,rownames=FALSE)
+```
+
+## Low priority: Paleontological and Archaeological/QC
 
 The lowest priority are those archaeological sites already obfuscated to the county level or any sites which fail all tests for archaeological status.
 
+These ones are more specific than presence/absence:
+
 ```{r lowerstill, echo=FALSE,warning=FALSE,message=FALSE}
 
-priority5 = faun_dt %>% dplyr::filter(((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QC")) | ((sitename_sensitive == "no" & archaeo=="no" & smith =="no")))
+priority5 = faun_dt %>% dplyr::filter(((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QC")) | ((sitename_sensitive == "no" & archaeo=="no" & smith =="no")) & !is.na(units))
 
 datatable(priority5,rownames=FALSE)
 ```
+
+These ones are presence/absence
+```{r lowerstill100, echo=FALSE,warning=FALSE,message=FALSE}
+
+priority50 = faun_dt %>% dplyr::filter(((sitename_sensitive == "yes" | archaeo=="yes" | smith =="yes") & geographic_precision %in% c("QC")) | ((sitename_sensitive == "no" & archaeo=="no" & smith =="no")) & is.na(units))
+
+datatable(priority50,rownames=FALSE)
+```
+
