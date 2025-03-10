@@ -42,14 +42,13 @@ library(neotoma2)
 library(lubridate)
 ```
 
-# Faunmap sites
+# Faunmap overall
 
-This table shows all FAUNMAP sites as well as their geographic precision when known and their archaeological status.
 
 ```{r download-tables,message=FALSE,warning=FALSE,echo=FALSE}
 
 
-tables = c("datasets","publications", "datasetpublications","collectionunits","datasetdatabases","constituentdatabases","sites","depenvttypes", "variables")
+tables = c("datasets","publications", "datasetpublications","collectionunits","datasetdatabases","constituentdatabases","sites","depenvttypes", "variables","repositoryspecimens","repositoryinstitutions")
 
 
 
@@ -97,10 +96,9 @@ faun_sites = sites_df %>% dplyr::left_join(collectionunits_df, by=join_by(siteid
 
 ```
 
+## Faunmap Units
 
 
-
-# MNI or NISP
 
 ```{r mni, message=FALSE,warning=FALSE,echo=FALSE}
 
@@ -171,9 +169,21 @@ specific = faun_dat_df %>% dplyr::filter(units %in% c("NISP","MNI","individual s
 
 specsites = specific %>% group_by(sitename) %>% count()
 numspecsites = length(specsites[[1]])
+
+
+faun_dat_df %>% group_by(units) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
 ```
 
 
+## FAUNMAP dataset repositories
+
+```{r repojoin, message=FALSE,warning=FALSE,echo=FALSE}
+
+repos = repositoryspecimens_df %>% dplyr::filter(datasetid %in% faun_sites$datasetid) %>%
+  left_join(repositoryinstitutions_df, by = join_by(repositoryid))
+
+repos %>% group_by(repository) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+```
 
 ```{r smiths, echo=FALSE, message=FALSE,warning=FALSE}
 
@@ -342,6 +352,10 @@ num_sacredsites = length(sitename_results[[1]])
 
 ```
 
+## Faunmap site info
+
+This table shows all FAUNMAP sites, their geographic precision when known, their archaeological status, units when more specific than present/absent, and the associated repositories.
+
 ```{r origifuzz, echo=FALSE,warning=FALSE,message=FALSE}
 
 
@@ -372,7 +386,12 @@ faun_sites2 = faun_sites %>% dplyr::mutate(faun_name = str_replace(sitename, "\\
 
 unittypes = specific %>% group_by(siteid,sitename) %>% summarize(toString(unique(units))) 
 names(unittypes) = c("siteid","sitename","units")
-faun_dt = faun_sites2 %>% select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,sitename_sensitive,smith,archaeo) %>% left_join(unittypes)
+
+repo_bysite = repos %>% left_join(faun_sites, by=join_by(datasetid)) %>% group_by(siteid) %>% summarize(toString(unique(repository)))
+
+names(repo_bysite) = c("siteid","repos")
+
+faun_dt = faun_sites2 %>% select(siteid,sitename,faun_name,extracted,sitenumber,geographic_precision,sitename_sensitive,smith,archaeo) %>% left_join(unittypes) %>% left_join(repo_bysite)
 
 datatable(faun_dt,rownames=FALSE)
 
@@ -380,12 +399,11 @@ datatable(faun_dt,rownames=FALSE)
 
 ```
 
-`r numspecsites` sites in FAUNMAP have units associated with them that are more specific than presence absence. Here are counts of those units:
+`r numspecsites` sites in FAUNMAP have units associated with them that are more specific than presence absence
 
 
 ```{r specsitesshow,message=FALSE,warning=FALSE,echo=FALSE}
 
-specific %>% group_by(siteid,sitename) %>% summarize(toString(unique(units))) %>% datatable(rownames=FALSE)
 ```
 # Priorities
 ## Highest Priority: very archaeo, exact, specific
@@ -416,7 +434,7 @@ datatable(priority10,rownames=FALSE)
 
 ```
 
-# High Priority: archaeo and exact
+## High Priority: archaeo and exact
 
 Also high priority are those sites which have at least one of
 
