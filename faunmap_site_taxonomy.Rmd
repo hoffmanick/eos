@@ -129,7 +129,7 @@ for (i in seq(length(all))) {
   }
 }
 
-faun_dats = matrix(nrow=idx,ncol=7)
+faun_dats = matrix(nrow=idx,ncol=8)
 
 idx = 0
 for (i in seq(length(all))) {
@@ -156,12 +156,13 @@ for (i in seq(length(all))) {
       faun_dats[[idx, 5]] = all[[i]]$site$collectionunit$dataset$datasetid
        faun_dats[[idx, 6]] = all[[i]]$site$siteid
         faun_dats[[idx, 7]] = all[[i]]$site$sitename
+        faun_dats[[idx, 8]] = all[[i]]$site$collectionunit$dataset$datasettype
     }
   }
 }
 
 faun_dat_df = as.data.frame(faun_dats)
-names(faun_dat_df) = c("value","units","elementtype","variablename","datasetid","siteid","sitename")
+names(faun_dat_df) = c("value","units","elementtype","variablename","datasetid","siteid","sitename","datasettype")
 
 
 specific = faun_dat_df %>% dplyr::filter(units %in% c("NISP","MNI","individual specimen","ml","1-4 scale","g/m^2", "MNE"))
@@ -170,8 +171,16 @@ specific = faun_dat_df %>% dplyr::filter(units %in% c("NISP","MNI","individual s
 specsites = specific %>% group_by(sitename) %>% count()
 numspecsites = length(specsites[[1]])
 
+faun_dat_df %>% group_by(units,datasettype) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
 
-faun_dat_df %>% group_by(units) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+na_fauna = faun_dat_df %>% dplyr::filter(is.na(units) & datasettype == "vertebrate fauna")
+
+
+nafaun_neo2 = get_datasets(as.numeric(na_fauna$datasetid),all_data=TRUE)
+nafaun_samps = samples(get_downloads(nafaun_neo2,all_data=TRUE))
+
+datatable(nafaun_samps[c("units","value","variablename","datasetid","database","datasettype","siteid","sitename")],rownames=FALSE)
+
 ```
 
 
