@@ -60,6 +60,35 @@ As of March 6, these have not answered:
 
 ```{r geoscope, message=FALSE,warning=FALSE,echo=FALSE}
 surv %>% dplyr::select(name,db,africa,europe,centralAmerica,NorthAmerica,SouthAmerica,oceania,asia,antarctica,arcticocean,atlanticocean,indianocean,pacificocean,southernocean,geoscope_other,othergeo_share) %>% datatable(rownames=FALSE)
+
+
+geos = surv %>% dplyr::select(name,db,africa,europe,centralAmerica,NorthAmerica,SouthAmerica,oceania,asia,antarctica,arcticocean,atlanticocean,indianocean,pacificocean,southernocean,geoscope_other,othergeo_share)
+
+#geo_coded = read.csv("geo_toJSON - Sheet1.csv")
+#colnames(geo_coded) <- gsub("\\.", " ", colnames(geo_coded))
+
+#json_list <- list()
+
+# Loop through each row of the dataframe
+#for (i in 1:nrow(geo_coded)) {
+  # Get the DB name for the current row
+ # db_name <- geo_coded$DB[i]
+  
+  # Get the places (column names) where the value is 1 for the current row
+  #places <- colnames(geo_coded)[-1][!is.na(geo_coded[i, -1]) & geo_coded[i, -1] == 1]
+  
+  # Create a db object and append it to the json_list
+  #json_list[[i]] <- list(
+  #  DB = db_name,
+   # places = places
+  #)
+#}
+
+# Convert the list to JSON
+#json_result <- jsonlite::toJSON(json_list, auto_unbox = TRUE, pretty = TRUE)
+
+# View the result
+#cat(json_result)
 ```
 
 ## Temporal Scope
@@ -67,6 +96,37 @@ surv %>% dplyr::select(name,db,africa,europe,centralAmerica,NorthAmerica,SouthAm
 ```{r tempscope, message=FALSE,warning=FALSE,echo=FALSE}
 
 surv %>% dplyr::select(name,db,post1850,Quaternary,preQuaternary,timescope_other,othertime_share) %>% datatable(rownames=FALSE)
+
+
+temp = surv %>% dplyr::select(name,db,post1850,Quaternary,preQuaternary,timescope_other,othertime_share) 
+
+#temp_coded = read.csv("tempcoded - Sheet1.csv")
+#colnames(temp_coded) <- gsub("\\.", " ", colnames(temp_coded))
+
+#names(temp_coded)[2] = "Modern (post 1850 AD)"
+#names(temp_coded)[4] = "pre-Quaternary"
+#json_list <- list()
+
+# Loop through each row of the dataframe
+#for (i in 1:nrow(temp_coded)) {
+  # Get the DB name for the current row
+#  db_name <- temp_coded$DB[i]
+  
+  # Get the places (column names) where the value is 1 for the current row
+ # times <- colnames(temp_coded)[-1][!is.na(temp_coded[i, -1]) & temp_coded[i, -1] == 1]
+  
+  # Create a db object and append it to the json_list
+#  json_list[[i]] <- list(
+ #   DB = db_name,
+#    times = times
+#  )
+#}
+
+# Convert the list to JSON
+#json_result <- jsonlite::toJSON(json_list, auto_unbox = TRUE, pretty = TRUE)
+
+# View the result
+#cat(json_result)
 ```
 
 ## Proxy Scope
