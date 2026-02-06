@@ -1,3 +1,5 @@
+## PaVeLa
+
 ``` {r chunk, echo = FALSE, message=FALSE, warning=FALSE}
 library(rnaturalearth)
 library(ggplot2)
@@ -143,6 +145,128 @@ leaflet() %>%
             opacity = 1)
 
 datatable(st_drop_geometry(latin_verts_all), rownames=FALSE,options = list(pageLength = 50))
+
+
+```
+
+## Mediterranean
+
+``` {r chunk2, warning=FALSE,message=FALSE,echo=FALSE}
+
+
+## bounding box for Africa
+lats3 = c(45, 45, 20, 20)
+lons3 = c(0, 45, 45, 0) # Reordered for a rectangle
+
+# Create a data frame with coordinates
+coordinates3 = data.frame(lat = lats3, lon = lons3)
+
+# Convert to sf object and create a polygon
+coordinates_sf3 = coordinates3 %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  summarise(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+
+med_verts = point_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+med_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+med_verts_all = med_verts %>% rbind(med_verts2)
+
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data=med_verts2,
+              fillColor=~pal(databasename),
+              color=~pal(databasename),
+              weight=2,
+              opacity=0.5,
+              fillOpacity=0.5,
+              popup = ~sitename) %>%
+  addCircleMarkers(data=med_verts,
+                   fillColor=~pal(databasename),
+                   stroke=FALSE,
+                   radius=3,
+                   fillOpacity=0.5,
+                   popup = ~sitename) %>%
+  addLegend("bottomright", 
+            pal = pal, 
+            values = med_verts$databasename,
+            title = "Database Name",
+            opacity = 1)
+
+
+
+datatable(st_drop_geometry(med_verts_all), rownames=FALSE,options = list(pageLength = 50))
+
+```
+
+## Neotoma undiff sites
+```{r chunk3, warning=FALSE,message=FALSE,echo=FALSE}
+
+vert_neo = vert_datasets %>% dplyr::filter(databasename =="Neotoma") 
+
+
+point_vert_neo = vert_neo %>% dplyr::filter(latitudesouth == latitudenorth & longitudeeast == longitudewest) %>% st_as_sf(coords=c("longitudeeast","latitudesouth"),crs="4326")
+
+poly_vert_neo = vert_neo %>% dplyr::filter(!datasetid %in% point_vert_neo$datasetid & !is.na(longitudeeast))
+
+poly_vert_neo = poly_vert_neo %>% mutate(latitudesouth = as.numeric(latitudesouth),
+                                                   latitudenorth = as.numeric(latitudenorth),
+                                                   longitudeeast = as.numeric(longitudeeast),
+                                                   longitudewest = as.numeric(longitudewest))
+
+polygons <- lapply(1:nrow(poly_vert_neo), function(i) {
+  coords <- matrix(c(
+    poly_vert_neo$longitudewest[i], poly_vert_neo$latitudesouth[i],
+    poly_vert_neo$longitudeeast[i], poly_vert_neo$latitudesouth[i],
+    poly_vert_neo$longitudeeast[i], poly_vert_neo$latitudenorth[i],
+    poly_vert_neo$longitudewest[i], poly_vert_neo$latitudenorth[i],
+    poly_vert_neo$longitudewest[i], poly_vert_neo$latitudesouth[i]  # Close the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords))
+})
+
+poly_vert_neo <- st_sf(poly_vert_neo, geometry = st_sfc(polygons, crs = 4326))
+
+pal <- colorFactor(palette = "Set1", domain = point_vert_neo$databasename)
+
+point_vert_neo = point_vert_neo %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
+poly_vert_neo = poly_vert_neo %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
+
+point_vert_neo = st_set_crs(point_vert_neo, 4326)
+poly_vert_neo = st_set_crs(poly_vert_neo, 4326)
+
+
+
+point_vert_neo = point_vert_neo %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+poly_vert_neo = poly_vert_neo %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+
+neo_all = point_vert_neo %>% rbind(poly_vert_neo)
+
+
+
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data=poly_vert_neo,
+              fillColor="blue",
+              color="blue",
+              weight=2,
+              opacity=0.5,
+              fillOpacity=0.5,
+              popup = ~sitename) %>%
+  addCircleMarkers(data=point_vert_neo,
+                   fillColor="blue",
+                   stroke=FALSE,
+                   radius=3,
+                   fillOpacity=0.5,
+                   popup = ~sitename) 
+datatable(st_drop_geometry(neo_all), rownames=FALSE,options = list(pageLength = 50))
 
 
 ```
