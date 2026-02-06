@@ -1,0 +1,148 @@
+``` {r chunk, echo = FALSE, message=FALSE, warning=FALSE}
+library(rnaturalearth)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(tidyverse)
+library(DT)
+library(httr)
+library(jsonlite)
+
+
+tables = c("sites","datasets","collectionunits","datasetdatabases","constituentdatabases","datasettypes")
+
+for (q in seq(length(tables))) {
+tablename=tables[q]
+
+length_analysisunits = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/",tablename,"?count=true")))$data
+
+divider = 80000
+num_reps = ceiling(as.numeric(length_analysisunits[[1]]$count)/divider)
+
+analysisunits = list()
+for (i in seq(num_reps)) {
+  start= (i-1)*divider
+  end = divider
+  newnits = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/",tablename,"?count=false&offset=",start,"&limit=",end)))$data
+ 
+  if (!is.null(newnits)) {
+  analysisunits = append(analysisunits,newnits)
+  }
+  }
+
+
+analysis_mat = matrix(nrow=length(analysisunits),ncol=length(analysisunits[[1]]))
+
+for (i in seq(length(analysisunits))) {
+  for(j in seq(length(analysisunits[[1]])) ) {
+    if (!is.null(analysisunits[[i]][[j]])) {
+      analysis_mat[i,j] = analysisunits[[i]][[j]]
+    }}}
+
+
+analysis_df = as.data.frame(analysis_mat)
+
+
+names(analysis_df) =names(newnits[[1]])
+
+assign(paste0(tablename,"_df"), analysis_df)}
+
+
+vert_datasets = datasets_df %>% left_join(datasettypes_df, by=join_by(datasettypeid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% dplyr::filter(datasettype=="vertebrate fauna") %>% left_join(collectionunits_df, by=join_by(collectionunitid)) %>% left_join(sites_df, by=join_by(siteid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid))
+
+## bounding box for Africa
+lats = c(25, 25, -56, -56)
+lons = c(-108, -28, -28, -108) # Reordered for a rectangle
+
+# Create a data frame with coordinates
+coordinates = data.frame(lat = lats, lon = lons)
+
+# Convert to sf object and create a polygon
+coordinates_sf = coordinates %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  summarise(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+
+lats2 = c(35, 35, 25, 25)
+lons2 = c(-98, -80, -80, -98) # Reordered for a rectangle
+
+# Create a data frame with coordinates
+coordinates2 = data.frame(lat = lats2, lon = lons2)
+
+# Convert to sf object and create a polygon
+coordinates_sf2 = coordinates2 %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  summarise(geometry = st_combine(geometry)) %>%
+  st_cast("POLYGON")
+
+
+
+
+
+
+point_vert_datasets = vert_datasets %>% dplyr::filter(latitudesouth == latitudenorth & longitudeeast == longitudewest) %>% st_as_sf(coords=c("longitudeeast","latitudesouth"),crs="4326")
+
+poly_vert_datasets = vert_datasets %>% dplyr::filter(!datasetid %in% point_vert_datasets$datasetid & !is.na(longitudeeast))
+
+poly_vert_datasets = poly_vert_datasets %>% mutate(latitudesouth = as.numeric(latitudesouth),
+                                                   latitudenorth = as.numeric(latitudenorth),
+                                                   longitudeeast = as.numeric(longitudeeast),
+                                                   longitudewest = as.numeric(longitudewest))
+
+polygons <- lapply(1:nrow(poly_vert_datasets), function(i) {
+  coords <- matrix(c(
+    poly_vert_datasets$longitudewest[i], poly_vert_datasets$latitudesouth[i],
+    poly_vert_datasets$longitudeeast[i], poly_vert_datasets$latitudesouth[i],
+    poly_vert_datasets$longitudeeast[i], poly_vert_datasets$latitudenorth[i],
+    poly_vert_datasets$longitudewest[i], poly_vert_datasets$latitudenorth[i],
+    poly_vert_datasets$longitudewest[i], poly_vert_datasets$latitudesouth[i]  # Close the polygon
+  ), ncol = 2, byrow = TRUE)
+  
+  st_polygon(list(coords))
+})
+
+poly_vert_datasets <- st_sf(poly_vert_datasets, geometry = st_sfc(polygons, crs = 4326))
+
+pal <- colorFactor(palette = "Set1", domain = point_vert_datasets$databasename)
+
+point_vert_datasets = point_vert_datasets %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
+poly_vert_datasets = poly_vert_datasets %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
+
+point_vert_datasets = st_set_crs(point_vert_datasets, 4326)
+poly_vert_datasets = st_set_crs(poly_vert_datasets, 4326)
+
+
+latin_verts = point_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+latin_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+
+latin_verts_all = latin_verts %>% rbind(latin_verts2)
+
+
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data=latin_verts2,
+              fillColor=~pal(databasename),
+              color=~pal(databasename),
+              weight=2,
+              opacity=0.5,
+              fillOpacity=0.5,
+              popup = ~sitename) %>%
+  addCircleMarkers(data=latin_verts,
+                   fillColor=~pal(databasename),
+                   stroke=FALSE,
+                   radius=3,
+                   fillOpacity=0.5,
+                   popup = ~sitename) %>%
+  addLegend("bottomright", 
+            pal = pal, 
+            values = latin_verts$databasename,
+            title = "Database Name",
+            opacity = 1)
+
+datatable(st_drop_geometry(latin_verts_all), rownames=FALSE,options = list(pageLength = 50))
+
+
+```

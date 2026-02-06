@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>PaVeLa.knit</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="site_libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-binding-2.2.3/leaflet.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.33/datatables.js"></script>
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+
+</div>
+
+
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-b486908f69a3a1709e86" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-b486908f69a3a1709e86">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addPolygons","args":[[[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.54810000000001,-69.5408,-69.5408,-69.54810000000001,-69.54810000000001],"lat":[-18.6636,-18.6636,-18.6596,-18.6596,-18.6636]}]],[[{"lng":[-69.62813,-69.6193,-69.6193,-69.62813,-69.62813],"lat":[-18.68385,-18.68385,-18.6771,-18.6771,-18.68385]}]],[[{"lng":[-69.62813,-69.6193,-69.6193,-69.62813,-69.62813],"lat":[-18.68385,-18.68385,-18.6771,-18.6771,-18.68385]}]],[[{"lng":[-69.62813,-69.6193,-69.6193,-69.62813,-69.62813],"lat":[-18.68385,-18.68385,-18.6771,-18.6771,-18.68385]}]],[[{"lng":[-69.62813,-69.6193,-69.6193,-69.62813,-69.62813],"lat":[-18.68385,-18.68385,-18.6771,-18.6771,-18.68385]}]],[[{"lng":[-95.986,-95.54900000000001,-95.54900000000001,-95.986,-95.986],"lat":[18.612,18.612,18.826,18.826,18.612]}]],[[{"lng":[-100.125,-100.094,-100.094,-100.125,-100.125],"lat":[25.414,25.414,25.446,25.446,25.414]}]],[[{"lng":[-98.116,-98.087,-98.087,-98.116,-98.116],"lat":[18.895,18.895,18.925,18.925,18.895]}]],[[{"lng":[-98.205,-98.15900000000001,-98.15900000000001,-98.205,-98.205],"lat":[18.928,18.928,18.966,18.966,18.928]}]],[[{"lng":[-98.95,-98.949,-98.949,-98.95,-98.95],"lat":[19.587,19.587,19.592,19.592,19.587]}]],[[{"lng":[-98.95,-98.949,-98.949,-98.95,-98.95],"lat":[19.587,19.587,19.592,19.592,19.587]}]],[[{"lng":[-89.29000000000001,-89.26000000000001,-89.26000000000001,-89.29000000000001,-89.29000000000001],"lat":[-0.751,-0.751,-0.728,-0.728,-0.751]}]],[[{"lng":[-90.72,-90.697,-90.697,-90.72,-90.72],"lat":[-0.4187,-0.4187,-0.398,-0.398,-0.4187]}]],[[{"lng":[-90.2606,-90.02867000000001,-90.02867000000001,-90.2606,-90.2606],"lat":[14.09734,14.09734,14.32217,14.32217,14.09734]}]],[[{"lng":[-90.57183000000001,-90.52537,-90.52537,-90.57183000000001,-90.57183000000001],"lat":[14.53446,14.53446,14.57942,14.57942,14.53446]}]],[[{"lng":[-89.67085,-89.57787,-89.57787,-89.67085,-89.67085],"lat":[14.66181,14.66181,14.75174,14.75174,14.66181]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":["#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#FF7F00","#FF7F00","#4DAF4A","#4DAF4A","#4DAF4A"],"weight":2,"opacity":0.5,"fill":true,"fillColor":["#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#FFFF33","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#FF7F00","#FF7F00","#4DAF4A","#4DAF4A","#4DAF4A"],"fillOpacity":0.5,"smoothFactor":1,"noClip":false},["Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Patarata","Cueva de La Boca","Cueva del Tepeyolo","Cueva del Texcal","Santa Isabel Iztapan","Santa Isabel Iztapan","Isla San Cristóbal","Isla Rábida","Jutiapa","Finca San Ramón","El Rosario"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[26.1166667,26.6166667,26.5,26.8666667,17.20451,20.4666666666667,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-51.6847573687272,-50.494037,-51.7883004245901,19.5680555555556,16.975,18.9333333333333,19.47,20.305,20.25,22.609,17.754,23.65,19.773,19.497,16.6,18.5,19.463,20.68,16.7,19.433,18.267222,26.646,26.1,25.9167,-0.1055,-0.915,-0.843,-1.252,-0.6634,-0.73,-0.75,26.10457,25.3653833333333,-40.76,-40.7527777777778,-44.9174,-45.0496,-45.05,-45.094,-45.221,-41.6,14.07,-40.3322,15.985,14.852,15.805,14.79,16.2152777777778,16.2355555555556,16.6022222222222,16.1513888888889,16.1386111111111,15.053,16.526,14.475,15.3130777777778,16.5314,14.9989,14.556145,14.638,-40.4156,-40.583,-40.564,-40.109,-39.282,-39.864,-41.51,-41.51],[-98.1166667,-80,-80,-80,-89.66217,-89.2166666666667,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-61.2572790472338,-69.03464200000001,-60.4002590969459,-99.70416666666669,-96.31,-98.18333333333329,-96.3716666666667,-97.10299999999999,-89.4666666666667,-99.024,-94.76300000000001,-100.65,-98.982,-99.14700000000001,-92.3833333333333,-98.1166666666667,-99.238,-88.569,-93.4166666666667,-99.13278,-97.14916700000001,-102.2,-102.722,-103.6667,-91.3275,-90.98999999999999,-91.03,-91.03,-90.434,-90.3275,-90.26900000000001,-77.177666,-76.5196833333333,-71.09888888888889,-71.1044444444444,-65.54467,-65.6474,-66.3229,-66.5151,-66.54600000000001,-71.51666666666669,-90.49939999999999,-72.955,-90.5797,-91.52200000000001,-91.316,-89.545,-93.33277777777781,-93.2269444444444,-93.21361111111111,-98.31527777777779,-93.15805555555551,-90.318,-90.18899999999999,-90.17400000000001,-91.54697222222219,-90.1892,-89.70780000000001,-90.5603666666667,-89.672,-73.011,-73.17700000000001,-73.169,-72.489,-72.79600000000001,-72.80200000000001,-73.20099999999999,-73.20099999999999],3,null,null,{"interactive":true,"className":"","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":["#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#A65628","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#A65628","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#FF7F00","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A","#4DAF4A"],"fillOpacity":0.5},null,null,["Ayala [79D5-1]","Patrician Shell Mound","Riviera [8PB30]","Jupiter Inlet","La Joyanca","Mayapan","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","Santa Cruz","Spring Point Farm","Tepexpan","Guilá Naquitz","Hueyatlaco","Chalahuites","Santa Luisa","Gruta de Loltún","Cueva del Abra","San Lorenzo","Cueva de la Presita","Los Reyes Acozac","San Bartolo Atepehuacan","Aguacatenango","Tepeji de Rodriguez","Tlatilco","Chichén Itzá","Santa Marta Cave","Templo Mayor","Coxcatlan Cave","Cañon de la Fragua","Puerto de Ventanillas","Sierra de la Misericordia","Isla Isabela Cueva Perdida","Isla Isabela Cueva de Macas","Isla Isabela Cueva de Sucre","Isla Floreana","Isla Santa Cruz Cave Number 4","Isla Santa Cruz Cueva de Kubler","Isla Santa Cruz André's Cave","Gilpin Point","Garden Cave","Cueva del Caballo","Puma II","Cabo Dos Bahias","Punta San Roque"," Punta Ezquerra","Arroyo Marea","Península Aristizábal  ","Población Anticura","Chinautla","Rio Bueno","Brisas del Chixoy","Cerro el Baúl (Xela)","Santa Cruz Barillas","Chiquimula","Gliptodonte (Rancho Argentina Brick Pit)","Los Mangos Brick Pit","El Bajión (Suchiapa)","La Simpatía river terrace","La Tejería brick pit","Salamá","Sayaxché","San Rafaelito (San Rafael las Flores)"," Chivacabé","Santa Amelia/Río la Pasión","La Estanzuela","Ciudad Real","Songotongo","San Pablo","Nochaco","Mulpulmo","La Plata","El Trébol","Los Lagos","Monte Verde I","Monte Verde II"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#4DAF4A","#FF7F00","#A65628"],"labels":["FAUNMAP","Neotoma","PaleoVertebrates of Latin America"],"na_color":null,"na_label":"NA","opacity":1,"position":"bottomright","type":"factor","title":"Database Name","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-51.7883004245901,26.8666667],"lng":[-103.6667,-60.4002590969459]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-b061bff1878e2b2bee2d" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-b061bff1878e2b2bee2d">{"x":{"filter":"none","vertical":false,"data":[["5028","6420","6444","6524","40805","55877","52550","52532","52534","52536","52538","52540","52542","52544","52546","52548","52555","52557","55899","55932","55901","55902","55903","54664","54667","55904","55973","55975","55977","56693","56493","57381","57382","57385","57575","57577","60715","60717","61064","61808","61810","61812","61814","61795","61799","61801","64772","64833","65185","65215","65533","65535","65537","65541","65543","65544","66249","66697","66254","66256","66257","66260","65706","65708","65709","65711","65713","66253","66258","66262","66155","66156","66161","66163","66251","66701","66724","66726","69143","69145","69321","69463","69519","14293","14301","14305","14312","14316","14320","14324","14328","14332","14336","14340","14344","14347","14351","14355","14359","14363","14367","55905","55971","56079","56498","57553","57554","58496","61797","66252","66164","66247"],["3947","5136","5148","5221","23587","29363","28225","28225","28225","28225","28225","28225","28225","28225","28225","28225","28228","28229","29374","29390","29375","29376","29377","29102","29104","29378","29410","29411","29412","29811","29679","30334","30335","30336","30404","30405","32459","32460","32759","33144","33145","33146","33147","33139","33141","33142","36097","36142","36404","36410","36451","36452","36453","36455","36456","36457","36634","36807","36639","36640","36641","36644","36475","36476","36477","36478","36479","36638","36642","36645","36556","36558","36560","36561","36636","36815","36827","36832","37527","37528","37558","37577","37590","9700","9700","9700","9700","9700","9700","9700","9700","9700","9700","9700","9700","9700","9700","9707","9707","9707","9707","29379","29409","29463","29683","29413","29413","30957","33140","36637","36562","36633"],["5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5","5"],["Ayala [79D5-1]","Patrician Shell Mound","Riviera [8PB30]","Jupiter Inlet","La Joyanca","Mayapan","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","New Island Bone Piles","Santa Cruz","Spring Point Farm","Tepexpan","Guilá Naquitz","Hueyatlaco","Chalahuites","Santa Luisa","Gruta de Loltún","Cueva del Abra","San Lorenzo","Cueva de la Presita","Los Reyes Acozac","San Bartolo Atepehuacan","Aguacatenango","Tepeji de Rodriguez","Tlatilco","Chichén Itzá","Santa Marta Cave","Templo Mayor","Coxcatlan Cave","Cañon de la Fragua","Puerto de Ventanillas","Sierra de la Misericordia","Isla Isabela Cueva Perdida","Isla Isabela Cueva de Macas","Isla Isabela Cueva de Sucre","Isla Floreana","Isla Santa Cruz Cave Number 4","Isla Santa Cruz Cueva de Kubler","Isla Santa Cruz André's Cave","Gilpin Point","Garden Cave","Cueva del Caballo","Puma II","Cabo Dos Bahias","Punta San Roque"," Punta Ezquerra","Arroyo Marea","Península Aristizábal  ","Población Anticura","Chinautla","Rio Bueno","Brisas del Chixoy","Cerro el Baúl (Xela)","Santa Cruz Barillas","Chiquimula","Gliptodonte (Rancho Argentina Brick Pit)","Los Mangos Brick Pit","El Bajión (Suchiapa)","La Simpatía river terrace","La Tejería brick pit","Salamá","Sayaxché","San Rafaelito (San Rafael las Flores)"," Chivacabé","Santa Amelia/Río la Pasión","La Estanzuela","Ciudad Real","Songotongo","San Pablo","Nochaco","Mulpulmo","La Plata","El Trébol","Los Lagos","Monte Verde I","Monte Verde II","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Upper Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Quebrada La Higuera Lower Middens","Patarata","Cueva de La Boca","Cueva del Tepeyolo","Cueva del Texcal","Santa Isabel Iztapan","Santa Isabel Iztapan","Isla San Cristóbal","Isla Rábida","Jutiapa","Finca San Ramón","El Rosario"],["FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","PaleoVertebrates of Latin America","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","Neotoma","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","FAUNMAP","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","Neotoma Midden Database","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","PaleoVertebrates of Latin America","Neotoma","Neotoma","FAUNMAP","FAUNMAP","FAUNMAP"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>datasetid<\/th>\n      <th>siteid<\/th>\n      <th>datasettypeid<\/th>\n      <th>sitename<\/th>\n      <th>databasename<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":50,"columnDefs":[{"name":"datasetid","targets":0},{"name":"siteid","targets":1},{"name":"datasettypeid","targets":2},{"name":"sitename","targets":3},{"name":"databasename","targets":4}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
