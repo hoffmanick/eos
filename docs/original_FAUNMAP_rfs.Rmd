@@ -1,0 +1,235 @@
+
+# Original FAUNMAP data
+
+Loading in the two R package libraries I need:
+```{r libs, message=FALSE,warning=FALSE}
+library(tidyverse)
+library(DT)
+library(httr)
+library(jsonlite)
+library(sf)
+library(leaflet)
+```
+
+Loading in all the original FAUNMAP data and adding in the column names manually for the tables, based on [FAUNMAP vol. 1](https://babel.hathitrust.org/cgi/pt?id=uiug.30112040546761&seq=21). The data themselves I downloaded [here](https://www.museum.state.il.us/research/faunmap/database/)
+
+```{r load-tables, message=FALSE,warning=FALSE}
+
+for (i in grep(".TXT",list.files())) {
+  file = list.files()[i]
+  numchar = nchar(file)
+  name = substr(file,0,numchar-4)
+  if (substr(file,0,2) == "L_") {
+    read_file_b = read.csv(file)
+    num_reps = length(read_file_b)
+    name_vector = c(rep("code",(num_reps-1)),"value")
+    read_file = read.csv(file,col.names=name_vector)
+  } else {
+  read_file_a = read.csv(file)
+  read_file = read.csv(file,col.names=as.character(seq(length(read_file_a))))}
+  assign(name,read_file)
+}
+
+names(LOCALITY) = c("locality_ID","site_name","alternate_name",
+                    "state_province","county","site_number",
+                    "coded_by","date_coded","date_updated" ,"comment",
+                    "precision","quadrangle","quadrangle_size",
+                    "latitude","longitude","altitude","repository")
+
+names(REFER) = c("locality_ID","reference_ID","bib_num",
+                 "uid","author","year")
+
+names(FAUNAL) = c("locality_ID","analysis_unit","taxon_id",
+                  "id_confidence","mni","nisp","context","modification")
+
+names(COMMENT) = c("locality_ID","analysis_unit",
+                   "taxon_ID","line_number","comment")
+
+names(DEPOSIT) = c("locality_ID","analysis_unit","recovery_method",
+                   "depositional_system","depositional_environment","facies","mixing")
+
+names(CULTURE) = c("locality_ID","analysis_unit",
+                   "cultural_id","cultural_age")
+
+names(AGE) = c("locality_ID","analysis_unit","period",
+               "epoch","age","land_mammal_age","oxygen_isotope",
+               "magnetochron","min_age","min_age_method",
+               "max_age","max_age_method")
+
+names(ABSOLUTE) = c("locality_ID","analysis_unit","age_ID",
+                    "associated_date","standard_dev","dating_method",
+                    "material_type","lab","date_position",
+                    "date_confidence","taxon")
+
+names(AGENT) = c("locality_ID","analysis_unit","agent_ID","agent")
+
+names(MODIF) = c("locality_ID","analysis_unit",
+                 "modification_ID","bone_modification")
+```
+
+
+Displaying a few tables for Florida.
+All the sites (in FAUNMAP parlance, LOCALITIES) in Florida:
+```{r flor, message=FALSE,warning=FALSE}
+
+fl_locs = LOCALITY %>% dplyr::filter(state_province=="FL")
+
+datatable(fl_locs,rownames=FALSE)
+
+```
+
+Who transcribed these sites? (It turns out Ralph Stearley only did two. Most are from MKR; not sure who that is but Russ Graham may know. Possibly Maureen someone, unless that's MKM. MAG = Mary Ann Graham)
+```{r flor2, message=FALSE,warning=FALSE}
+fl_locs %>% group_by(coded_by) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+
+
+```
+
+Looking at the faunal data from Summer Haven (Original FAUNMAP ID == 1581) specifically, since that had a bunch of discrepancies. Looks like the discrepancies were there from initial upload.
+
+I also looked at Lehigh. In the original FAUNMAP data, Lehigh also had <i>Homo sapiens</i> as a taxon
+```{r flor3, message=FALSE,warning=FALSE}
+##Summer Haven
+FAUNAL %>% dplyr::filter(locality_ID == 1581) %>% left_join(L_TAXA,by=join_by(taxon_id==code)) %>% datatable(rownames=FALSE)
+
+## Lehigh
+FAUNAL %>% dplyr::filter(locality_ID == 1570) %>% left_join(L_TAXA,by=join_by(taxon_id==code)) %>% datatable(rownames=FALSE)
+
+## Marco Island
+
+DEPOSIT %>% dplyr::filter(locality_ID %in% c(1711,1712,1713,1714)) %>% datatable(rownames=FALSE)
+```
+
+How precisely were the site coordinates delimited in FAUNMAP? A plurality of sites (n=68), they don't tell us. After that, 51 sites were precise to the quadrangle level. 
+
+From the FAUNMAP project:
+[“Site location was established in a variety of ways. In many cases, precise locations (quadrangle, township and range, or latitude and longitude) were actually given in the literature. For all sites with radiocarbon dates that weer reported in the journal Radiocarbon, the latitude and longitude of the site were reported with the dates. In some cases, the reference may not have listed the precise location of the site, but it might have identified the quadrangle that contained the site. If the precise location was not given in the literature, then an approximate location was determined by the person coding the site based upon descriptions of the site location in the reference (e.g., the site is located five miles west of Springfield, IL). These descriptions were then transferred to index maps for the 48 states, provided by the United States Geological Survey (USGS), showing the location of all quadrangles. These maps were used to determine the quadrangle in which the site was located (e.g., the site five miles west of Springfield, IL, is in the Farmingdale Quadrangle). After determining the quadrangle, the latitude and longitude were taken from a USGS list giving the coordinates for the southeast corners of all USGS quadranges (e.g., the longitude and latitude for the southeast corner of the Farmingdale Quadrangle are 89° 45’ W and 39° 45’N, respectively). These coordinates were used as the location for the site in the FAUNMAP database (e.g., the location of the site five miles west of Springfield, Illinois, is 89° 45’ W longitude and 39° 45’N latitude).”
+
+“‘Exact location’ indicates that the actual latitude and longitude of the site were used in determining its location. ‘Quadrangle Approximate’ was coded if the person coding had to determine the quadrangle based upon a locational description in the reference, as described above. ‘Quadrangle Precise’ was used if the quadrangle was named in the reference or if township and ranges were given. ‘Quadrangle in the center of the county’ was used if the county was known but exactly location within the county was not known. In these cases, the latitude and longitude of the quadrangle in the center of the county were coded as the location for the site.”]
+
+
+```{r flor4, message=FALSE,warning=FALSE}
+
+fl_locs %>% left_join(L_PREC,by=join_by(precision==code)) %>% group_by(value) %>% count() %>% arrange(desc(n)) %>% datatable(rownames=FALSE)
+
+
+```
+
+```{r dates, message=FALSE,warning=FALSE}
+
+
+library(lubridate)
+
+
+fl_locs = fl_locs %>% dplyr::mutate(date_coded = mdy(date_coded),date_updated = mdy(date_updated))
+
+fl_faunal = FAUNAL %>% dplyr::filter(locality_ID %in% fl_locs$locality_ID) %>% left_join(L_TAXA,by=join_by(taxon_id==code))
+fl_faunal_uncertain = fl_faunal %>% dplyr::filter(id_confidence != "") %>% left_join(COMMENT)
+
+fl_sites_uncertain = fl_faunal_uncertain %>% distinct(locality_ID) %>% left_join(fl_locs)
+
+uncertain_refs = REFER %>% dplyr::filter(locality_ID %in% fl_sites_uncertain$locality_ID)
+
+site_refs = uncertain_refs %>% left_join(fl_locs) %>% select(author,year,site_name,county)
+
+```
+
+
+
+```{r dasopkds}
+
+
+tables = c("sites","datasets","collectionunits","datasetdatabases","constituentdatabases","datasettypes")
+
+for (q in seq(length(tables))) {
+tablename=tables[q]
+
+length_analysisunits = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/",tablename,"?count=true")))$data
+
+divider = 80000
+num_reps = ceiling(as.numeric(length_analysisunits[[1]]$count)/divider)
+
+analysisunits = list()
+for (i in seq(num_reps)) {
+  start= (i-1)*divider
+  end = divider
+  newnits = content(GET(paste0("https://api.neotomadb.org/v2.0/data/dbtables/",tablename,"?count=false&offset=",start,"&limit=",end)))$data
+ 
+  if (!is.null(newnits)) {
+  analysisunits = append(analysisunits,newnits)
+  }
+  }
+
+
+analysis_mat = matrix(nrow=length(analysisunits),ncol=length(analysisunits[[1]]))
+
+for (i in seq(length(analysisunits))) {
+  for(j in seq(length(analysisunits[[1]])) ) {
+    if (!is.null(analysisunits[[i]][[j]])) {
+      analysis_mat[i,j] = analysisunits[[i]][[j]]
+    }}}
+
+
+analysis_df = as.data.frame(analysis_mat)
+
+
+names(analysis_df) =names(newnits[[1]])
+
+assign(paste0(tablename,"_df"), analysis_df)}
+
+```
+
+```{r chunkanew, message=FALSE,warning=FALSE,echo=FALSE}
+
+
+LOCALITY_mod1 <- LOCALITY %>%
+  mutate(longitude = as.character(longitude),latitude = as.character(latitude)) %>% 
+  dplyr::filter(nchar(longitude) == 6) %>%
+  extract(longitude,
+          into = c("long_degree", "long_minute", "long_second"),
+          regex = "(.{2})(.{2})(.{2})") %>%
+  extract(latitude,
+          into = c("lat_degree", "lat_minute", "lat_second"),
+          regex = "(.{2})(.{2})(.{2})") %>%
+  mutate(lat = as.numeric(lat_degree) + as.numeric(lat_minute)/60 +as.numeric(lat_second)/3600) %>%
+  mutate(long = 0 - (as.numeric(long_degree) + as.numeric(long_minute)/60 +as.numeric(long_second)/3600)) %>%
+  dplyr::filter(!is.na(lat) & !is.na(long)) %>%
+  st_as_sf(coords=c("long","lat"),crs=4326)
+
+
+
+LOCALITY_mod2 <- LOCALITY %>%
+  mutate(longitude = as.character(longitude),latitude = as.character(latitude)) %>% 
+  dplyr::filter(nchar(longitude) == 7) %>%
+  extract(longitude,
+          into = c("long_degree", "long_minute", "long_second"),
+          regex = "(.{3})(.{2})(.{2})") %>%
+  extract(latitude,
+          into = c("lat_degree", "lat_minute", "lat_second"),
+          regex = "(.{2})(.{2})(.{2})") %>%
+  mutate(lat = as.numeric(lat_degree) + as.numeric(lat_minute)/60 +as.numeric(lat_second)/3600) %>%
+  mutate(long = 0 - (as.numeric(long_degree) + as.numeric(long_minute)/60 +as.numeric(long_second)/3600)) %>%
+  dplyr::filter(!is.na(lat) & !is.na(long)) %>%
+  st_as_sf(coords=c("long","lat"),crs=4326)
+pal <- colorFactor(palette = "Set1", domain =LOCALITY$coded_by)
+
+
+leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(data=LOCALITY_mod1,
+                   stroke=FALSE,
+                   color=~pal(coded_by),
+                   radius=3,
+                   fillOpacity=0.5,
+                   popup = ~site_name) %>%
+  addCircleMarkers(data=LOCALITY_mod2,
+                   stroke=FALSE,
+                   color=~pal(coded_by),
+                   radius=3,
+                   fillOpacity=0.5,
+                   popup = ~site_name) %>%
+    addLegend("bottomright", 
+            pal = pal, 
+            values = LOCALITY$coded_by,
+            title = "Coder",
+            opacity = 1)
