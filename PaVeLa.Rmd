@@ -11,7 +11,7 @@ library(httr)
 library(jsonlite)
 
 
-tables = c("sites","datasets","collectionunits","datasetdatabases","constituentdatabases","datasettypes")
+tables = c("sites","datasets","collectionunits","datasetdatabases","constituentdatabases","datasettypes","contacts","datasetpis")
 
 for (q in seq(length(tables))) {
 tablename=tables[q]
@@ -50,7 +50,7 @@ names(analysis_df) =names(newnits[[1]])
 assign(paste0(tablename,"_df"), analysis_df)}
 
 
-vert_datasets = datasets_df %>% left_join(datasettypes_df, by=join_by(datasettypeid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% dplyr::filter(datasettype=="vertebrate fauna") %>% left_join(collectionunits_df, by=join_by(collectionunitid)) %>% left_join(sites_df, by=join_by(siteid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid))
+vert_datasets = datasets_df %>% left_join(datasettypes_df, by=join_by(datasettypeid)) %>% left_join(datasetdatabases_df,by=join_by(datasetid)) %>% dplyr::filter(datasettype %in% c("vertebrate fauna","specimen stable isotope")) %>% left_join(collectionunits_df, by=join_by(collectionunitid)) %>% left_join(sites_df, by=join_by(siteid)) %>% left_join(constituentdatabases_df,by=join_by(databaseid)) %>% left_join(datasetpis_df,by=join_by(datasetid)) %>% left_join(contacts_df,by=join_by(contactid.y == contactid))
 
 ## bounding box for Africa
 lats = c(25, 25, -56, -56)
@@ -106,7 +106,8 @@ polygons <- lapply(1:nrow(poly_vert_datasets), function(i) {
 
 poly_vert_datasets <- st_sf(poly_vert_datasets, geometry = st_sfc(polygons, crs = 4326))
 
-pal <- colorFactor(palette = "Set1", domain = point_vert_datasets$databasename)
+pal1 <- colorFactor(palette = "Set1", domain = point_vert_datasets$databasename)
+pal2 <- colorFactor(palette = "Set1", domain = poly_vert_datasets$databasename)
 
 point_vert_datasets = point_vert_datasets %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
 poly_vert_datasets = poly_vert_datasets %>% dplyr::mutate(link = paste0("<a target='_blank' href='https://data.neotomadb.org/datasets/",datasetid,"'/>",sitename,"</a>"))
@@ -115,32 +116,35 @@ point_vert_datasets = st_set_crs(point_vert_datasets, 4326)
 poly_vert_datasets = st_set_crs(poly_vert_datasets, 4326)
 
 
-latin_verts = point_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+latin_verts = point_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
-latin_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+latin_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf) %>% st_filter(coordinates_sf2, .predicate=st_disjoint) %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
-latin_verts_all = latin_verts %>% rbind(latin_verts2)
+latin_verts_all = latin_verts %>% rbind(latin_verts2) %>% select(!link)
+
+
+pal3 <- colorFactor(palette = "Set1", domain = latin_verts_all$databasename)
 
 
 
 leaflet() %>%
   addTiles() %>%
   addPolygons(data=latin_verts2,
-              fillColor=~pal(databasename),
-              color=~pal(databasename),
+              fillColor=~pal3(databasename),
+              color=~pal3(databasename),
               weight=2,
               opacity=0.5,
               fillOpacity=0.5,
-              popup = ~sitename) %>%
+              popup = ~link) %>%
   addCircleMarkers(data=latin_verts,
-                   fillColor=~pal(databasename),
+                   fillColor=~pal3(databasename),
                    stroke=FALSE,
                    radius=3,
                    fillOpacity=0.5,
-                   popup = ~sitename) %>%
+                   popup = ~link) %>%
   addLegend("bottomright", 
-            pal = pal, 
-            values = latin_verts$databasename,
+            pal = pal3, 
+            values = latin_verts_all$databasename,
             title = "Database Name",
             opacity = 1)
 
@@ -168,31 +172,36 @@ coordinates_sf3 = coordinates3 %>%
   st_cast("POLYGON")
 
 
-med_verts = point_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+med_verts = point_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
-med_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+med_verts2 = poly_vert_datasets %>% st_filter(coordinates_sf3) %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
-med_verts_all = med_verts %>% rbind(med_verts2)
+med_verts_all = med_verts %>% rbind(med_verts2) %>% select(!link)
+
+
+
+pal4 <- colorFactor(palette = "Set1", domain = med_verts_all$databasename)
+
 
 
 leaflet() %>%
   addTiles() %>%
   addPolygons(data=med_verts2,
-              fillColor=~pal(databasename),
-              color=~pal(databasename),
+              fillColor=~pal4(databasename),
+              color=~pal4(databasename),
               weight=2,
               opacity=0.5,
               fillOpacity=0.5,
-              popup = ~sitename) %>%
+              popup = ~link) %>%
   addCircleMarkers(data=med_verts,
-                   fillColor=~pal(databasename),
+                   fillColor=~pal4(databasename),
                    stroke=FALSE,
                    radius=3,
                    fillOpacity=0.5,
-                   popup = ~sitename) %>%
+                   popup = ~link) %>%
   addLegend("bottomright", 
-            pal = pal, 
-            values = med_verts$databasename,
+            pal = pal4, 
+            values = med_verts_all$databasename,
             title = "Database Name",
             opacity = 1)
 
@@ -241,12 +250,12 @@ poly_vert_neo = st_set_crs(poly_vert_neo, 4326)
 
 
 
-point_vert_neo = point_vert_neo %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+point_vert_neo = point_vert_neo %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
-poly_vert_neo = poly_vert_neo %>% select(datasetid,siteid,datasettypeid,sitename,databasename)
+poly_vert_neo = poly_vert_neo %>% select(datasetid,siteid,datasettype,sitename,databasename,contactname,link)
 
 
-neo_all = point_vert_neo %>% rbind(poly_vert_neo)
+neo_all = point_vert_neo %>% rbind(poly_vert_neo) %>% select(!link)
 
 
 
