@@ -1,0 +1,46 @@
+---
+title: "GCDv4 Snapshot from PALEOFIRE"
+output: html_document
+date: "2026-04-22"
+---
+
+
+
+```{r car,message=FALSE,warning=FALSE,echo=FALSE}
+
+
+library(DBI)
+library(RMariaDB)
+library(DT)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(sf)
+library(leaflet)
+
+con <- dbConnect(
+  RMariaDB::MariaDB(),
+  username = "nicholashoffman",
+  #password = "your_password",
+  dbname   = "GCD_paleofire_in_progress",
+  unix.sock = "/tmp/mysql.sock"
+)
+
+
+
+core <- tbl(con, "t_core") %>%
+  select_all() %>%
+  collect()
+
+
+core_sf = core %>% st_as_sf(coords=c("LONGITUDE","LATITUDE"),crs=4326)
+
+
+leaflet() %>%
+    addTiles() %>%
+    addCircleMarkers(data=core_sf,
+                     stroke=FALSE,
+                     radius=3,
+                     fillOpacity=0.5,
+                     popup = ~CORE_NAME) 
+```
