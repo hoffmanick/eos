@@ -1,10 +1,15 @@
 ---
 title: "GCDv4 Snapshot from PALEOFIRE"
+author: Nick H.
 output: html_document
 date: "2026-04-22"
 ---
 
+Trying to diagnose the status of the GCDv4 snapshot ("paleofire in progress") on paleofire.org. Chiefly, when is it from? Whose data does it include?
 
+The first map is all the cores with their site names from the GCD. (click for site name.)
+
+The second map is only the cores that have an update_date on their charcoal. You can find the latest update date by clicking on the site in that second map. They are colored by year.
 
 ```{r car,message=FALSE,warning=FALSE,echo=FALSE}
 
@@ -17,11 +22,11 @@ library(httr)
 library(jsonlite)
 library(sf)
 library(leaflet)
+library(lubridate)
 
 con <- dbConnect(
   RMariaDB::MariaDB(),
   username = "nicholashoffman",
-  #password = "your_password",
   dbname   = "GCD_paleofire_in_progress",
   unix.sock = "/tmp/mysql.sock"
 )
@@ -33,7 +38,43 @@ core <- tbl(con, "t_core") %>%
   collect()
 
 
-core_sf = core %>% st_as_sf(coords=c("LONGITUDE","LATITUDE"),crs=4326)
+datbase <- tbl(con, "tr_database") %>%
+    select_all() %>%
+    collect()
+
+notes = tbl(con, "t_notes") %>%
+    select_all() %>%
+    collect()
+
+note_model = tbl(con, "t_note_age_model") %>%
+    select_all() %>%
+    collect()
+
+char = tbl(con, "t_charcoal") %>%
+    select_all() %>%
+    collect()
+
+sample <- tbl(con, "t_sample") %>%
+    select_all() %>%
+    collect()
+
+
+site <- tbl(con, "t_site") %>%
+  select_all() %>%
+  collect()
+
+core_comb= site %>% left_join(core,by=join_by(ID_SITE)) %>% left_join(sample,by=join_by(ID_CORE)) %>% left_join(char,by=join_by(ID_SAMPLE))
+
+core_comb1 = core_comb %>% drop_na(UPDATE_DATE) %>% group_by(ID_CORE) %>% dplyr::filter(UPDATE_DATE == max(UPDATE_DATE))
+
+core_comb2 = core_comb %>% distinct(ID_CORE,.keep_all=TRUE)  %>% drop_na(LONGITUDE,LATITUDE)
+core_sf = core_comb2 %>% st_as_sf(coords=c("LONGITUDE","LATITUDE"),crs=4326)
+
+
+core_sf_dated = core_comb1 %>% st_as_sf(coords=c("LONGITUDE","LATITUDE"),crs=4326) %>% mutate(year = year(UPDATE_DATE))
+
+
+pal <- colorFactor(palette = "Set1", domain =core_sf_dated$year)
 
 
 leaflet() %>%
@@ -42,5 +83,19 @@ leaflet() %>%
                      stroke=FALSE,
                      radius=3,
                      fillOpacity=0.5,
-                     popup = ~CORE_NAME) 
+                     popup = ~SITE_NAME) 
+
+
+
+leaflet() %>%
+    addTiles() %>%
+    addCircleMarkers(data=core_sf_dated,
+                     stroke=FALSE,
+                     color=~pal(year),
+                     radius=3,
+                     fillOpacity=0.5,
+                     popup = ~UPDATE_DATE) 
+
 ```
+
+\
